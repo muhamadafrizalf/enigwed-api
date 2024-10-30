@@ -1,23 +1,25 @@
 package com.enigwed.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterRequest {
+public class CityRequest {
+
+    private String id;
+
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String description;
-    private String address;
-    private String npwp;
-    private String nib;
-    private String cityId;
-    private String phone;
-    private String email;
-    private String password;
-    private String confirmPassword;
+
+    private MultipartFile thumbnail;
 }

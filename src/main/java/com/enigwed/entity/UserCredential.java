@@ -22,9 +22,13 @@ import java.util.List;
 @Table(name = PathDb.USER_CREDENTIAL)
 public class UserCredential extends AuditEntity implements UserDetails {
     private String email;
+
     private String password;
+
     @Enumerated(EnumType.STRING)
     private ERole role;
+
+    @Column(name = "is_active")
     private boolean isActive;
 
     @Override
