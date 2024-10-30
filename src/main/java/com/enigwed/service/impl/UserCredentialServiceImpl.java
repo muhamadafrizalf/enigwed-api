@@ -45,7 +45,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     }
 
     @Override
-    public UserCredential findById(String id) {
+    public UserCredential loadUserById(String id) {
         return userCredentialRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException(id));
     }
 

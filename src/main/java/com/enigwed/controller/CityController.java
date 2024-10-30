@@ -55,9 +55,15 @@ public class CityController {
     }
 
     @GetMapping(PathApi.PUBLIC_CITY)
-    public ResponseEntity<?> getAllCities() {
-        ApiResponse<?> response = cityService.findAll();
-
+    public ResponseEntity<?> getCities(
+            @RequestParam(required = false) String name
+    ) {
+        ApiResponse<?> response;
+        if (name != null && !name.isEmpty()) {
+            response = cityService.findByName(name);
+        } else {
+            response = cityService.findAll();
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -89,6 +95,13 @@ public class CityController {
             @PathVariable String id
     ) {
         ApiResponse<?> response = cityService.deleteById(id);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(PathApi.PUBLIC_CITY + "/test/{id}")
+    public ResponseEntity<?> getCityTest(@PathVariable String id) {
+        ApiResponse<?> response = cityService.testGetCityByID(id);
 
         return ResponseEntity.ok(response);
     }

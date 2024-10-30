@@ -2,6 +2,7 @@ package com.enigwed.service;
 
 import com.enigwed.dto.request.CityRequest;
 import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.CityResponse;
 import com.enigwed.entity.City;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface CityService {
     ApiResponse<List<City>> findAll();
     ApiResponse<City> update(CityRequest cityRequest);
     ApiResponse<?> deleteById(String id);
+
+    ApiResponse<CityResponse> testGetCityByID (String id);
 }

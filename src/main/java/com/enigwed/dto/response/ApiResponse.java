@@ -30,6 +30,7 @@ public class ApiResponse <T> {
 
     public static ApiResponse<?> success(String message) {
         return ApiResponse.builder()
+                .success(true)
                 .message(message)
                 .build();
     }

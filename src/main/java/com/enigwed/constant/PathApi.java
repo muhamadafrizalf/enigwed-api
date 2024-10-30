@@ -2,8 +2,9 @@ package com.enigwed.constant;
 
 public class PathApi {
     // Base url
-    public static final String VERSION = "/v1";
-    public static final String BASE_URL = "/api" + VERSION;
+//    public static final String VERSION = "/v1";
+//    public static final String BASE_URL = "/api" + VERSION;
+    public static final String BASE_URL = "/api";
 
     // Accessibility
     public static final String PROTECTED = "/protected";

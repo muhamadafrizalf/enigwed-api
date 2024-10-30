@@ -3,6 +3,7 @@ package com.enigwed.service.impl;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.request.CityRequest;
 import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.CityResponse;
 import com.enigwed.entity.City;
 import com.enigwed.entity.Image;
 import com.enigwed.exception.ErrorResponse;
@@ -10,6 +11,8 @@ import com.enigwed.repository.CityRepository;
 import com.enigwed.service.CityService;
 import com.enigwed.service.ImageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CityServiceImpl implements CityService {
     private final CityRepository cityRepository;
     private final ImageService imageService;
@@ -102,5 +106,17 @@ public class CityServiceImpl implements CityService {
         cityRepository.save(city);
 
         return ApiResponse.success(Message.CITY_DELETED);
+    }
+
+    @Override
+    public ApiResponse<CityResponse> testGetCityByID(String id) {
+        City city = findByIdOrThrow(id);
+
+        Resource thumbnail = imageService.findById(city.getThumbnail().getId());
+        System.out.println("THUMBNAIL NAME: " + thumbnail.getFilename());
+
+        CityResponse response = CityResponse.from(city, thumbnail);
+
+        return ApiResponse.success(response, Message.CITY_FOUND);
     }
 }

@@ -26,6 +26,7 @@ public class WeddingOrganizer extends AuditEntity{
 
     private String phone;
 
+    @Column(length = 1000)
     private String description;
 
     private String address;

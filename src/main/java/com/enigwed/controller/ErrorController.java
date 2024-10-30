@@ -14,7 +14,7 @@ public class ErrorController {
 
     @ExceptionHandler(ErrorResponse.class)
     public ResponseEntity<?> handle(ErrorResponse e) {
-        ApiResponse<?> response = ApiResponse.failed(e.getMessage(), e.getErrorMessage());
+        ApiResponse<?> response = ApiResponse.failed(e.getMessage(), e.getError());
         return ResponseEntity.status(e.getHttpStatus()).body(response);
     }
 
