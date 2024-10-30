@@ -8,6 +8,7 @@ import com.enigwed.exception.ErrorResponse;
 import com.enigwed.service.CityService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class CityController {
     private final CityService cityService;
     private final ObjectMapper objectMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(PathApi.PROTECTED_CITY)
+    @PostMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> createCity(
             @RequestPart(name = "city") String jsonCity,
             @RequestPart(name = "thumbnail", required = true) MultipartFile thumbnail

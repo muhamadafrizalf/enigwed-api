@@ -1,10 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.PathDb;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +19,7 @@ public class City extends AuditEntity{
 
     private String name;
 
+    @Column(length = 1000)
     private String description;
 
     @OneToOne
