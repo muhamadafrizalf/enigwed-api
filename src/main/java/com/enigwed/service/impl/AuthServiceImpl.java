@@ -71,6 +71,10 @@ public class AuthServiceImpl implements AuthService {
         try {
             validationUtil.validateAndThrow(registerRequest);
 
+            if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+                throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, ErrorMessage.CONFIRM_PASSWORD_MISMATCH);
+            }
+
             UserCredential userCredential = UserCredential.builder()
                     .email(registerRequest.getEmail())
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
