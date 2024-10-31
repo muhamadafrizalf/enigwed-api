@@ -3,6 +3,8 @@ package com.enigwed.service.impl;
 import com.enigwed.constant.ERole;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
+import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.RefreshToken;
 import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
@@ -24,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,5 +105,28 @@ public class AuthServiceImpl implements AuthService {
             throw new ErrorResponse(HttpStatus.CONFLICT, Message.REGISTER_FAILED, e.getMessage());
         }
 
+    }
+
+    @Override
+    public ApiResponse<RefreshToken> refresh(RefreshToken refreshToken) {
+        try {
+            validationUtil.validateAndThrow(refreshToken);
+
+            if (jwtUtil.verifyJwtToken(refreshToken.getToken())) {
+                JwtClaim userInfo = jwtUtil.getUserInfoByToken(refreshToken.getToken());
+                UserCredential user = userCredentialService.loadUserById(userInfo.getUserId());
+                String token = jwtUtil.generateToken(user);
+
+                RefreshToken newToken = RefreshToken.builder().token(token).build();
+
+                return ApiResponse.success(newToken, Message.REFRESH_TOKEN_SUCCESS);
+            } else {
+                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
+            }
+        } catch (ValidationException e) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REFRESH_TOKEN_FAILED, e.getErrors().get(0));
+        } catch (UsernameNotFoundException e) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REFRESH_TOKEN_FAILED, e.getMessage());
+        }
     }
 }
