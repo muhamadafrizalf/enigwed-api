@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
 import com.enigwed.constant.ERole;
-import com.enigwed.constant.Error;
+import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
@@ -10,13 +10,14 @@ import com.enigwed.dto.response.LoginResponse;
 import com.enigwed.entity.UserCredential;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.ValidationException;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.AuthService;
 import com.enigwed.service.UserCredentialService;
 import com.enigwed.service.WeddingOrganizerService;
 import com.enigwed.util.ValidationUtil;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,9 +38,12 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<LoginResponse> login(LoginRequest loginRequest) {
         try {
+            validationUtil.validateAndThrow(loginRequest);
+
             Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
@@ -54,17 +58,18 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
             return ApiResponse.success(response, Message.LOGIN_SUCCESS);
+        } catch (ValidationException e) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.LOGIN_FAILED, e.getErrors().get(0));
         } catch (AuthenticationException e) {
-            throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, Error.INVALID_EMAIL_OR_PASSWORD);
+            throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, ErrorMessage.INVALID_EMAIL_OR_PASSWORD);
         }
-
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<?> register(RegisterRequest registerRequest) {
         try {
-            validationUtil.validate(registerRequest);
+            validationUtil.validateAndThrow(registerRequest);
 
             UserCredential userCredential = UserCredential.builder()
                     .email(registerRequest.getEmail())
@@ -88,7 +93,9 @@ public class AuthServiceImpl implements AuthService {
 
             return ApiResponse.success(Message.REGISTER_SUCCESS);
         } catch (ValidationException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, e.getErrors().get(0));
+        } catch (DataIntegrityViolationException e) {
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.REGISTER_FAILED, e.getMessage());
         }
 
     }

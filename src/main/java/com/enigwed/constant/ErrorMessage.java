@@ -1,6 +1,7 @@
 package com.enigwed.constant;
 
-public class Error {
+public class ErrorMessage {
+    public static final String CONSTRAINT_VIOLATION = "Constraint violation";
     // Auth
     public static final String REQUIRED_FIELD_MISSING = "Required fields are missing";
     public static final String EMAIL_ALREADY_IN_USE = "Email already in use";

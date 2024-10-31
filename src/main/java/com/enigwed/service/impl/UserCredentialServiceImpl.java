@@ -1,12 +1,14 @@
 package com.enigwed.service.impl;
 
 import com.enigwed.constant.ERole;
+import com.enigwed.constant.ErrorMessage;
 import com.enigwed.entity.UserCredential;
 import com.enigwed.repository.UserCredentialRepository;
 import com.enigwed.service.UserCredentialService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,6 +54,10 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserCredential create(UserCredential userCredential) {
+        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) {
+            throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
+        }
+
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 }
