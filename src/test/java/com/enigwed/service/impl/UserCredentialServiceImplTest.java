@@ -1,6 +1,5 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ERole;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.entity.UserCredential;
@@ -12,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
         "com.enigwed.email-admin=admin@enigwed.com",
         "com.enigwed.password-admin=admin4321"
 })
+@SpringBootTest
 class UserCredentialServiceImplTest {
 
     @InjectMocks

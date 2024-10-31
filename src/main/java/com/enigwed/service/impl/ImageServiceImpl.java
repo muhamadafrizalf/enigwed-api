@@ -58,13 +58,16 @@ public class ImageServiceImpl implements ImageService {
         String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
         String uniqueFilename = System.currentTimeMillis() + "_" + UUID.randomUUID() + extension;
 
+        Path tempFile = Files.createTempFile("upload-", uniqueFilename);
+        Files.write(tempFile, file.getBytes());
+
         Path filePath = directoryPath.resolve(uniqueFilename);
         Files.copy(file.getInputStream(), filePath);
 
         String contentType = file.getContentType();
         long size = file.getSize();
 
-        return new SaveImage(filePath, uniqueFilename, contentType, size);
+        return new SaveImage(filePath.toString(), uniqueFilename, contentType, size);
     }
 
     private void deleteImage(String path) throws IOException {
@@ -81,7 +84,7 @@ public class ImageServiceImpl implements ImageService {
             SaveImage savedImage = saveImage(file);
             Image image = Image.builder()
                     .name(savedImage.uniqueFilename())
-                    .path(savedImage.filePath().toString())
+                    .path(savedImage.filePath())
                     .contentType(savedImage.contentType())
                     .size(savedImage.size())
                     .build();
@@ -118,7 +121,7 @@ public class ImageServiceImpl implements ImageService {
             SaveImage newImage = saveImage(updatedImage);
 
             image.setName(newImage.uniqueFilename());
-            image.setPath(newImage.filePath().toString());
+            image.setPath(newImage.filePath());
             image.setContentType(newImage.contentType());
             image.setSize(newImage.size());
 
@@ -141,4 +144,5 @@ public class ImageServiceImpl implements ImageService {
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
         }
     }
+
 }
