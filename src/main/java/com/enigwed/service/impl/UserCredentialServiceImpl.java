@@ -44,12 +44,19 @@ public class UserCredentialServiceImpl implements UserCredentialService {
         userCredentialRepository.save(admin);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        if (email == null || email.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        if (email == null || email.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.EMAIL_IS_REQUIRED);
         return userCredentialRepository.findByEmailAndDeletedAtIsNull(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public UserCredential loadUserById(String id) {
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        return userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override

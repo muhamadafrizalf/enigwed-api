@@ -99,17 +99,14 @@ public class ImageServiceImpl implements ImageService {
     public Resource findById(String id) {
         try {
             Image image = findByIdOrThrow(id);
-//            Image image = imageRepository.findById(id).orElse(null);
             if (image == null) return null;
             Path filePath = Paths.get(image.getPath());
             if (!Files.exists(filePath)) {
-                return null;
-//                throw new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND);
+                throw new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND);
                 }
             return new UrlResource(filePath.toUri());
         } catch (IOException e) {
-            return null;
-//            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.FETCHING_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.FETCHING_FAILED, e.getMessage());
         }
     }
 

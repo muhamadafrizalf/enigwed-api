@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface UserCredentialRepository extends JpaRepository<UserCredential, String> {
     Optional<UserCredential> findByEmailAndDeletedAtIsNull(String email);
+    Optional<UserCredential> findByIdAndDeletedAtIsNull(String id);
 }

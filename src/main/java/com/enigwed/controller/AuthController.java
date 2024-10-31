@@ -1,6 +1,7 @@
 package com.enigwed.controller;
 
 import com.enigwed.constant.PathApi;
+import com.enigwed.dto.RefreshToken;
 import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
@@ -28,5 +29,11 @@ public class AuthController {
     public ResponseEntity<?> register (@RequestBody RegisterRequest registerRequest) {
         ApiResponse<?> apiResponse = authService.register(registerRequest);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping(PathApi.REFRESH_TOKEN)
+    public ResponseEntity<?> refreshToken (@RequestBody RefreshToken refreshToken) {
+        ApiResponse<?> response = authService.refresh(refreshToken);
+        return ResponseEntity.ok(response);
     }
 }

@@ -8,6 +8,8 @@ public class Message {
     public static final String REGISTER_FAILED = "Register failed";
     public static final String LOGIN_SUCCESS = "Login success";
     public static final String LOGIN_FAILED = "Login failed";
+    public static final String REFRESH_TOKEN_SUCCESS = "Refresh token success";
+    public static final String REFRESH_TOKEN_FAILED = "Refresh token failed";
 
     // City
     public static final String CITY_CREATED = "City created";
