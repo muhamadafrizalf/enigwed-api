@@ -40,7 +40,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
                 .email(emailAdmin)
                 .password(passwordEncoder.encode(passwordAdmin))
                 .role(ERole.ROLE_ADMIN)
-                .isActive(true)
+                .active(true)
                 .build();
 
         userCredentialRepository.save(admin);
@@ -77,11 +77,17 @@ public class UserCredentialServiceImpl implements UserCredentialService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteUser(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        UserCredential user = userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
-        user.setEmail("deleted_" + user.getEmail());
-        user.setDeletedAt(LocalDateTime.now());
-        userCredentialRepository.saveAndFlush(user);
+    public UserCredential deleteUser(String id) {
+        try {
+            if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, ErrorMessage.ID_IS_REQUIRED);
+            UserCredential user = userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
+            user.setEmail("deleted_" + user.getEmail());
+            user.setDeletedAt(LocalDateTime.now());
+            user.setActive(false);
+            return userCredentialRepository.saveAndFlush(user);
+        } catch (UsernameNotFoundException e) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, e.getMessage());
+        }
+
     }
 }

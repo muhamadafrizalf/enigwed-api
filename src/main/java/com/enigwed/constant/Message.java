@@ -26,7 +26,12 @@ public class Message {
     public static final String IMAGE_UPDATED = "Image updated";
     public static final String IMAGE_DELETED = "Image deleted";
     public static final String IMAGE_FOUND = "Image found";
-
+    // Wedding Organization
+    public static final String WEDDING_ORGANIZER_FOUND = "Wedding organizer found";
+    public static final String WEDDING_ORGANIZERS_FOUND = "Wedding organizer found";
+    public static final String WEDDING_ORGANIZER_UPDATED = "Wedding organizer updated";
+    public static final String WEDDING_ORGANIZER_DELETED = "Wedding organizer deleted";
+    public static final String NO_WEDDING_ORGANIZER_FOUND = "No wedding organizer found";
     // Api Response Message
     public static final String CREATE_FAILED = "Create failed";
     public static final String FETCHING_FAILED = "Fetching failed";

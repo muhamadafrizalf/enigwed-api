@@ -8,9 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageService {
     Image createImage(MultipartFile file);
-    Resource findById(String id);
-    Image update(String id, MultipartFile image);
-    void deleteById(String id);
+    
+    Resource loadImageResourceById(String id);
+    Image updateImage(String id, MultipartFile image);
+    void deleteImage(String id);
 
     ApiResponse<ImageResponse> findByIdResponse(String id);
     ApiResponse<ImageResponse> updateResponse(String id, MultipartFile image);

@@ -28,4 +28,9 @@ public class PathApi {
     public static final String PUBLIC_IMAGE_ID = PUBLIC_IMAGE + "/{id}";
     public static final String PROTECTED_IMAGE = PROTECTED + "/images";
     public static final String PROTECTED_IMAGE_ID = PROTECTED_IMAGE + "/{id}";
+    // Wedding organizer
+    public static final String PUBLIC_WO = PUBLIC + "/wedding-organizer";
+    public static final String PUBLIC_WO_ID = PUBLIC_WO + "/{id}";
+    public static final String PROTECTED_WO = PROTECTED + "/wo";
+    public static final String PROTECTED_WO_ID = PROTECTED_WO + "/{id}";
 }

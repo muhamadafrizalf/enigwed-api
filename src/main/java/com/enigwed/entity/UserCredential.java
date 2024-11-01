@@ -28,8 +28,7 @@ public class UserCredential extends AuditEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private ERole role;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    private boolean active;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -60,6 +59,6 @@ public class UserCredential extends AuditEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        return active;
     }
 }

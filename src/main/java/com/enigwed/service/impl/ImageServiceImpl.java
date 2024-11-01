@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,7 +52,7 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND));
     }
 
-    private SaveImage saveImage(MultipartFile file) throws IOException {
+    private SaveImage savePathImage(MultipartFile file) throws IOException {
         if (!List.of("image/jpeg", "image/png", "image/jpg", "image/svg+xml").contains(file.getContentType())) {
             throw new ConstraintViolationException(Message.INVALID_IMAGE_TYPE, null);
         }
@@ -74,7 +73,7 @@ public class ImageServiceImpl implements ImageService {
         return new SaveImage(filePath.toString(), uniqueFilename, contentType, size);
     }
 
-    private void deleteImage(String path) throws IOException {
+    private void deletePathImage(String path) throws IOException {
         Path filePath = Paths.get(path);
         if (!Files.exists(filePath))
             throw new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND);
@@ -88,7 +87,7 @@ public class ImageServiceImpl implements ImageService {
             Image image = new Image();
             if (file != null && !file.isEmpty()) {
                 // ConstraintViolationException & IOException
-                SaveImage savedImage = saveImage(file);
+                SaveImage savedImage = savePathImage(file);
                 image.setName(savedImage.uniqueFilename());
                 image.setPath(savedImage.filePath());
                 image.setContentType(savedImage.contentType());
@@ -104,7 +103,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Transactional(readOnly = true)
     @Override
-    public Resource findById(String id) {
+    public Resource loadImageResourceById(String id) {
         try {
             Image image = findByIdOrThrow(id);
             if (image == null) return null;
@@ -119,11 +118,11 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Image update(String imageId, MultipartFile updatedImage) {
+    public Image updateImage(String imageId, MultipartFile updatedImage) {
         try {
             Image image = findByIdOrThrow(imageId);
-            deleteImage(image.getPath());
-            SaveImage newImage = saveImage(updatedImage);
+            deletePathImage(image.getPath());
+            SaveImage newImage = savePathImage(updatedImage);
 
             image.setName(newImage.uniqueFilename());
             image.setPath(newImage.filePath());
@@ -140,10 +139,10 @@ public class ImageServiceImpl implements ImageService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteById(String id) {
+    public void deleteImage(String id) {
         try {
             Image image = findByIdOrThrow(id);
-            deleteImage(image.getPath());
+            deletePathImage(image.getPath());
             imageRepository.deleteById(id);
         } catch (IOException e) {
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
@@ -162,8 +161,8 @@ public class ImageServiceImpl implements ImageService {
     public ApiResponse<ImageResponse> updateResponse(String imageId, MultipartFile updatedImage) {
         try {
             Image image = findByIdOrThrow(imageId);
-            deleteImage(image.getPath());
-            SaveImage newImage = saveImage(updatedImage);
+            deletePathImage(image.getPath());
+            SaveImage newImage = savePathImage(updatedImage);
 
             image.setName(newImage.uniqueFilename());
             image.setPath(newImage.filePath());
@@ -186,7 +185,7 @@ public class ImageServiceImpl implements ImageService {
     public ApiResponse<?> softDeleteById(String id) {
         try {
             Image image = findByIdOrThrow(id);
-            deleteImage(image.getPath());
+            deletePathImage(image.getPath());
             image.setName(null);
             image.setPath(null);
             image.setContentType(null);

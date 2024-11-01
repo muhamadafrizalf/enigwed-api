@@ -10,9 +10,7 @@ import org.springframework.core.io.Resource;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class CityResponse {
     private String id;
     private String name;
@@ -22,13 +20,13 @@ public class CityResponse {
     private ImageResponse thumbnail;
 
     public static CityResponse from(City city) {
-        return CityResponse.builder()
-                .id(city.getId())
-                .name(city.getName())
-                .description(city.getDescription())
-                .createdAt(city.getCreatedAt())
-                .updatedAt(city.getUpdatedAt())
-                .thumbnail(ImageResponse.from(city.getThumbnail()))
-                .build();
+        CityResponse response = new CityResponse();
+        response.setId(city.getId());
+        response.setName(city.getName());
+        response.setDescription(city.getDescription());
+        response.setCreatedAt(city.getCreatedAt());
+        response.setUpdatedAt(city.getUpdatedAt());
+        response.setThumbnail(ImageResponse.from(city.getThumbnail()));
+        return response;
     }
 }

@@ -19,7 +19,7 @@ public class ImageController {
 
     @GetMapping(PathApi.PUBLIC_IMAGE_RESOURCE_ID)
     public ResponseEntity<?> getRawImageById(@PathVariable String id) {
-        Resource image = imageService.findById(id);
+        Resource image = imageService.loadImageResourceById(id);
         return ResponseEntity.ok(image);
     }
 

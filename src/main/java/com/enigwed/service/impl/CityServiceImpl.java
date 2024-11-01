@@ -109,7 +109,7 @@ public class CityServiceImpl implements CityService {
         city.setDescription(cityRequest.getDescription());
 
         if (cityRequest.getThumbnail() != null) {
-            Image image = imageService.update(city.getThumbnail().getId(), cityRequest.getThumbnail());
+            Image image = imageService.updateImage(city.getThumbnail().getId(), cityRequest.getThumbnail());
             city.setThumbnail(image);
         }
 

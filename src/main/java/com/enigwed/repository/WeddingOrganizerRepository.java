@@ -16,10 +16,22 @@ public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganiz
     Optional<WeddingOrganizer> findByIdAndDeletedAtIsNull(String id);
     List<WeddingOrganizer> findByDeletedAtIsNull();
 
-    @Query(value = "SELECT * FROM wedding_organizer t " +
-            "WHERE to_tsvector('english', t.name || ' ' || t.phone || ' ' || t.description || ' ' || t.address || ' ' || t.city.name) @@ to_tsquery(:keyword) " +
-            "AND t.deleted_at IS NULL", nativeQuery = true)
+//    @Query(value = "SELECT * FROM wedding_organizer t " +
+//            "WHERE to_tsvector('english', " +
+//            "COALESCE(t.name, '') || ' ' || " +
+//            "COALESCE(t.phone, '') || ' ' || " +
+//            "COALESCE(t.description, '') || ' ' || " +
+//            "COALESCE(t.address, '') || ' ' || " +
+//            "COALESCE(t.city.name, '')) @@ to_tsquery(:keyword) " +
+//            "AND t.deleted_at IS NULL", nativeQuery = true)
+//    List<WeddingOrganizer> searchWeddingOrganizer(@Param("keyword") String keyword);
+
+    @Query("SELECT wo FROM WeddingOrganizer wo " +
+            "WHERE (LOWER(wo.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(wo.phone) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(wo.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(wo.address) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(wo.city.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND wo.deletedAt IS NULL")
     List<WeddingOrganizer> searchWeddingOrganizer(@Param("keyword") String keyword);
-
-
 }
