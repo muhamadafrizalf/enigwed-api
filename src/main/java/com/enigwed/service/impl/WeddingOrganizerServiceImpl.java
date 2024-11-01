@@ -43,6 +43,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createWeddingOrganizer(WeddingOrganizer weddingOrganizer) {
+        // Catch in AuthService
         if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizer.getPhone()) > 0) throw new DataIntegrityViolationException(ErrorMessage.PHONE_ALREADY_EXIST);
         if (weddingOrganizerRepository.countByNibAndDeletedAtIsNull(weddingOrganizer.getNib()) > 0) throw new DataIntegrityViolationException(ErrorMessage.NIB_ALREADY_EXIST);
         if (weddingOrganizerRepository.countByNpwpAndDeletedAtIsNull(weddingOrganizer.getNpwp()) > 0) throw new DataIntegrityViolationException(ErrorMessage.NPWP_ALREADY_EXIST);

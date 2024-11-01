@@ -35,7 +35,7 @@ public class CityController {
                 request.setThumbnail(thumbnail);
             }
 
-            ApiResponse<?> response = cityService.create(request);
+            ApiResponse<?> response = cityService.createCity(request);
 
             return ResponseEntity.ok(response);
         } catch (ErrorResponse e) {
@@ -49,7 +49,7 @@ public class CityController {
     public ResponseEntity<?> getCityById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = cityService.findById(id);
+        ApiResponse<?> response = cityService.findCityById(id);
 
         return ResponseEntity.ok(response);
     }
@@ -60,9 +60,9 @@ public class CityController {
     ) {
         ApiResponse<?> response;
         if (name != null && !name.isEmpty()) {
-            response = cityService.findByName(name);
+            response = cityService.findCityByName(name);
         } else {
-            response = cityService.findAll();
+            response = cityService.findAllCity();
         }
         return ResponseEntity.ok(response);
     }
@@ -78,8 +78,7 @@ public class CityController {
             if (thumbnail != null && !thumbnail.isEmpty()) {
                 request.setThumbnail(thumbnail);
             }
-
-            ApiResponse<?> response = cityService.update(request);
+            ApiResponse<?> response = cityService.updateCity(request);
 
             return ResponseEntity.ok(response);
         } catch (ErrorResponse e) {
@@ -94,7 +93,7 @@ public class CityController {
     public ResponseEntity<?> deleteCityById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = cityService.deleteById(id);
+        ApiResponse<?> response = cityService.deleteCity(id);
 
         return ResponseEntity.ok(response);
     }

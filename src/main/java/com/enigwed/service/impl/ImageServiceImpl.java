@@ -47,8 +47,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     private Image findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty())
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
         return imageRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND));
     }
 
@@ -123,12 +122,10 @@ public class ImageServiceImpl implements ImageService {
             Image image = findByIdOrThrow(imageId);
             deletePathImage(image.getPath());
             SaveImage newImage = savePathImage(updatedImage);
-
             image.setName(newImage.uniqueFilename());
             image.setPath(newImage.filePath());
             image.setContentType(newImage.contentType());
             image.setSize(newImage.size());
-
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());

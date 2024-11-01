@@ -8,12 +8,14 @@ import com.enigwed.dto.response.CityResponse;
 import com.enigwed.entity.City;
 import com.enigwed.entity.Image;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.CityRepository;
 import com.enigwed.service.CityService;
 import com.enigwed.service.ImageService;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,92 +44,101 @@ public class CityServiceImpl implements CityService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<CityResponse> create(CityRequest cityRequest) {
-        if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.NAME_UNIQUE);
-        if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
-        validationUtil.validateAndThrow(cityRequest);
-
-        Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
-
-        City city = City.builder()
-                .name(cityRequest.getName())
-                .description(cityRequest.getDescription())
-                .thumbnail(thumbnail)
-                .build();
-
-        city = cityRepository.save(city);
-
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_CREATED);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<CityResponse> findById(String id) {
-        City city = findByIdOrThrow(id);
-
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<CityResponse> findByName(String name) {
-        if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.NAME_IS_REQUIRED);
-        City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
-
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<CityResponse>> findAll() {
-        List<City> cityList = cityRepository.findByDeletedAtIsNull();
-
-        if (cityList == null || cityList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.CITIES_FOUND);
+    public ApiResponse<CityResponse> createCity(CityRequest cityRequest) {
+        try {
+            // DataIntegrityViolationException
+            if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.NAME_UNIQUE);
+            // ErrorResponse (Don't catch)
+            if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+            // ValidationException
+            validationUtil.validateAndThrow(cityRequest);
+            // ErrorResponse (Don't catch)
+            Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
+            City city = City.builder()
+                    .name(cityRequest.getName())
+                    .description(cityRequest.getDescription())
+                    .thumbnail(thumbnail)
+                    .build();
+            city = cityRepository.save(city);
+            CityResponse response = CityResponse.from(city);
+            return ApiResponse.success(response, Message.CITY_CREATED);
+        } catch (ValidationException e) {
+            log.error("Validation error during creation: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation error during creation: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
         }
+    }
 
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<CityResponse> findCityById(String id) {
+        // ErrorResponse (Don't catch)
+        City city = findByIdOrThrow(id);
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<CityResponse> findCityByName(String name) {
+        // ErrorResponse (Don't catch)
+        if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.NAME_IS_REQUIRED);
+        // ErrorResponse (Don't catch)
+        City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<CityResponse>> findAllCity() {
+        List<City> cityList = cityRepository.findByDeletedAtIsNull();
+        if (cityList == null || cityList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_CITY_FOUND);
         List<CityResponse> cityResponseList = cityList.stream().map(CityResponse::from).toList();
         return ApiResponse.success(cityResponseList, Message.CITIES_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<CityResponse> update(CityRequest cityRequest) {
-        validationUtil.validateAndThrow(cityRequest);
-
-        City city = findByIdOrThrow(cityRequest.getId());
-
-        City possibleConflict = cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).orElse(null);
-        if (possibleConflict != null && !possibleConflict.getId().equals(cityRequest.getId())) {
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.NAME_UNIQUE);
+    public ApiResponse<CityResponse> updateCity(CityRequest cityRequest) {
+        try {
+            // ValidationException
+            validationUtil.validateAndThrow(cityRequest);
+            // ErrorResponse (Don't catch)
+            City city = findByIdOrThrow(cityRequest.getId());
+            City possibleConflict = cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).orElse(null);
+            // DataIntegrityViolationException
+            if (possibleConflict != null && !possibleConflict.getId().equals(cityRequest.getId())) {
+                throw new DataIntegrityViolationException(ErrorMessage.NAME_UNIQUE);
+            }
+            city.setName(cityRequest.getName());
+            city.setDescription(cityRequest.getDescription());
+            if (cityRequest.getThumbnail() != null) {
+                // ErrorResponse (Don't catch)
+                Image image = imageService.updateImage(city.getThumbnail().getId(), cityRequest.getThumbnail());
+                city.setThumbnail(image);
+            }
+            city = cityRepository.save(city);
+            CityResponse response = CityResponse.from(city);
+            return ApiResponse.success(response, Message.CITY_UPDATED);
+        } catch (ValidationException e) {
+            log.error("Validation error during update: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation error during update: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
         }
-
-        city.setName(cityRequest.getName());
-        city.setDescription(cityRequest.getDescription());
-
-        if (cityRequest.getThumbnail() != null) {
-            Image image = imageService.updateImage(city.getThumbnail().getId(), cityRequest.getThumbnail());
-            city.setThumbnail(image);
-        }
-
-        city = cityRepository.save(city);
-
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_UPDATED);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<?> deleteById(String id) {
+    public ApiResponse<?> deleteCity(String id) {
+        // ErrorResponse (Don't catch)
         City city = findByIdOrThrow(id);
-
         city.setDeletedAt(LocalDateTime.now());
-
         cityRepository.save(city);
-
         return ApiResponse.success(Message.CITY_DELETED);
     }
 }

@@ -10,10 +10,10 @@ import java.util.List;
 public interface CityService {
     City loadCityById(String id);
 
-    ApiResponse<CityResponse> create(CityRequest cityRequest);
-    ApiResponse<CityResponse> findById(String id);
-    ApiResponse<CityResponse> findByName(String name);
-    ApiResponse<List<CityResponse>> findAll();
-    ApiResponse<CityResponse> update(CityRequest cityRequest);
-    ApiResponse<?> deleteById(String id);
+    ApiResponse<CityResponse> createCity(CityRequest cityRequest);
+    ApiResponse<CityResponse> findCityById(String id);
+    ApiResponse<CityResponse> findCityByName(String name);
+    ApiResponse<List<CityResponse>> findAllCity();
+    ApiResponse<CityResponse> updateCity(CityRequest cityRequest);
+    ApiResponse<?> deleteCity(String id);
 }

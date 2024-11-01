@@ -17,7 +17,7 @@ public class Message {
     public static final String CITIES_FOUND = "Cities found";
     public static final String CITY_UPDATED = "City updated";
     public static final String CITY_DELETED = "City deleted";
-
+    public static final String NO_CITY_FOUND = "No city found";
     // Image
     public static final String ERROR_CREATING_IMAGE_DIRECTORY = "Error while creating image directory";
     public static final String ERROR_CREATING_IMAGE = "Error while creating image";
