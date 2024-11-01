@@ -1,6 +1,9 @@
 package com.enigwed.service.impl;
 
+import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
+import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.ImageResponse;
 import com.enigwed.entity.Image;
 import com.enigwed.record.SaveImage;
 import com.enigwed.exception.ErrorResponse;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,7 +49,7 @@ public class ImageServiceImpl implements ImageService {
 
     private Image findByIdOrThrow(String id) {
         if (id == null || id.isEmpty())
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, Message.ID_IS_REQUIRED);
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
         return imageRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND));
     }
 
@@ -81,13 +85,14 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public Image create(MultipartFile file) {
         try {
-            SaveImage savedImage = saveImage(file);
-            Image image = Image.builder()
-                    .name(savedImage.uniqueFilename())
-                    .path(savedImage.filePath())
-                    .contentType(savedImage.contentType())
-                    .size(savedImage.size())
-                    .build();
+            Image image = new Image();
+            if (file != null && !file.isEmpty()) {
+                SaveImage savedImage = saveImage(file);
+                image.setName(savedImage.uniqueFilename());
+                image.setPath(savedImage.filePath());
+                image.setContentType(savedImage.contentType());
+                image.setSize(savedImage.size());
+            }
             imageRepository.saveAndFlush(image);
             return image;
         } catch (ConstraintViolationException e) {
@@ -127,7 +132,7 @@ public class ImageServiceImpl implements ImageService {
 
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.ERROR_CREATING_IMAGE, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());
         } catch (IOException e) {
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.UPDATE_FAILED, e.getMessage());
         }
@@ -145,4 +150,51 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    @Override
+    public ApiResponse<ImageResponse> findByIdResponse(String id) {
+        Image image = findByIdOrThrow(id);
+
+        ImageResponse response = ImageResponse.from(image);
+        return ApiResponse.success(response, Message.IMAGE_FOUND);
+    }
+
+    @Override
+    public ApiResponse<ImageResponse> updateResponse(String imageId, MultipartFile updatedImage) {
+        try {
+            Image image = findByIdOrThrow(imageId);
+            deleteImage(image.getPath());
+            SaveImage newImage = saveImage(updatedImage);
+
+            image.setName(newImage.uniqueFilename());
+            image.setPath(newImage.filePath());
+            image.setContentType(newImage.contentType());
+            image.setSize(newImage.size());
+
+            image = imageRepository.saveAndFlush(image);
+            
+            ImageResponse response = ImageResponse.from(image);
+
+            return ApiResponse.success(response, Message.IMAGE_UPDATED);
+        } catch (ConstraintViolationException e) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());
+        } catch (IOException e) {
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.UPDATE_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    public ApiResponse<?> softDeleteById(String id) {
+        try {
+            Image image = findByIdOrThrow(id);
+            deleteImage(image.getPath());
+            image.setName(null);
+            image.setPath(null);
+            image.setContentType(null);
+            image.setSize(null);
+            imageRepository.saveAndFlush(image);
+            return ApiResponse.success(Message.IMAGE_DELETED);
+        } catch (IOException e) {
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
+        }
+    }
 }

@@ -8,12 +8,12 @@ import com.enigwed.entity.City;
 import java.util.List;
 
 public interface CityService {
-    ApiResponse<City> create(CityRequest cityRequest);
-    ApiResponse<City> findById(String id);
-    ApiResponse<City> findByName(String name);
-    ApiResponse<List<City>> findAll();
-    ApiResponse<City> update(CityRequest cityRequest);
-    ApiResponse<?> deleteById(String id);
+    City loadCityById(String id);
 
-    ApiResponse<CityResponse> testGetCityByID (String id);
+    ApiResponse<CityResponse> create(CityRequest cityRequest);
+    ApiResponse<CityResponse> findById(String id);
+    ApiResponse<CityResponse> findByName(String name);
+    ApiResponse<List<CityResponse>> findAll();
+    ApiResponse<CityResponse> update(CityRequest cityRequest);
+    ApiResponse<?> deleteById(String id);
 }

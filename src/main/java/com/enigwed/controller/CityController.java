@@ -68,7 +68,7 @@ public class CityController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(PathApi.PROTECTED_CITY)
+    @PutMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateCity(
             @RequestPart(name = "city") String jsonCity,
             @RequestPart(name = "thumbnail", required = false) MultipartFile thumbnail
@@ -95,13 +95,6 @@ public class CityController {
             @PathVariable String id
     ) {
         ApiResponse<?> response = cityService.deleteById(id);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping(PathApi.PUBLIC_CITY + "/test/{id}")
-    public ResponseEntity<?> getCityTest(@PathVariable String id) {
-        ApiResponse<?> response = cityService.testGetCityByID(id);
 
         return ResponseEntity.ok(response);
     }

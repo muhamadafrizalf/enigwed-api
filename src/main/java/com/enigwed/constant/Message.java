@@ -23,18 +23,13 @@ public class Message {
     public static final String ERROR_CREATING_IMAGE = "Error while creating image";
     public static final String INVALID_IMAGE_TYPE = "Invalid image type";
     public static final String IMAGE_NOT_FOUND = "Image not found";
-    // City
-    public static final String CITY_NOT_FOUND = "City not found";
-
+    public static final String IMAGE_UPDATED = "Image updated";
+    public static final String IMAGE_DELETED = "Image deleted";
+    public static final String IMAGE_FOUND = "Image found";
 
     // Api Response Message
     public static final String CREATE_FAILED = "Create failed";
     public static final String FETCHING_FAILED = "Fetching failed";
     public static final String UPDATE_FAILED = "Update failed";
     public static final String DELETE_FAILED = "Delete failed";
-
-
-    // Null or Empty
-    public static final String ID_IS_REQUIRED = "ID is null or empty";
-    public static final String NAME_IS_REQUIRED = "Name is null or empty";
 }

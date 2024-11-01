@@ -12,13 +12,10 @@ public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganiz
     Optional<WeddingOrganizer> findByIdAndDeletedAtIsNull(String id);
     List<WeddingOrganizer> findByDeletedAtIsNull();
 
-    @Query("SELECT t FROM WeddingOrganizer t " +
-            "WHERE (LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(t.phone) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(t.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(t.city.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND t.deletedAt IS NULL")
+    @Query(value = "SELECT * FROM wedding_organizer t " +
+            "WHERE to_tsvector('english', t.name || ' ' || t.phone || ' ' || t.description || ' ' || t.address || ' ' || t.city.name) @@ to_tsquery(:keyword) " +
+            "AND t.deleted_at IS NULL", nativeQuery = true)
     List<WeddingOrganizer> searchWeddingOrganizer(@Param("keyword") String keyword);
+
 
 }

@@ -19,18 +19,16 @@ public class CityResponse {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
-    Resource thumbnail;
+    private ImageResponse thumbnail;
 
-    public static CityResponse from(City city, Resource thumbnail) {
+    public static CityResponse from(City city) {
         return CityResponse.builder()
                 .id(city.getId())
                 .name(city.getName())
                 .description(city.getDescription())
                 .createdAt(city.getCreatedAt())
                 .updatedAt(city.getUpdatedAt())
-                .deletedAt(city.getDeletedAt())
-                .thumbnail(thumbnail)
+                .thumbnail(ImageResponse.from(city.getThumbnail()))
                 .build();
     }
 }

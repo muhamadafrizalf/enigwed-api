@@ -37,6 +37,7 @@ public class WeddingOrganizer extends AuditEntity{
 
     @OneToOne
     @JoinColumn(name = "avatar_id")
+    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     private Image avatar;
 
     @OneToOne

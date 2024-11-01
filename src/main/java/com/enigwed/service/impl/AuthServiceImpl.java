@@ -9,14 +9,14 @@ import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.LoginResponse;
+import com.enigwed.entity.City;
+import com.enigwed.entity.Image;
 import com.enigwed.entity.UserCredential;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.security.JwtUtil;
-import com.enigwed.service.AuthService;
-import com.enigwed.service.UserCredentialService;
-import com.enigwed.service.WeddingOrganizerService;
+import com.enigwed.service.*;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
     private final UserCredentialService userCredentialService;
     private final WeddingOrganizerService weddingOrganizerService;
+    private final ImageService imageService;
+    private final CityService cityService;
     private final JwtUtil jwtUtil;
     private final ValidationUtil validationUtil;
     private final AuthenticationManager authenticationManager;
@@ -51,8 +53,9 @@ public class AuthServiceImpl implements AuthService {
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
             ));
-            SecurityContextHolder.getContext().setAuthentication(authenticate);
+
             UserCredential userCredential = (UserCredential) authenticate.getPrincipal();
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
             String token = jwtUtil.generateToken(userCredential);
 
             LoginResponse response = LoginResponse.builder()
@@ -64,7 +67,13 @@ public class AuthServiceImpl implements AuthService {
         } catch (ValidationException e) {
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.LOGIN_FAILED, e.getErrors().get(0));
         } catch (AuthenticationException e) {
-            throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, ErrorMessage.INVALID_EMAIL_OR_PASSWORD);
+            if (e.getMessage().equals("Bad credentials")) {
+                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, ErrorMessage.INVALID_EMAIL_OR_PASSWORD);
+            }
+            if (e.getMessage().equals("User is disabled")) {
+                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, ErrorMessage.ACCOUNT_NOT_ACTIVE);
+            }
+            throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.LOGIN_FAILED, e.getMessage());
         }
     }
 
@@ -86,6 +95,9 @@ public class AuthServiceImpl implements AuthService {
 
             userCredential = userCredentialService.create(userCredential);
 
+            City city = cityService.loadCityById(registerRequest.getCityId());
+            Image avatar = imageService.create(null);
+
             WeddingOrganizer wo = WeddingOrganizer.builder()
                     .name(registerRequest.getName())
                     .description(registerRequest.getDescription())
@@ -93,6 +105,8 @@ public class AuthServiceImpl implements AuthService {
                     .npwp(registerRequest.getNpwp())
                     .nib(registerRequest.getNib())
                     .phone(registerRequest.getPhone())
+                    .city(city)
+                    .avatar(avatar)
                     .userCredential(userCredential)
                     .build();
 

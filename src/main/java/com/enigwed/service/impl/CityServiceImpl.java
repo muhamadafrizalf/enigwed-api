@@ -1,5 +1,6 @@
 package com.enigwed.service.impl;
 
+import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.request.CityRequest;
 import com.enigwed.dto.response.ApiResponse;
@@ -10,9 +11,9 @@ import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.CityRepository;
 import com.enigwed.service.CityService;
 import com.enigwed.service.ImageService;
+import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,61 +28,82 @@ import java.util.List;
 public class CityServiceImpl implements CityService {
     private final CityRepository cityRepository;
     private final ImageService imageService;
+    private final ValidationUtil validationUtil;
 
     private City findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, Message.ID_IS_REQUIRED);
-        return cityRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.CITY_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        return cityRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
+    }
+
+    @Override
+    public City loadCityById(String id) {
+        return findByIdOrThrow(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<City> create(CityRequest cityRequest) {
+    public ApiResponse<CityResponse> create(CityRequest cityRequest) {
+        if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.NAME_UNIQUE);
+        if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+        validationUtil.validateAndThrow(cityRequest);
+
         Image thumbnail = imageService.create(cityRequest.getThumbnail());
 
-        City city = cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).orElse(new City());
-
-        city.setName(cityRequest.getName());
-        city.setDescription(cityRequest.getDescription());
-        city.setThumbnail(thumbnail);
+        City city = City.builder()
+                .name(cityRequest.getName())
+                .description(cityRequest.getDescription())
+                .thumbnail(thumbnail)
+                .build();
 
         city = cityRepository.save(city);
 
-        return ApiResponse.success(city, Message.CITY_CREATED);
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_CREATED);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<City> findById(String id) {
+    public ApiResponse<CityResponse> findById(String id) {
         City city = findByIdOrThrow(id);
 
-        return ApiResponse.success(city, Message.CITY_FOUND);
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<City> findByName(String name) {
-        if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, Message.NAME_IS_REQUIRED);
-        City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.CITY_NOT_FOUND));
+    public ApiResponse<CityResponse> findByName(String name) {
+        if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.NAME_IS_REQUIRED);
+        City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
 
-        return ApiResponse.success(city, Message.CITY_FOUND);
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<City>> findAll() {
+    public ApiResponse<List<CityResponse>> findAll() {
         List<City> cityList = cityRepository.findByDeletedAtIsNull();
 
         if (cityList == null || cityList.isEmpty()) {
             return ApiResponse.success(new ArrayList<>(), Message.CITIES_FOUND);
         }
 
-        return ApiResponse.success(cityList, Message.CITIES_FOUND);
+        List<CityResponse> cityResponseList = cityList.stream().map(CityResponse::from).toList();
+        return ApiResponse.success(cityResponseList, Message.CITIES_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<City> update(CityRequest cityRequest) {
+    public ApiResponse<CityResponse> update(CityRequest cityRequest) {
+        validationUtil.validateAndThrow(cityRequest);
+
         City city = findByIdOrThrow(cityRequest.getId());
+
+        City possibleConflict = cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).orElse(null);
+        if (possibleConflict != null && !possibleConflict.getId().equals(cityRequest.getId())) {
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.NAME_UNIQUE);
+        }
 
         city.setName(cityRequest.getName());
         city.setDescription(cityRequest.getDescription());
@@ -93,7 +115,8 @@ public class CityServiceImpl implements CityService {
 
         city = cityRepository.save(city);
 
-        return ApiResponse.success(city, Message.CITY_UPDATED);
+        CityResponse response = CityResponse.from(city);
+        return ApiResponse.success(response, Message.CITY_UPDATED);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -106,17 +129,5 @@ public class CityServiceImpl implements CityService {
         cityRepository.save(city);
 
         return ApiResponse.success(Message.CITY_DELETED);
-    }
-
-    @Override
-    public ApiResponse<CityResponse> testGetCityByID(String id) {
-        City city = findByIdOrThrow(id);
-
-        Resource thumbnail = imageService.findById(city.getThumbnail().getId());
-        System.out.println("THUMBNAIL NAME: " + thumbnail.getFilename());
-
-        CityResponse response = CityResponse.from(city, thumbnail);
-
-        return ApiResponse.success(response, Message.CITY_FOUND);
     }
 }
