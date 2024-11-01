@@ -88,6 +88,12 @@ public class UserCredentialServiceImpl implements UserCredentialService {
         } catch (UsernameNotFoundException e) {
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, e.getMessage());
         }
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public UserCredential activateUser(UserCredential userCredential) {
+        userCredential.setActive(true);
+        return userCredentialRepository.saveAndFlush(userCredential);
     }
 }

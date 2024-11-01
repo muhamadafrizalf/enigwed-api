@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,7 +38,6 @@ public class WeddingOrganizerController {
             response = weddingOrganizerService.findAllWeddingOrganizer();
         }
         return ResponseEntity.ok(response);
-
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -51,13 +51,42 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping(PathApi.PROTECTED_WO)
+    @DeleteMapping(PathApi.PROTECTED_WO_ID)
     public ResponseEntity<?> deleteWeddingOrganizer(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody String weddingOrganizerId
+            @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = weddingOrganizerService.deleteWeddingOrganizer(userInfo, weddingOrganizerId);
+        ApiResponse<?> response = weddingOrganizerService.deleteWeddingOrganizer(userInfo, id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PutMapping(value = PathApi.PROTECTED_WO_ID_IMAGE, consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateWeddingOrganizerImage(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable String id,
+            @RequestPart(name = "avatar", required = true) MultipartFile avatar
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = weddingOrganizerService.updateWeddingOrganizerImage(userInfo, id, avatar);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping(PathApi.PROTECTED_WO_ID_IMAGE)
+    public ResponseEntity<?> deleteWeddingOrganizerImage(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable String id
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = weddingOrganizerService.deleteWeddingOrganizerImage(userInfo, id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(PathApi.PROTECTED_WO_ID_ACTIVATE)
+    public ResponseEntity<?> activateWeddingOrganizer(@PathVariable String id) {
+        ApiResponse<?> response = weddingOrganizerService.activateWeddingOrganizer(id);
         return ResponseEntity.ok(response);
     }
 }

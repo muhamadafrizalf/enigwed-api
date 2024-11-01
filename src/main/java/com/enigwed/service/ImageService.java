@@ -10,7 +10,7 @@ public interface ImageService {
     Image createImage(MultipartFile file);
     Image updateImage(String id, MultipartFile image);
     void deleteImage(String id);
-    void softDeleteImageById(String id);
+    Image softDeleteImageById(String id);
 
     Resource loadImageResourceById(String id);
 

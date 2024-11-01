@@ -33,4 +33,6 @@ public class PathApi {
     public static final String PUBLIC_WO_ID = PUBLIC_WO + "/{id}";
     public static final String PROTECTED_WO = PROTECTED + "/wedding-organizers";
     public static final String PROTECTED_WO_ID = PROTECTED_WO + "/{id}";
+    public static final String PROTECTED_WO_ID_IMAGE = PROTECTED_WO_ID + "/image";
+    public static final String PROTECTED_WO_ID_ACTIVATE = PROTECTED_WO_ID + "/activate";
 }

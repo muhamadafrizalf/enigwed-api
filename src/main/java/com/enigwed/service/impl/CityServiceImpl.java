@@ -39,8 +39,14 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City loadCityById(String id) {
-        // ErrorResponse (Don't catch)
-        return findByIdOrThrow(id);
+        try {
+            // ErrorResponse
+            return findByIdOrThrow(id);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading city: {}", e.getMessage());
+            throw e;
+        }
+
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -49,11 +55,11 @@ public class CityServiceImpl implements CityService {
         try {
             // DataIntegrityViolationException
             if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.NAME_UNIQUE);
-            // ErrorResponse (Don't catch)
+            // ErrorResponse
             if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
             // ValidationException
             validationUtil.validateAndThrow(cityRequest);
-            // ErrorResponse (Don't catch)
+            // ErrorResponse
             Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
             City city = City.builder()
                     .name(cityRequest.getName())
@@ -64,32 +70,46 @@ public class CityServiceImpl implements CityService {
             CityResponse response = CityResponse.from(city);
             return ApiResponse.success(response, Message.CITY_CREATED);
         } catch (ValidationException e) {
-            log.error("Validation error during creation: {}", e.getErrors());
+            log.error("Validation error during creation city: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation error during creation: {}", e.getMessage());
+            log.error("Data integrity violation error during creation city: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during creation city: {}", e.getMessage());
+            throw e;
         }
     }
 
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<CityResponse> findCityById(String id) {
-        // ErrorResponse (Don't catch)
-        City city = findByIdOrThrow(id);
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_FOUND);
+        try {
+            // ErrorResponse
+            City city = findByIdOrThrow(id);
+            CityResponse response = CityResponse.from(city);
+            return ApiResponse.success(response, Message.CITY_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading city: {}", e.getMessage());
+            throw e;
+        }
+
     }
 
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<CityResponse> findCityByName(String name) {
-        // ErrorResponse (Don't catch)
-        if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.NAME_IS_REQUIRED);
-        // ErrorResponse (Don't catch)
-        City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
-        CityResponse response = CityResponse.from(city);
-        return ApiResponse.success(response, Message.CITY_FOUND);
+        try {
+            // ErrorResponse (Don't catch)
+            if (name == null || name.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.NAME_IS_REQUIRED);
+            // ErrorResponse (Don't catch)
+            City city = cityRepository.findByNameAndDeletedAtIsNull(name).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
+            CityResponse response = CityResponse.from(city);
+            return ApiResponse.success(response, Message.CITY_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading city: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -125,21 +145,30 @@ public class CityServiceImpl implements CityService {
             CityResponse response = CityResponse.from(city);
             return ApiResponse.success(response, Message.CITY_UPDATED);
         } catch (ValidationException e) {
-            log.error("Validation error during update: {}", e.getErrors());
+            log.error("Validation error during update city: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation error during update: {}", e.getMessage());
+            log.error("Data integrity violation error during update city: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during update city: {}", e.getMessage());
+            throw e;
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<?> deleteCity(String id) {
-        // ErrorResponse (Don't catch)
-        City city = findByIdOrThrow(id);
-        city.setDeletedAt(LocalDateTime.now());
-        cityRepository.save(city);
-        return ApiResponse.success(Message.CITY_DELETED);
+        try {
+            // ErrorResponse
+            City city = findByIdOrThrow(id);
+            city.setDeletedAt(LocalDateTime.now());
+            cityRepository.save(city);
+            return ApiResponse.success(Message.CITY_DELETED);
+        } catch (ErrorResponse e) {
+            log.error("Error during deletion city: {}", e.getMessage());
+            throw e;
+        }
+
     }
 }

@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             // ValidationException
             validationUtil.validateAndThrow(registerRequest);
-            // ErrorResponse (Don't catch)
+            // ErrorResponse
             if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
                 throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, ErrorMessage.CONFIRM_PASSWORD_MISMATCH);
             UserCredential userCredential = UserCredential.builder()
@@ -97,9 +97,9 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             // DataIntegrityViolationException
             userCredential = userCredentialService.createUser(userCredential);
-            // ErrorResponse (Don't catch)
+            // ErrorResponse
             City city = cityService.loadCityById(registerRequest.getCityId());
-            // ErrorResponse (Don't catch)
+            // ErrorResponse
             Image avatar = imageService.createImage(null);
             WeddingOrganizer wo = WeddingOrganizer.builder()
                     .name(registerRequest.getName())
@@ -121,6 +121,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (DataIntegrityViolationException e) {
             log.error("Database conflict error during register: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.CONFLICT, Message.REGISTER_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during register: {}", e.getError());
+            throw e;
         }
     }
 
@@ -131,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
             validationUtil.validateAndThrow(refreshToken);
             if (jwtUtil.verifyJwtToken(refreshToken.getToken())) {
                 JwtClaim userInfo = jwtUtil.getUserInfoByToken(refreshToken.getToken());
-                // ErrorResponse (Don't catch)
+                // ErrorResponse
                 if (userInfo == null) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
                 // UsernameNotFoundException
                 UserCredential user = userCredentialService.loadUserById(userInfo.getUserId());
@@ -140,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
                 RefreshToken newToken = RefreshToken.builder().token(token).build();
                 return ApiResponse.success(newToken, Message.REFRESH_TOKEN_SUCCESS);
             } else {
-                // ErrorResponse (Don't catch)
+                // ErrorResponse
                 throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
             }
         } catch (ValidationException e) {
@@ -152,6 +155,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (JWTCreationException e) {
             log.error("JWT creation error during refresh token: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.LOGIN_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during refresh token: {}", e.getError());
+            throw e;
         }
     }
 }

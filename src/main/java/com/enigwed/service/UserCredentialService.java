@@ -8,4 +8,5 @@ public interface UserCredentialService extends UserDetailsService {
     UserCredential createUser(UserCredential userCredential);
     UserCredential updateUser(UserCredential userCredential);
     UserCredential deleteUser(String id);
+    UserCredential activateUser(UserCredential userCredential);
 }

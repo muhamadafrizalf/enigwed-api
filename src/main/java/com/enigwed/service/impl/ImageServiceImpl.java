@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -102,13 +101,13 @@ public class ImageServiceImpl implements ImageService {
             }
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
-            log.error("Constraint violation error during creation: {}", e.getMessage());
+            log.error("Constraint violation error during creation image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.ERROR_CREATING_IMAGE, e.getMessage());
         } catch (IOException e) {
-            log.error("IO error during creation: {}", e.getMessage());
+            log.error("IO error during creation image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.ERROR_CREATING_IMAGE, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during creation: {}", e.getError());
+            log.error("Error during creation image: {}", e.getError());
             throw e;
         }
     }
@@ -128,13 +127,13 @@ public class ImageServiceImpl implements ImageService {
             image.setSize(newImage.size());
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
-            log.error("Constraint violation error during update: {}", e.getMessage());
+            log.error("Constraint violation error during update image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());
         } catch (IOException e) {
-            log.error("IO error during update: {}", e.getMessage());
+            log.error("IO error during update image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during update: {}", e.getError());
+            log.error("Error during update image: {}", e.getError());
             throw e;
         }
     }
@@ -149,16 +148,16 @@ public class ImageServiceImpl implements ImageService {
             deleteImageFromDirectory(image.getPath());
             imageRepository.deleteById(id);
         } catch (IOException e) {
-            log.error("IO error during deletion: {}", e.getMessage());
+            log.error("IO error during deletion image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during deletion: {}", e.getError());
+            log.error("Error during deletion image: {}", e.getError());
             throw e;
         }
     }
 
     @Override
-    public void softDeleteImageById(String id) {
+    public Image softDeleteImageById(String id) {
         try {
             // ErrorResponse
             Image image = findByIdOrThrow(id);
@@ -168,12 +167,12 @@ public class ImageServiceImpl implements ImageService {
             image.setPath(null);
             image.setContentType(null);
             image.setSize(null);
-            imageRepository.saveAndFlush(image);
+            return imageRepository.saveAndFlush(image);
         } catch (IOException e) {
-            log.error("IO error during deletion: {}", e.getMessage());
+            log.error("IO error during deletion image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during deletion: {}", e.getError());
+            log.error("Error during deletion image: {}", e.getError());
             throw e;
         }
     }
@@ -190,10 +189,10 @@ public class ImageServiceImpl implements ImageService {
             }
             return new UrlResource(filePath.toUri());
         } catch (IOException e) {
-            log.error("IO error during loading image: {}", e.getMessage());
+            log.error("IO error during loading image image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.FETCHING_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during loading image: {}", e.getError());
+            log.error("Error during loading image image: {}", e.getError());
             throw e;
         }
     }
