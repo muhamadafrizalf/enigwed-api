@@ -73,6 +73,7 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @DeleteMapping(PathApi.PROTECTED_WO_ID_IMAGE)
     public ResponseEntity<?> deleteWeddingOrganizerImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

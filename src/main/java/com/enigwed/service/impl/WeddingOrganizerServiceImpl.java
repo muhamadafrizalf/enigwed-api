@@ -164,7 +164,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             log.error("Error during update wedding organizer image: {}", e.getError());
             throw e;
         }
-
     }
 
     @Override

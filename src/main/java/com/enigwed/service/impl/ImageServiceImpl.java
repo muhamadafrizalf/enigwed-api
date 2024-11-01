@@ -118,7 +118,7 @@ public class ImageServiceImpl implements ImageService {
             // ErrorResponse
             Image image = findByIdOrThrow(imageId);
             // IOException
-            deleteImageFromDirectory(image.getPath());
+            if (image.getPath() != null) deleteImageFromDirectory(image.getPath());
             // ConstraintViolationException & IOException
             SaveImage newImage = saveImageToDirectory(updatedImage);
             image.setName(newImage.uniqueFilename());

@@ -3,6 +3,7 @@ package com.enigwed.controller;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.exception.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class ErrorController {
 
     @ExceptionHandler(ErrorResponse.class)
@@ -27,6 +29,7 @@ public class ErrorController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handle(Exception e) {
+        log.error("UNHANDLED ERROR: {}",e.getMessage(), e);
         ApiResponse<?> response = ApiResponse.failed(Message.ERROR, e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
