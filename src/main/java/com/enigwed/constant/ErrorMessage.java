@@ -24,4 +24,5 @@ public class ErrorMessage {
     // Not found
     public static final String CITY_NOT_FOUND = "City not found";
     public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
+    public static final String IMAGE_NOT_FOUND = "Image not found";
 }

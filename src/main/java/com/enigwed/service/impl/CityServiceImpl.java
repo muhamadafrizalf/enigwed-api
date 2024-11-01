@@ -39,6 +39,7 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City loadCityById(String id) {
+        // ErrorResponse (Don't catch)
         return findByIdOrThrow(id);
     }
 

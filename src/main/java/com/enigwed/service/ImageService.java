@@ -8,13 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageService {
     Image createImage(MultipartFile file);
-    
-    Resource loadImageResourceById(String id);
     Image updateImage(String id, MultipartFile image);
     void deleteImage(String id);
+    void softDeleteImageById(String id);
+
+    Resource loadImageResourceById(String id);
 
     ApiResponse<ImageResponse> findByIdResponse(String id);
     ApiResponse<ImageResponse> updateResponse(String id, MultipartFile image);
-    ApiResponse<?> softDeleteById(String id);
 
 }

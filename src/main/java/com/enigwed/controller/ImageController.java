@@ -36,9 +36,4 @@ public class ImageController {
         ApiResponse<?> response = imageService.updateResponse(id, image);
         return ResponseEntity.ok(response);
     }
-
-    public ResponseEntity<?> deleteImageById(@PathVariable String id) {
-        ApiResponse<?> response = imageService.softDeleteById(id);
-        return ResponseEntity.ok(response);
-    }
 }
