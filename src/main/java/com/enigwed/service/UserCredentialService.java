@@ -5,5 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserCredentialService extends UserDetailsService {
     UserCredential loadUserById(String id);
-    UserCredential create(UserCredential userCredential);
+    UserCredential createUser(UserCredential userCredential);
+    UserCredential updateUser(UserCredential userCredential);
+    void deleteUser(String id);
 }

@@ -83,18 +83,18 @@ public class ImageServiceImpl implements ImageService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Image create(MultipartFile file) {
+    public Image createImage(MultipartFile file) {
         try {
             Image image = new Image();
             if (file != null && !file.isEmpty()) {
+                // ConstraintViolationException & IOException
                 SaveImage savedImage = saveImage(file);
                 image.setName(savedImage.uniqueFilename());
                 image.setPath(savedImage.filePath());
                 image.setContentType(savedImage.contentType());
                 image.setSize(savedImage.size());
             }
-            imageRepository.saveAndFlush(image);
-            return image;
+            return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.ERROR_CREATING_IMAGE, e.getMessage());
         } catch (IOException e) {

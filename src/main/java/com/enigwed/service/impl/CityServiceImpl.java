@@ -47,7 +47,7 @@ public class CityServiceImpl implements CityService {
         if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
         validationUtil.validateAndThrow(cityRequest);
 
-        Image thumbnail = imageService.create(cityRequest.getThumbnail());
+        Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
 
         City city = City.builder()
                 .name(cityRequest.getName())

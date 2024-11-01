@@ -49,7 +49,7 @@ public class JwtUtil {
 
         } catch (JWTCreationException e) {
             log.error("Invalid while creating jwt token : {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 

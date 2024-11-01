@@ -6,7 +6,7 @@ import com.enigwed.entity.WeddingOrganizer;
 import java.util.List;
 
 public interface WeddingOrganizerService {
-    WeddingOrganizer create (WeddingOrganizer weddingOrganizer);
+    void createWeddingOrganizer(WeddingOrganizer weddingOrganizer);
 
     ApiResponse<WeddingOrganizer> update (WeddingOrganizer weddingOrganizer);
     ApiResponse<WeddingOrganizer> findById(Long id);

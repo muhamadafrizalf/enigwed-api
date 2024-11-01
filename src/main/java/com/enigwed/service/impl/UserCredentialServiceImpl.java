@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class UserCredentialServiceImpl implements UserCredentialService {
@@ -60,11 +62,26 @@ public class UserCredentialServiceImpl implements UserCredentialService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UserCredential create(UserCredential userCredential) {
-        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) {
-            throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
-        }
-
+    public UserCredential createUser(UserCredential userCredential) {
+        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
         return userCredentialRepository.saveAndFlush(userCredential);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public UserCredential updateUser(UserCredential userCredential) {
+        UserCredential possibleConflict = userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).orElse(null);
+        if (possibleConflict != null && !possibleConflict.getId().equals(userCredential.getId())) throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
+        return userCredentialRepository.saveAndFlush(userCredential);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteUser(String id) {
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        UserCredential user = userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
+        user.setEmail("deleted_" + user.getEmail());
+        user.setDeletedAt(LocalDateTime.now());
+        userCredentialRepository.saveAndFlush(user);
     }
 }

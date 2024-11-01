@@ -122,7 +122,7 @@ class UserCredentialServiceImplTest {
     }
 
     @Test
-    void create_UserAlreadyExists_ThrowsDataIntegrityViolationException() {
+    void create_User_UserAlreadyExists_ThrowsDataIntegrityViolationException() {
         // Arrange
         UserCredential existingUser = new UserCredential();
         existingUser.setEmail("existing@enigwed.com");
@@ -130,14 +130,14 @@ class UserCredentialServiceImplTest {
 
         // Act & Assert
         DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> {
-            userCredentialService.create(existingUser);
+            userCredentialService.createUser(existingUser);
         });
 
         assertEquals(ErrorMessage.EMAIL_ALREADY_IN_USE, exception.getMessage());
     }
 
     @Test
-    void create_SuccessfullyCreatesUser() {
+    void create_User_SuccessfullyCreatesUser() {
         // Arrange
         UserCredential newUser = new UserCredential();
         newUser.setEmail("new@enigwed.com");
@@ -146,7 +146,7 @@ class UserCredentialServiceImplTest {
         when(userCredentialRepository.saveAndFlush(newUser)).thenReturn(newUser);
 
         // Act
-        UserCredential createdUser = userCredentialService.create(newUser);
+        UserCredential createdUser = userCredentialService.createUser(newUser);
 
         // Assert
         assertEquals(newUser, createdUser);

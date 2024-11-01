@@ -42,5 +42,6 @@ public class WeddingOrganizer extends AuditEntity{
 
     @OneToOne
     @JoinColumn(name = "user_credential_id")
+    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     private UserCredential userCredential;
 }

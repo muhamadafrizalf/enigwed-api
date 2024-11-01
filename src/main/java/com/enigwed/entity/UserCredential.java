@@ -45,7 +45,7 @@ public class UserCredential extends AuditEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return this.getDeletedAt() == null;
     }
 
     @Override

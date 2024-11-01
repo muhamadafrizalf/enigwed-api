@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganizer, String> {
+    Integer countByPhoneAndDeletedAtIsNull(String phone);
+    Integer countByNibAndDeletedAtIsNull(String Nib);
+    Integer countByNpwpAndDeletedAtIsNull(String Npwp);
+
     Optional<WeddingOrganizer> findByIdAndDeletedAtIsNull(String id);
     List<WeddingOrganizer> findByDeletedAtIsNull();
 
