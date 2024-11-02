@@ -28,11 +28,19 @@ public class PathApi {
     public static final String PUBLIC_IMAGE_ID = PUBLIC_IMAGE + "/{id}";
     public static final String PROTECTED_IMAGE = PROTECTED + "/images";
     public static final String PROTECTED_IMAGE_ID = PROTECTED_IMAGE + "/{id}";
-    // Wedding organizer
+    // Wedding Organizer
     public static final String PUBLIC_WO = PUBLIC + "/wedding-organizers";
     public static final String PUBLIC_WO_ID = PUBLIC_WO + "/{id}";
     public static final String PROTECTED_WO = PROTECTED + "/wedding-organizers";
     public static final String PROTECTED_WO_ID = PROTECTED_WO + "/{id}";
-    public static final String PROTECTED_WO_ID_IMAGE = PROTECTED_WO_ID + "/image";
+    public static final String PROTECTED_WO_ID_IMAGES = PROTECTED_WO_ID + "/images";
     public static final String PROTECTED_WO_ID_ACTIVATE = PROTECTED_WO_ID + "/activate";
+    // Bonus Package
+    public static final String PUBLIC_BONUS_PACKAGE = PUBLIC + "/bonus-packages";
+    public static final String PUBLIC_BONUS_PACKAGE_ID = PUBLIC_BONUS_PACKAGE + "/{id}";
+    public static final String PUBLIC_BONUS_PACKAGE_WO_ID = PUBLIC_BONUS_PACKAGE + "/{wedding-organizer-id}";
+    public static final String PROTECTED_BONUS_PACKAGE = PROTECTED + "/bonus-packaged";
+    public static final String PROTECTED_BONUS_PACKAGE_ID = PROTECTED_BONUS_PACKAGE + "/{id}";
+    public static final String PROTECTED_BONUS_PACKAGE_ID_IMAGES = PROTECTED_BONUS_PACKAGE_ID + "/images";
+    public static final String PROTECTED_BONUS_PACKAGE_ID_IMAGES_ID = PROTECTED_BONUS_PACKAGE_ID_IMAGES + "/{image-id}";
 }

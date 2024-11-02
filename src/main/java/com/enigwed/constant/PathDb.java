@@ -5,4 +5,5 @@ public class PathDb {
     public static final String WEDDING_ORGANIZER = "wedding_organizer";
     public static final String CITY = "city";
     public static final String IMAGE = "image";
+    public static final String BONUS_PACKAGE = "bonus_package";
 }

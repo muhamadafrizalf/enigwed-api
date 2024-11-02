@@ -11,8 +11,10 @@ import java.util.List;
 
 public interface WeddingOrganizerService {
     void createWeddingOrganizer(WeddingOrganizer weddingOrganizer);
+    WeddingOrganizer loadWeddingOrganizerById(String id);
+    WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
-    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizer();
+    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers();
     ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword);
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer (JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest);
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);

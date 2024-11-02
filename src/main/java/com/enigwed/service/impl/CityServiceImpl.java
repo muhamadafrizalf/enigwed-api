@@ -37,6 +37,7 @@ public class CityServiceImpl implements CityService {
         return cityRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.CITY_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public City loadCityById(String id) {
         try {

@@ -16,5 +16,8 @@ public class Constraint {
     public static final String PASSWORD_MIN = "Password must be at least 6 characters long.";
     public static final String PASSWORD_BLANK = "Password cannot be blank.";
     public static final String CONFIRM_PASSWORD_BLANK = "Confirm Password cannot be blank.";
-
+    // Bonus Package Request
+    public static final String PRICE_POSITIVE = "Price must be a positive number.";
+    public static final String QUANTITY_POSITIVE = "Quantity must be a positive number.";
+    public static final String WEDDING_ORGANIZER_ID_BLANK = "Wedding organizer ID cannot be blank.";
 }

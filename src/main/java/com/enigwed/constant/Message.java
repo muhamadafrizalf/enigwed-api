@@ -1,6 +1,11 @@
 package com.enigwed.constant;
 
 public class Message {
+    // Api Response Message
+    public static final String CREATE_FAILED = "Create failed";
+    public static final String FETCHING_FAILED = "Fetching failed";
+    public static final String UPDATE_FAILED = "Update failed";
+    public static final String DELETE_FAILED = "Delete failed";
     // Error Message
     public static final String ERROR = "An unexpected error occurred";
     // Auth
@@ -10,7 +15,6 @@ public class Message {
     public static final String LOGIN_FAILED = "Login failed";
     public static final String REFRESH_TOKEN_SUCCESS = "Refresh token success";
     public static final String REFRESH_TOKEN_FAILED = "Refresh token failed";
-
     // City
     public static final String CITY_CREATED = "City created";
     public static final String CITY_FOUND = "City found";
@@ -35,9 +39,11 @@ public class Message {
     public static final String WEDDING_ORGANIZER_AVATAR_UPDATED = "Wedding organizer avatar updated";
     public static final String WEDDING_ORGANIZER_AVATAR_DELETED = "Wedding organizer avatar deleted";
     public static final String WEDDING_ORGANIZERS_ACTIVATED = "Wedding organizer activated";
-    // Api Response Message
-    public static final String CREATE_FAILED = "Create failed";
-    public static final String FETCHING_FAILED = "Fetching failed";
-    public static final String UPDATE_FAILED = "Update failed";
-    public static final String DELETE_FAILED = "Delete failed";
+    // Bonus Package
+    public static final String BONUS_PACKAGE_CREATED = "Bonus package created";
+    public static final String BONUS_PACKAGE_FOUND = "Bonus package found";
+    public static final String NO_BONUS_PACKAGE_FOUND = "No bonus package found";
+    public static final String BONUS_PACKAGES_FOUND = "Bonus packages found";
+    public static final String BONUS_PACKAGE_UPDATED = "Bonus package updated";
+    public static final String BONUS_PACKAGE_DELETED = "Bonus package deleted";
 }

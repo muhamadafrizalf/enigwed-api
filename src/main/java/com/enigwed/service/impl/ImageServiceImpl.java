@@ -148,10 +148,10 @@ public class ImageServiceImpl implements ImageService {
             deleteImageFromDirectory(image.getPath());
             imageRepository.deleteById(id);
         } catch (IOException e) {
-            log.error("IO error during deletion image: {}", e.getMessage());
+            log.error("IO error during deleting image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during deletion image: {}", e.getError());
+            log.error("Error during deleting image: {}", e.getError());
             throw e;
         }
     }

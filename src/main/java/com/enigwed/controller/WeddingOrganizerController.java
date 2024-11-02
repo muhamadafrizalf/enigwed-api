@@ -35,7 +35,7 @@ public class WeddingOrganizerController {
         if (keyword != null && !keyword.isEmpty()) {
             response = weddingOrganizerService.searchWeddingOrganizer(keyword);
         } else {
-            response = weddingOrganizerService.findAllWeddingOrganizer();
+            response = weddingOrganizerService.findAllWeddingOrganizers();
         }
         return ResponseEntity.ok(response);
     }
@@ -62,7 +62,7 @@ public class WeddingOrganizerController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(value = PathApi.PROTECTED_WO_ID_IMAGE, consumes = {"multipart/form-data"})
+    @PutMapping(value = PathApi.PROTECTED_WO_ID_IMAGES, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateWeddingOrganizerImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,
@@ -74,7 +74,7 @@ public class WeddingOrganizerController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @DeleteMapping(PathApi.PROTECTED_WO_ID_IMAGE)
+    @DeleteMapping(PathApi.PROTECTED_WO_ID_IMAGES)
     public ResponseEntity<?> deleteWeddingOrganizerImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id

@@ -57,6 +57,25 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
+    public WeddingOrganizer loadWeddingOrganizerById(String id) {
+        try {
+            // ErrorResponse
+            return findByIdOrThrow(id);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading wedding organizer: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId) {
+        if (userCredentialId == null || userCredentialId.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        return weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNull(userCredentialId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id) {
         try {
             // ErrorResponse
@@ -71,7 +90,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizer() {
+    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers() {
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNull();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::from).toList();
@@ -91,13 +110,13 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer(JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest) {
         try {
-            // ValidationException
-            validationUtil.validateAndThrow(weddingOrganizerRequest);
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(weddingOrganizerRequest.getId());
             // ErrorResponse
             if (!userInfo.getUserId().equals(wo.getUserCredential().getId()) && !userInfo.getRole().equals("ROLE_ADMIN"))
                 throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.UPDATE_FAILED, ErrorMessage.ACCESS_DENIED);
+            // ValidationException
+            validationUtil.validateAndThrow(weddingOrganizerRequest);
             // DataIntegrityViolationException
             if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizerRequest.getPhone()) > 0 && !wo.getPhone().equals(weddingOrganizerRequest.getPhone()))
                 throw new DataIntegrityViolationException(ErrorMessage.PHONE_ALREADY_EXIST);
