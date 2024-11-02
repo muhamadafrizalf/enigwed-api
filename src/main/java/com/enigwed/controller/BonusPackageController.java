@@ -40,22 +40,21 @@ public class BonusPackageController {
 
     @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE)
     public ResponseEntity<?> getAllBonusPackages(
+            @RequestParam(required = false) String weddingOrganizerId,
             @RequestParam(required = false) String keyword
     ) {
         ApiResponse<?> response;
-        if (keyword != null && !keyword.isEmpty()) {
+        boolean isWoId = weddingOrganizerId != null && !weddingOrganizerId.isEmpty();
+        boolean isKeyword = keyword != null && !keyword.isEmpty();
+        if (isWoId && isKeyword) {
+            response = bonusPackageService.searchBonusPackageFromWeddingOrganizerId(weddingOrganizerId, keyword);
+        } else if (isWoId) {
+            response = bonusPackageService.findAllBonusPackagesByWeddingOrganizerId(weddingOrganizerId);
+        } else if (isKeyword) {
             response = bonusPackageService.searchBonusPackage(keyword);
         } else {
             response = bonusPackageService.findAllBonusPackages();
         }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE_WO_ID)
-    public ResponseEntity<?> getAllBonusPackagesByWeddingOrganizerId(
-            @PathVariable(value = "wedding-organizer-id") String weddingOrganizerId
-    ) {
-        ApiResponse<?> response = bonusPackageService.findAllBonusPackagesByWeddingOrganizerId(weddingOrganizerId);
         return ResponseEntity.ok(response);
     }
 

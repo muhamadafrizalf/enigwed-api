@@ -21,6 +21,7 @@ public class BonusPackage extends AuditEntity{
 
     private String name;
 
+    @Column(length = 1000)
     private String description;
 
     private double price;

@@ -14,6 +14,7 @@ public interface BonusPackageService {
     ApiResponse<List<BonusPackageResponse>> findAllBonusPackages();
     ApiResponse<List<BonusPackageResponse>> findAllBonusPackagesByWeddingOrganizerId(String weddingOrganizerId);
     ApiResponse<List<BonusPackageResponse>> searchBonusPackage(String keyword);
+    ApiResponse<List<BonusPackageResponse>> searchBonusPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword);
     ApiResponse<BonusPackageResponse> updateBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest);
     ApiResponse<?> deleteBonusPackage(JwtClaim userInfo, String id);
     ApiResponse<BonusPackageResponse> addBonusPackageImage (JwtClaim userInfo, String id, MultipartFile image);

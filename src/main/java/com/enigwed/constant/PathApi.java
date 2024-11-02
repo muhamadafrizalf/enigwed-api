@@ -38,7 +38,6 @@ public class PathApi {
     // Bonus Package
     public static final String PUBLIC_BONUS_PACKAGE = PUBLIC + "/bonus-packages";
     public static final String PUBLIC_BONUS_PACKAGE_ID = PUBLIC_BONUS_PACKAGE + "/{id}";
-    public static final String PUBLIC_BONUS_PACKAGE_WO_ID = PUBLIC_BONUS_PACKAGE + "/{wedding-organizer-id}";
     public static final String PROTECTED_BONUS_PACKAGE = PROTECTED + "/bonus-packaged";
     public static final String PROTECTED_BONUS_PACKAGE_ID = PROTECTED_BONUS_PACKAGE + "/{id}";
     public static final String PROTECTED_BONUS_PACKAGE_ID_IMAGES = PROTECTED_BONUS_PACKAGE_ID + "/images";

@@ -39,7 +39,7 @@ public class BonusPackageServiceImpl implements BonusPackageService {
 
     private BonusPackage findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return bonusPackageRepository.findByIdAAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.BONUS_PACKAGE_NOT_FOUND));
+        return bonusPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.BONUS_PACKAGE_NOT_FOUND));
     }
 
     private void validateUserAccess(JwtClaim userInfo, BonusPackage bonusPackage) throws AccessDeniedException {
@@ -115,6 +115,15 @@ public class BonusPackageServiceImpl implements BonusPackageService {
     @Override
     public ApiResponse<List<BonusPackageResponse>> searchBonusPackage(String keyword) {
         List<BonusPackage> bonusPackageList = bonusPackageRepository.searchBonusPackage(keyword);
+        if (bonusPackageList == null || bonusPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_BONUS_PACKAGE_FOUND);
+        List<BonusPackageResponse> responses = bonusPackageList.stream().map(BonusPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.BONUS_PACKAGES_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<BonusPackageResponse>> searchBonusPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword) {
+        List<BonusPackage> bonusPackageList = bonusPackageRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
         if (bonusPackageList == null || bonusPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_BONUS_PACKAGE_FOUND);
         List<BonusPackageResponse> responses = bonusPackageList.stream().map(BonusPackageResponse::from).toList();
         return ApiResponse.success(responses, Message.BONUS_PACKAGES_FOUND);
