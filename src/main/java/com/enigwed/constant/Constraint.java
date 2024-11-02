@@ -3,7 +3,8 @@ package com.enigwed.constant;
 public class Constraint {
     // General
     public static final String NAME_BLANK = "Name cannot be blank.";
-    public static final String DESCRIPTION_MAX = "Description must be at most 255 characters.";
+    public static final String DESCRIPTION_MAX = "Description must be at most 1000 characters.";
+    public static final String DESCRIPTION_MAX_10000 = "Description must be at most 1000 characters.";
 
     // Register Request
     public static final String ADDRESS_BLANK = "Address cannot be blank.";
@@ -19,5 +20,6 @@ public class Constraint {
     // Bonus Package Request
     public static final String PRICE_POSITIVE = "Price must be a positive number.";
     public static final String QUANTITY_POSITIVE = "Quantity must be a positive number.";
-    public static final String WEDDING_ORGANIZER_ID_BLANK = "Wedding organizer ID cannot be blank.";
+    // Bonus Detail Request
+    public static final String BONUS_PACKAGE_ID_BLANK = "Bonus Package ID cannot be blank.";
 }

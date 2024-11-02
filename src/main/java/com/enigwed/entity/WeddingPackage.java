@@ -17,30 +17,32 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.BONUS_PACKAGE)
-public class BonusPackage extends AuditEntity{
+@Table(name = PathDb.WEDDING_PACKAGE)
+public class WeddingPackage extends AuditEntity {
 
     private String name;
 
-    @Column(length = 1000)
+    @Column(length = 10000)
     private String description;
 
-    private double price;
+    @Column(name = "base_price")
+    private double basePrice;
 
-    @Column(name = "min_quantity")
-    private int minQuantity;
-
-    @Column(name = "max_quantity")
-    private int maxQuantity;
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 
     @ManyToOne
     @JoinColumn(name = "wedding_organizer_id")
     private WeddingOrganizer weddingOrganizer;
 
+    @OneToMany(mappedBy = "weddingPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BonusDetail> bonusDetails = new ArrayList<>();
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(
-            name = "bonus_package_image",
-            joinColumns = @JoinColumn(name = "bonus_package_id"),
+            name = "wedding_package_image",
+            joinColumns = @JoinColumn(name = "wedding_package_id"),
             inverseJoinColumns = @JoinColumn(name = "image_id")
     )
     private List<Image> images = new ArrayList<>();

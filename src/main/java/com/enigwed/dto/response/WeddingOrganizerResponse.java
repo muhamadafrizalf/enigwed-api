@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class WeddingOrganizerResponse {
     private String id;
     private String name;
+    private String npwp;
     private String nib;
     private String phone;
     private String description;
@@ -25,6 +26,7 @@ public class WeddingOrganizerResponse {
         WeddingOrganizerResponse response = new WeddingOrganizerResponse();
         response.setId(weddingOrganizer.getId());
         response.setName(weddingOrganizer.getName());
+        response.setNpwp(weddingOrganizer.getNpwp());
         response.setNib(weddingOrganizer.getNib());
         response.setPhone(weddingOrganizer.getPhone());
         response.setDescription(weddingOrganizer.getDescription());

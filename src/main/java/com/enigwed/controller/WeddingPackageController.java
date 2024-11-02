@@ -2,10 +2,10 @@ package com.enigwed.controller;
 
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
-import com.enigwed.dto.request.BonusPackageRequest;
+import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
-import com.enigwed.service.BonusPackageService;
+import com.enigwed.service.WeddingPackageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,29 +17,29 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
-public class BonusPackageController {
-    private final BonusPackageService bonusPackageService;
+public class WeddingPackageController {
+    private final WeddingPackageService weddingPackageService;
     private final JwtUtil jwtUtil;
 
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_BONUS_PACKAGE)
-    public ResponseEntity<?> createBonusPackage(
+    @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    public ResponseEntity<?> createWeddingPackage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody BonusPackageRequest bonusPackageRequest
+            @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.createBonusPackage(userInfo, bonusPackageRequest);
+        ApiResponse<?> response = weddingPackageService.createWeddingPackage(userInfo, weddingPackageRequest);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE_ID)
-    public ResponseEntity<?> getBonusPackageById(@PathVariable String id) {
-        ApiResponse<?> response = bonusPackageService.findBonusPackageById(id);
+    @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
+    public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
+        ApiResponse<?> response = weddingPackageService.findWeddingPackageById(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE)
-    public ResponseEntity<?> getAllBonusPackages(
+    @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
+    public ResponseEntity<?> getAllWeddingPackages(
             @RequestParam(required = false) String weddingOrganizerId,
             @RequestParam(required = false) String keyword
     ) {
@@ -47,60 +47,60 @@ public class BonusPackageController {
         boolean isWoId = weddingOrganizerId != null && !weddingOrganizerId.isEmpty();
         boolean isKeyword = keyword != null && !keyword.isEmpty();
         if (isWoId && isKeyword) {
-            response = bonusPackageService.searchBonusPackageFromWeddingOrganizerId(weddingOrganizerId, keyword);
+            response = weddingPackageService.searchWeddingPackageFromWeddingOrganizerId(weddingOrganizerId, keyword);
         } else if (isWoId) {
-            response = bonusPackageService.findAllBonusPackagesByWeddingOrganizerId(weddingOrganizerId);
+            response = weddingPackageService.findAllWeddingPackagesByWeddingOrganizerId(weddingOrganizerId);
         } else if (isKeyword) {
-            response = bonusPackageService.searchBonusPackage(keyword);
+            response = weddingPackageService.searchWeddingPackage(keyword);
         } else {
-            response = bonusPackageService.findAllBonusPackages();
+            response = weddingPackageService.findAllWeddingPackages();
         }
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(PathApi.PROTECTED_BONUS_PACKAGE)
-    public ResponseEntity<?> updateBonusPackage(
+    @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    public ResponseEntity<?> updateWeddingPackage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody BonusPackageRequest bonusPackageRequest
+            @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.updateBonusPackage(userInfo, bonusPackageRequest);
+        ApiResponse<?> response = weddingPackageService.updateWeddingPackage(userInfo, weddingPackageRequest);
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @DeleteMapping(PathApi.PROTECTED_BONUS_PACKAGE_ID)
-    public ResponseEntity<?> deleteBonusPackage(
+    @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
+    public ResponseEntity<?> deleteWeddingPackage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.deleteBonusPackage(userInfo, id);
+        ApiResponse<?> response = weddingPackageService.deleteWeddingPackage(userInfo, id);
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(value = PathApi.PROTECTED_BONUS_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
-    public ResponseEntity<?> addBonusPackageImages(
+    @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE)
+    public ResponseEntity<?> addWeddingPackageImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,
             @RequestPart(name = "image") MultipartFile image
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.addBonusPackageImage(userInfo, id, image);
+        ApiResponse<?> response = weddingPackageService.addWeddingPackageImage(userInfo, id, image);
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @DeleteMapping(PathApi.PROTECTED_BONUS_PACKAGE_ID_IMAGE_ID)
-    public ResponseEntity<?> deleteBonusPackageImages(
+    @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)
+    public ResponseEntity<?> deleteWeddingPackageImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,
             @PathVariable(value = "image-id") String imageId
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.deleteBonusPackageImage(userInfo, id, imageId);
+        ApiResponse<?> response = weddingPackageService.deleteWeddingPackageImage(userInfo, id, imageId);
         return ResponseEntity.ok(response);
     }
 }

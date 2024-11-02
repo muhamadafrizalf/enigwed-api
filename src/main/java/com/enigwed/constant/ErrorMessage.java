@@ -22,9 +22,12 @@ public class ErrorMessage {
     public static final String INVALID_TOKEN = "Invalid token";
     public static final String ACCESS_DENIED = "Access denied";
     public static final String INVALID_MIN_MAX_QUANTITY = "Invalid minimum and maximum quantity";
+    public static final String INVALID_QUANTITY_MIN = "Default quantity can't lower than minimum quantity";
+    public static final String INVALID_QUANTITY_MAX = "Default quantity can't higher than maximum quantity";
     // Not found
     public static final String CITY_NOT_FOUND = "City not found";
     public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
     public static final String IMAGE_NOT_FOUND = "Image not found";
     public static final String BONUS_PACKAGE_NOT_FOUND = "Bonus package not found";
+    public static final String WEDDING_PACKAGE_NOT_FOUND = "Wedding package not found";
 }

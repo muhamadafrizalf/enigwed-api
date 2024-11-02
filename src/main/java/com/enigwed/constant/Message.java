@@ -46,4 +46,11 @@ public class Message {
     public static final String BONUS_PACKAGES_FOUND = "Bonus packages found";
     public static final String BONUS_PACKAGE_UPDATED = "Bonus package updated";
     public static final String BONUS_PACKAGE_DELETED = "Bonus package deleted";
+    // Wedding Package
+    public static final String WEDDING_PACKAGE_CREATED = "Wedding package created";
+    public static final String WEDDING_PACKAGE_FOUND = "Wedding package found";
+    public static final String NO_WEDDING_PACKAGE_FOUND = "No wedding package found";
+    public static final String WEDDING_PACKAGES_FOUND = "Wedding packages found";
+    public static final String WEDDING_PACKAGE_UPDATED = "Wedding package updated";
+    public static final String WEDDING_PACKAGE_DELETED = "Wedding package deleted";
 }

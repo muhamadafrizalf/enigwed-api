@@ -1,5 +1,6 @@
 package com.enigwed.service.impl;
 
+import com.enigwed.constant.ERole;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
@@ -43,13 +44,19 @@ public class BonusPackageServiceImpl implements BonusPackageService {
     }
 
     private void validateUserAccess(JwtClaim userInfo, BonusPackage bonusPackage) throws AccessDeniedException {
-        String userCredentialId = bonusPackageRepository.findBonusPackageWeddingOrganizerUserCredentialIdById(bonusPackage.getId());
+        String userCredentialId = bonusPackage.getWeddingOrganizer().getUserCredential().getId();
         if (userInfo.getUserId().equals(userCredentialId)) {
             return;
-        } else if (userInfo.getRole().equals("ROLE_ADMIN")) {
+        } else if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
             return;
         }
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public BonusPackage loadBonusPackageById(String id) {
+        return findByIdOrThrow(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -170,6 +177,7 @@ public class BonusPackageServiceImpl implements BonusPackageService {
             // AccessDeniedException
             validateUserAccess(userInfo, bonusPackage);
             bonusPackage.setDeletedAt(LocalDateTime.now());
+            bonusPackageRepository.save(bonusPackage);
             return ApiResponse.success(Message.BONUS_PACKAGE_DELETED);
         } catch (AccessDeniedException e) {
             log.error("Access denied during deletion bonus package: {}", e.getMessage());
