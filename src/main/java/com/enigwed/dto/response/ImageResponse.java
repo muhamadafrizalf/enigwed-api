@@ -17,7 +17,16 @@ public class ImageResponse {
         if (image.getPath() != null) {
             imageResponse.setName(image.getName());
             imageResponse.setUrl("images/" + image.getName());
+        } else {
+            imageResponse.setName("No_Image_Available.jpg");
+            imageResponse.setUrl("images/No_Image_Available.jpg");
         }
+        return imageResponse;
+    }
+    public static ImageResponse noImage() {
+        ImageResponse imageResponse = new ImageResponse();
+        imageResponse.setName("No_Image_Available.jpg");
+        imageResponse.setUrl("images/No_Image_Available.jpg");
         return imageResponse;
     }
 }

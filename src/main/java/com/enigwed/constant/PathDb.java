@@ -8,4 +8,7 @@ public class PathDb {
     public static final String BONUS_PACKAGE = "bonus_package";
     public static final String WEDDING_PACKAGE = "wedding_package";
     public static final String BONUS_DETAIL = "bonus_detail";
+    public static final String ORDER = "order";
+    public static final String ORDER_DETAIL = "order_detail";
+    public static final String CUSTOMER = "customer";
 }

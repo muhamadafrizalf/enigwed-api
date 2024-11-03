@@ -28,6 +28,9 @@ public class WeddingPackage extends AuditEntity {
     @Column(name = "base_price")
     private double basePrice;
 
+    @Column(name = "order_count")
+    private int orderCount = 0;
+
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;

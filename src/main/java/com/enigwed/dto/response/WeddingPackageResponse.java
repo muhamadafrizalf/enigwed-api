@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -38,10 +39,15 @@ public class WeddingPackageResponse {
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
         if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
             response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::from).toList());
+        } else {
+            response.setBonusDetails(new ArrayList<>());
         }
         if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
             response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
+        } else {
+            response.setThumbnail(ImageResponse.noImage());
+            response.setImages(new ArrayList<>());
         }
         return response;
     }

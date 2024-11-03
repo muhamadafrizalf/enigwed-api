@@ -17,6 +17,7 @@ target/
 src/main/resources/static/images/*
 
 # Un-ignore specific files in the static/images folder
+!src/main/resources/static/images/No_Image_Available.jpg
 !src/main/resources/static/images/bandung.jpg
 !src/main/resources/static/images/bali.jpg
 !src/main/resources/static/images/jakarta.jpg

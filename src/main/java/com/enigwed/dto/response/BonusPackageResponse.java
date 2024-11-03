@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -38,6 +39,9 @@ public class BonusPackageResponse {
         if (bonusPackage.getImages() != null && !bonusPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(bonusPackage.getImages().get(0)));
             response.setImages(bonusPackage.getImages().stream().map(ImageResponse::from).toList());
+        } else {
+            response.setThumbnail(ImageResponse.noImage());
+            response.setImages(new ArrayList<>());
         }
         return response;
     }
