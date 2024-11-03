@@ -40,6 +40,13 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('WO')")
+    public ResponseEntity<?> getOwnWeddingOrganizer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = weddingOrganizerService.getOwnWeddingOrganizer(userInfo);
+        return ResponseEntity.ok(response);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @PutMapping(PathApi.PROTECTED_WO)
     public ResponseEntity<?> updateWeddingOrganizer(

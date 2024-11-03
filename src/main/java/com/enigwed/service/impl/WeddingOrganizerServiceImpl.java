@@ -106,6 +106,14 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
+    @Override
+    public ApiResponse<WeddingOrganizerResponse> getOwnWeddingOrganizer(JwtClaim userInfo) {
+        if (userInfo.getUserId() == null || userInfo.getUserId().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        WeddingOrganizer wo = weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNull(userInfo.getUserId()).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+        return ApiResponse.success(response, Message.WEDDING_ORGANIZER_FOUND);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer(JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest) {

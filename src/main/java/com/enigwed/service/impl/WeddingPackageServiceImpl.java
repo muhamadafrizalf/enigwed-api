@@ -52,6 +52,65 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id) {
+        try {
+            // ErrorResponse
+            WeddingPackage weddingPackage = findByIdOrThrow(id);
+            WeddingPackageResponse response = WeddingPackageResponse.from(weddingPackage);
+            return ApiResponse.success(response, Message.WEDDING_PACKAGE_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading wedding package: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages() {
+        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByDeletedAtIsNull();
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackagesByWeddingOrganizerId(String weddingOrganizerId) {
+        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword) {
+        List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchWeddingPackage(keyword);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword) {
+        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo) {
+        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<WeddingPackageResponse> createWeddingPackage(JwtClaim userInfo, WeddingPackageRequest weddingPackageRequest) {
@@ -101,56 +160,6 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             log.error("Error during creating wedding package: {}", e.getMessage());
             throw e;
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id) {
-        try {
-            // ErrorResponse
-            WeddingPackage weddingPackage = findByIdOrThrow(id);
-            WeddingPackageResponse response = WeddingPackageResponse.from(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during loading wedding package: {}", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages() {
-        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByDeletedAtIsNull();
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackagesByWeddingOrganizerId(String weddingOrganizerId) {
-        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword) {
-        List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchWeddingPackage(keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword) {
-        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)

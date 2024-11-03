@@ -47,39 +47,6 @@ public class CityServiceImpl implements CityService {
             log.error("Error during loading city: {}", e.getMessage());
             throw e;
         }
-
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ApiResponse<CityResponse> createCity(CityRequest cityRequest) {
-        try {
-            // DataIntegrityViolationException
-            if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.NAME_UNIQUE);
-            // ErrorResponse
-            if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
-            // ValidationException
-            validationUtil.validateAndThrow(cityRequest);
-            // ErrorResponse
-            Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
-            City city = City.builder()
-                    .name(cityRequest.getName())
-                    .description(cityRequest.getDescription())
-                    .thumbnail(thumbnail)
-                    .build();
-            city = cityRepository.save(city);
-            CityResponse response = CityResponse.from(city);
-            return ApiResponse.success(response, Message.CITY_CREATED);
-        } catch (ValidationException e) {
-            log.error("Validation error during creation city: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
-        } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation error during creation city: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
-        } catch (ErrorResponse e) {
-            log.error("Error during creation city: {}", e.getMessage());
-            throw e;
-        }
     }
 
     @Transactional(readOnly = true)
@@ -120,6 +87,38 @@ public class CityServiceImpl implements CityService {
         if (cityList == null || cityList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_CITY_FOUND);
         List<CityResponse> cityResponseList = cityList.stream().map(CityResponse::from).toList();
         return ApiResponse.success(cityResponseList, Message.CITIES_FOUND);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<CityResponse> createCity(CityRequest cityRequest) {
+        try {
+            // DataIntegrityViolationException
+            if (cityRepository.findByNameAndDeletedAtIsNull(cityRequest.getName()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.NAME_UNIQUE);
+            // ErrorResponse
+            if (cityRequest.getThumbnail() == null || cityRequest.getThumbnail().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+            // ValidationException
+            validationUtil.validateAndThrow(cityRequest);
+            // ErrorResponse
+            Image thumbnail = imageService.createImage(cityRequest.getThumbnail());
+            City city = City.builder()
+                    .name(cityRequest.getName())
+                    .description(cityRequest.getDescription())
+                    .thumbnail(thumbnail)
+                    .build();
+            city = cityRepository.save(city);
+            CityResponse response = CityResponse.from(city);
+            return ApiResponse.success(response, Message.CITY_CREATED);
+        } catch (ValidationException e) {
+            log.error("Validation error during creation city: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation error during creation city: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during creation city: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)

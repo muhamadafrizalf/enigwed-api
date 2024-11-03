@@ -21,17 +21,6 @@ public class WeddingPackageController {
     private final WeddingPackageService weddingPackageService;
     private final JwtUtil jwtUtil;
 
-    @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
-    public ResponseEntity<?> createWeddingPackage(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody WeddingPackageRequest weddingPackageRequest
-    ) {
-        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = weddingPackageService.createWeddingPackage(userInfo, weddingPackageRequest);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
         ApiResponse<?> response = weddingPackageService.findWeddingPackageById(id);
@@ -55,6 +44,25 @@ public class WeddingPackageController {
         } else {
             response = weddingPackageService.findAllWeddingPackages();
         }
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('WO')")
+    @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    public ResponseEntity<?> getOwnWeddingPackages(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = weddingPackageService.getOwnWeddingPackages(userInfo);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('WO')")
+    @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    public ResponseEntity<?> createWeddingPackage(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestBody WeddingPackageRequest weddingPackageRequest
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = weddingPackageService.createWeddingPackage(userInfo, weddingPackageRequest);
         return ResponseEntity.ok(response);
     }
 

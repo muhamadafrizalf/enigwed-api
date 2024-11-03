@@ -11,12 +11,15 @@ import java.util.List;
 
 public interface BonusPackageService {
     BonusPackage loadBonusPackageById(String id);
-    ApiResponse<BonusPackageResponse> createBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest);
+
     ApiResponse<BonusPackageResponse> findBonusPackageById(String id);
     ApiResponse<List<BonusPackageResponse>> findAllBonusPackages();
     ApiResponse<List<BonusPackageResponse>> findAllBonusPackagesByWeddingOrganizerId(String weddingOrganizerId);
     ApiResponse<List<BonusPackageResponse>> searchBonusPackage(String keyword);
     ApiResponse<List<BonusPackageResponse>> searchBonusPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword);
+
+    ApiResponse<List<BonusPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo);
+    ApiResponse<BonusPackageResponse> createBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest);
     ApiResponse<BonusPackageResponse> updateBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest);
     ApiResponse<?> deleteBonusPackage(JwtClaim userInfo, String id);
     ApiResponse<BonusPackageResponse> addBonusPackageImage (JwtClaim userInfo, String id, MultipartFile image);

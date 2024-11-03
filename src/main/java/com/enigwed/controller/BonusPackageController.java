@@ -21,17 +21,6 @@ public class BonusPackageController {
     private final BonusPackageService bonusPackageService;
     private final JwtUtil jwtUtil;
 
-    @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_BONUS_PACKAGE)
-    public ResponseEntity<?> createBonusPackage(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody BonusPackageRequest bonusPackageRequest
-    ) {
-        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.createBonusPackage(userInfo, bonusPackageRequest);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE_ID)
     public ResponseEntity<?> getBonusPackageById(@PathVariable String id) {
         ApiResponse<?> response = bonusPackageService.findBonusPackageById(id);
@@ -57,6 +46,26 @@ public class BonusPackageController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @PreAuthorize("hasRole('WO')")
+    @GetMapping(PathApi.PROTECTED_BONUS_PACKAGE)
+    public ResponseEntity<?> getOwnBonusPackages(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = bonusPackageService.getOwnWeddingPackages(userInfo);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('WO')")
+    @PostMapping(PathApi.PROTECTED_BONUS_PACKAGE)
+    public ResponseEntity<?> createBonusPackage(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestBody BonusPackageRequest bonusPackageRequest
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = bonusPackageService.createBonusPackage(userInfo, bonusPackageRequest);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @PutMapping(PathApi.PROTECTED_BONUS_PACKAGE)

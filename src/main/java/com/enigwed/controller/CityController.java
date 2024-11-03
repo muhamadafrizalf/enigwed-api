@@ -23,28 +23,6 @@ public class CityController {
     private final CityService cityService;
     private final ObjectMapper objectMapper;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
-    public ResponseEntity<?> createCity(
-            @RequestPart(name = "city") String jsonCity,
-            @RequestPart(name = "thumbnail", required = true) MultipartFile thumbnail
-    ) {
-        try {
-            CityRequest request = objectMapper.readValue(jsonCity, new TypeReference<CityRequest>() {});
-            if (thumbnail != null && !thumbnail.isEmpty()) {
-                request.setThumbnail(thumbnail);
-            }
-
-            ApiResponse<?> response = cityService.createCity(request);
-
-            return ResponseEntity.ok(response);
-        } catch (ErrorResponse e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.CREATE_FAILED, e.getMessage());
-        }
-    }
-
     @GetMapping(PathApi.PUBLIC_CITY_ID)
     public ResponseEntity<?> getCityById(
             @PathVariable String id
@@ -65,6 +43,28 @@ public class CityController {
             response = cityService.findAllCity();
         }
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createCity(
+            @RequestPart(name = "city") String jsonCity,
+            @RequestPart(name = "thumbnail", required = true) MultipartFile thumbnail
+    ) {
+        try {
+            CityRequest request = objectMapper.readValue(jsonCity, new TypeReference<CityRequest>() {});
+            if (thumbnail != null && !thumbnail.isEmpty()) {
+                request.setThumbnail(thumbnail);
+            }
+
+            ApiResponse<?> response = cityService.createCity(request);
+
+            return ResponseEntity.ok(response);
+        } catch (ErrorResponse e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.CREATE_FAILED, e.getMessage());
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

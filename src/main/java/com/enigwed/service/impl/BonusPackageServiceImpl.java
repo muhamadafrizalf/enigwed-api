@@ -59,33 +59,6 @@ public class BonusPackageServiceImpl implements BonusPackageService {
         return findByIdOrThrow(id);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ApiResponse<BonusPackageResponse> createBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest) {
-        try {
-            // ErrorResponse
-            WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            // ErrorResponse
-            validationUtil.validateAndThrow(bonusPackageRequest);
-            // ErrorResponse
-            if (bonusPackageRequest.getMaxQuantity()<bonusPackageRequest.getMinQuantity()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_MIN_MAX_QUANTITY);
-            BonusPackage bonusPackage = BonusPackage.builder()
-                    .name(bonusPackageRequest.getName())
-                    .description(bonusPackageRequest.getDescription())
-                    .price(bonusPackageRequest.getPrice())
-                    .minQuantity(bonusPackageRequest.getMinQuantity())
-                    .maxQuantity(bonusPackageRequest.getMaxQuantity())
-                    .weddingOrganizer(weddingOrganizer)
-                    .build();
-            bonusPackage = bonusPackageRepository.save(bonusPackage);
-            BonusPackageResponse response = BonusPackageResponse.from(bonusPackage);
-            return ApiResponse.success(response, Message.BONUS_PACKAGE_CREATED);
-        } catch (ErrorResponse e) {
-            log.error("Error during creation bonus package: {}", e.getMessage());
-            throw e;
-        }
-    }
-
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<BonusPackageResponse> findBonusPackageById(String id) {
@@ -135,6 +108,45 @@ public class BonusPackageServiceImpl implements BonusPackageService {
         List<BonusPackageResponse> responses = bonusPackageList.stream().map(BonusPackageResponse::from).toList();
         return ApiResponse.success(responses, Message.BONUS_PACKAGES_FOUND);
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<BonusPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo) {
+        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+        List<BonusPackage> bonusPackageList = bonusPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
+        if (bonusPackageList == null || bonusPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_BONUS_PACKAGE_FOUND);
+        List<BonusPackageResponse> responses = bonusPackageList.stream().map(BonusPackageResponse::from).toList();
+        return ApiResponse.success(responses, Message.BONUS_PACKAGES_FOUND);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<BonusPackageResponse> createBonusPackage(JwtClaim userInfo, BonusPackageRequest bonusPackageRequest) {
+        try {
+            // ErrorResponse
+            WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            // ErrorResponse
+            validationUtil.validateAndThrow(bonusPackageRequest);
+            // ErrorResponse
+            if (bonusPackageRequest.getMaxQuantity()<bonusPackageRequest.getMinQuantity()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_MIN_MAX_QUANTITY);
+            BonusPackage bonusPackage = BonusPackage.builder()
+                    .name(bonusPackageRequest.getName())
+                    .description(bonusPackageRequest.getDescription())
+                    .price(bonusPackageRequest.getPrice())
+                    .minQuantity(bonusPackageRequest.getMinQuantity())
+                    .maxQuantity(bonusPackageRequest.getMaxQuantity())
+                    .weddingOrganizer(weddingOrganizer)
+                    .build();
+            bonusPackage = bonusPackageRepository.save(bonusPackage);
+            BonusPackageResponse response = BonusPackageResponse.from(bonusPackage);
+            return ApiResponse.success(response, Message.BONUS_PACKAGE_CREATED);
+        } catch (ErrorResponse e) {
+            log.error("Error during creation bonus package: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+
 
     @Transactional(rollbackFor = Exception.class)
     @Override
