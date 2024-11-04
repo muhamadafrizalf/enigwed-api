@@ -263,7 +263,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             validateUserAccess(userInfo, weddingPackage);
             // ErrorResponse
             if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
-            // ErrorResponse
+            // ErrorResponse// ErrorResponse
             Image addedImage = imageService.createImage(image);
             if (weddingPackage.getImages() == null) {
                 weddingPackage.setImages(new ArrayList<>());

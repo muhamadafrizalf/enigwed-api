@@ -19,8 +19,7 @@ public class WeddingPackageResponse {
     private LocalDateTime updatedAt;
     private String cityId;
     private String cityName;
-    private String weddingOrganizerId;
-    private String weddingOrganizerName;
+    private WeddingOrganizerResponse weddingOrganizer;
     private ImageResponse thumbnail;
     private List<ImageResponse> images = new ArrayList<>();
     List<BonusDetailResponse> bonusDetails = new ArrayList<>();
@@ -35,8 +34,7 @@ public class WeddingPackageResponse {
         response.setUpdatedAt(weddingPackage.getUpdatedAt());
         response.setCityId(weddingPackage.getCity().getId());
         response.setCityName(weddingPackage.getCity().getName());
-        response.setWeddingOrganizerId(weddingPackage.getWeddingOrganizer().getId());
-        response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
+        response.setWeddingOrganizer(WeddingOrganizerResponse.from(weddingPackage.getWeddingOrganizer()));
         if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
             response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
