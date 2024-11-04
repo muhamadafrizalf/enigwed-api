@@ -135,7 +135,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             if (!wo.getCity().getId().equals(weddingOrganizerRequest.getCityId())) {
                 // ErrorResponse
                 City city = cityService.loadCityById(weddingOrganizerRequest.getCityId());
-                wo.getCity().setId(city.getId());
+                wo.setCity(city);
             }
             wo = weddingOrganizerRepository.saveAndFlush(wo);
             WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
