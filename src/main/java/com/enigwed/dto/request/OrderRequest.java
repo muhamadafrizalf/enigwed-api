@@ -19,6 +19,7 @@ import static com.enigwed.constant.Constraint.*;
 @Builder
 public class OrderRequest {
 
+    @NotNull(message = CUSTOMER_NULL)
     private CustomerRequest customer;
 
     @NotNull(message = WEDDING_DATE_NULL)

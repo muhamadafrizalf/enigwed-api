@@ -10,6 +10,7 @@ import com.enigwed.security.JwtUtil;
 import com.enigwed.service.OrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +28,9 @@ public class OrderController {
 
     // Customer
     @PostMapping(PathApi.PUBLIC_ORDER)
-    public ResponseEntity<?> createOrder(OrderRequest orderRequest) {
+    public ResponseEntity<?> createOrder(
+            @RequestBody OrderRequest orderRequest
+    ) {
         ApiResponse<?> response = orderService.createOrder(orderRequest);
         return ResponseEntity.ok(response);
     }

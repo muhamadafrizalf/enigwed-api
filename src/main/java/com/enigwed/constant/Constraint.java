@@ -25,4 +25,5 @@ public class Constraint {
     public static final String WEDDING_PACKAGE_ID_BLANK = "Wedding Package ID cannot be blank";
     public static final String WEDDING_DATE_NULL = "Wedding date cannot be null";
     public static final String WEDDING_DATE_FUTURE = "Wedding date must be in the future";
+    public static final String CUSTOMER_NULL = "Customer cannot be null";
 }
