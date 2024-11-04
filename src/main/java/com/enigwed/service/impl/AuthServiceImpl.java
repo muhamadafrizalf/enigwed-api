@@ -10,6 +10,7 @@ import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.LoginResponse;
+import com.enigwed.dto.response.UserResponse;
 import com.enigwed.entity.City;
 import com.enigwed.entity.Image;
 import com.enigwed.entity.UserCredential;
@@ -61,9 +62,13 @@ public class AuthServiceImpl implements AuthService {
             SecurityContextHolder.getContext().setAuthentication(authenticate);
             // JWTCreationException
             String token = jwtUtil.generateToken(userCredential);
+            // ErrorResponse
+            WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
+            UserResponse user = UserResponse.fromUser(weddingOrganizer);
             LoginResponse response = LoginResponse.builder()
                     .token(token)
                     .role(userCredential.getRole().name())
+                    .user(user)
                     .build();
             return ApiResponse.success(response, Message.LOGIN_SUCCESS);
         } catch (ValidationException e) {
@@ -78,6 +83,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (JWTCreationException e) {
             log.error("JWT creation error during login: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.LOGIN_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during login: {}", e.getError());
+            throw e;
         }
     }
 
