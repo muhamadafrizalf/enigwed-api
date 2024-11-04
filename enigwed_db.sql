@@ -45,7 +45,7 @@ CREATE TABLE public.user_credential (
                                         "password" varchar(255) NULL,
                                         "role" varchar(255) NULL,
                                         CONSTRAINT user_credential_pkey PRIMARY KEY (id),
-                                        CONSTRAINT user_credential_role_check CHECK (((role)::text = ANY (ARRAY[('ROLE_ADMIN'::character varying)::text, ('ROLE_WO'::character varying)::text])))
+                                        CONSTRAINT user_credential_role_check CHECK (((role)::text = ANY ((ARRAY['ROLE_ADMIN'::character varying, 'ROLE_WO'::character varying])::text[])))
 );
 
 
@@ -112,9 +112,9 @@ CREATE TABLE public.wedding_package (
                                         base_price float8 NULL,
                                         description varchar(10000) NULL,
                                         "name" varchar(255) NULL,
+                                        order_count int4 NULL,
                                         city_id varchar(255) NULL,
                                         wedding_organizer_id varchar(255) NULL,
-                                        order_count int4 NULL,
                                         CONSTRAINT wedding_package_pkey PRIMARY KEY (id),
                                         CONSTRAINT fkja7q06xrnm81522ntfkaepid2 FOREIGN KEY (wedding_organizer_id) REFERENCES public.wedding_organizer(id),
                                         CONSTRAINT fkjv0s87tbfhja6p4iq9qj9mr4r FOREIGN KEY (city_id) REFERENCES public.city(id)
@@ -171,20 +171,33 @@ CREATE TABLE public.bonus_package_image (
 );
 
 
--- public.order_detail definition
+-- public.orders definition
 
 -- Drop table
 
--- DROP TABLE public.order_detail;
+-- DROP TABLE public.orders;
 
-CREATE TABLE public.order_detail (
-                                     id varchar(255) NOT NULL,
-                                     price float8 NOT NULL,
-                                     quantity int4 NOT NULL,
-                                     bonu_package_id varchar(255) NULL,
-                                     order_id varchar(255) NULL,
-                                     CONSTRAINT order_detail_pkey PRIMARY KEY (id),
-                                     CONSTRAINT fkr113qjsbuhyp0k51l25uidcyh FOREIGN KEY (bonu_package_id) REFERENCES public.bonus_package(id)
+CREATE TABLE public.orders (
+                               id varchar(255) NOT NULL,
+                               book_code varchar(255) NOT NULL,
+                               status varchar(255) NULL,
+                               transaction_date timestamp(6) NULL,
+                               transaction_finish_date timestamp(6) NULL,
+                               updated_at timestamp(6) NULL,
+                               wedding_date timestamp(6) NULL,
+                               wedding_package_base_price float8 NULL,
+                               customer_id varchar(255) NULL,
+                               payment_image_id varchar(255) NULL,
+                               wedding_organizer_id varchar(255) NULL,
+                               wedding_package_id varchar(255) NULL,
+                               CONSTRAINT orders_pkey PRIMARY KEY (id),
+                               CONSTRAINT orders_status_check CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'REJECTED'::character varying, 'WAITING_FOR_PAYMENT'::character varying, 'CHECKING_PAYMENT'::character varying, 'PAID'::character varying, 'CANCELED'::character varying, 'FINISHED'::character varying])::text[]))),
+                               CONSTRAINT uk37omj6e1jolodop4fj6nya4l UNIQUE (book_code),
+                               CONSTRAINT ukastys1dv61mdlp0n0wx0574r2 UNIQUE (customer_id),
+                               CONSTRAINT fk624gtjin3po807j3vix093tlf FOREIGN KEY (customer_id) REFERENCES public.customer(id),
+                               CONSTRAINT fk79ueewhdcvwc2pkn4k92mp8mb FOREIGN KEY (wedding_organizer_id) REFERENCES public.wedding_organizer(id),
+                               CONSTRAINT fkeh8n7hdmbof1ikxt2rw4qju20 FOREIGN KEY (wedding_package_id) REFERENCES public.wedding_package(id),
+                               CONSTRAINT fkk5l1xkm8mrbi9nwijque1g8qv FOREIGN KEY (payment_image_id) REFERENCES public.image(id)
 );
 
 
@@ -203,6 +216,24 @@ CREATE TABLE public.bonus_detail (
                                      CONSTRAINT bonus_detail_pkey PRIMARY KEY (id),
                                      CONSTRAINT fk469fp3j7ub1p0xqijgpr3scen FOREIGN KEY (bonus_package_id) REFERENCES public.bonus_package(id),
                                      CONSTRAINT fkhr0fii8r5400wwkate105nbb9 FOREIGN KEY (wedding_package_id) REFERENCES public.wedding_package(id)
+);
+
+
+-- public.order_detail definition
+
+-- Drop table
+
+-- DROP TABLE public.order_detail;
+
+CREATE TABLE public.order_detail (
+                                     id varchar(255) NOT NULL,
+                                     price float8 NOT NULL,
+                                     quantity int4 NOT NULL,
+                                     bonu_package_id varchar(255) NULL,
+                                     order_id varchar(255) NULL,
+                                     CONSTRAINT order_detail_pkey PRIMARY KEY (id),
+                                     CONSTRAINT fkr113qjsbuhyp0k51l25uidcyh FOREIGN KEY (bonu_package_id) REFERENCES public.bonus_package(id),
+                                     CONSTRAINT fkrws2q0si6oyd6il8gqe2aennc FOREIGN KEY (order_id) REFERENCES public.orders(id)
 );
 
 INSERT INTO public.image (id,conten_type,"name","path","size") VALUES
@@ -389,5 +420,4 @@ INSERT INTO public.bonus_detail (id,adjustable,quantity,bonus_package_id,wedding
                                                                                                  ('a3b2f17c-09ca-4265-bc03-14b170e911e2',false,1,'bp-music-001','31e6654f-d382-4721-a645-9c833c09ca6b'),
                                                                                                  ('f01aeb3c-64da-4412-94fd-42ff05c12aa6',true,100,'bp-invitation-001','31e6654f-d382-4721-a645-9c833c09ca6b'),
                                                                                                  ('26c9c7b1-db63-42e2-8f02-88ac3437e61b',false,1,'bp-fireworks-001','31e6654f-d382-4721-a645-9c833c09ca6b');
-
 

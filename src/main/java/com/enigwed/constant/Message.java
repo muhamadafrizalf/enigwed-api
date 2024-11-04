@@ -57,4 +57,5 @@ public class Message {
     public static final String ORDER_CREATED = "Order created";
     public static final String ORDER_FOUND = "Order found";
     public static final String ORDER_UPDATED = "Order updated";
+    public static final String NO_ORDER_FOUND = "No order found";
 }

@@ -89,7 +89,7 @@ public class WeddingPackageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE)
+    @PutMapping(value = PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addWeddingPackageImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,

@@ -19,17 +19,18 @@ public interface OrderService {
     ApiResponse<OrderResponse> finishOrder(String orderId); // Add review later
     // Admin
     ApiResponse<OrderResponse> findOrderById(String id);
-    ApiResponse<OrderResponse> acceptPayment(String orderId);
-    ApiResponse<OrderResponse> rejectPayment(String orderId);
-    List<OrderResponse> findAllOrders();
-    List<OrderResponse> findOrdersByWeddingOrganizerId(String weddingOrganizerId);
-    List<OrderResponse> findOrdersByWeddingPackageId(String weddingPackageId);
-    List<OrderResponse> findOrdersByStatus(EStatus status);
-    List<OrderResponse> findOrdersByWeddingOrganizerIdAndStatus(String weddingOrganizerId, EStatus status);
-    List<OrderResponse> findOrdersByTransactionDateBetween(LocalDateTime start, LocalDateTime end);
+    ApiResponse<OrderResponse> confirmPayment(String orderId);
+    ApiResponse<List<OrderResponse>> findAllOrders();
+    ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerId(String weddingOrganizerId);
+    ApiResponse<List<OrderResponse>> findOrdersByWeddingPackageId(String weddingPackageId);
+    ApiResponse<List<OrderResponse>> findOrdersByStatus(EStatus status);
+    ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerIdAndStatus(String weddingOrganizerId, EStatus status);
+    ApiResponse<List<OrderResponse>> findOrdersByTransactionDateBetween(LocalDateTime start, LocalDateTime end);
     // Wedding Organizer
-    List<OrderResponse> findOwnOrders(JwtClaim userInfo);
-    List<OrderResponse> findOwnOrdersByStatus(JwtClaim userInfo, EStatus status);
-    OrderResponse acceptOrder(JwtClaim userInfo, String orderId);
-    OrderResponse rejectOrder(JwtClaim userInfo, String orderId);
+    ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo);
+    ApiResponse<List<OrderResponse>> findOwnOrdersByStatus(JwtClaim userInfo, EStatus status);
+    ApiResponse<List<OrderResponse>> findOwnOrdersByWeddingPackageId(JwtClaim userInfo, String weddingPackageId);
+    ApiResponse<List<OrderResponse>> findOwnOrdersByTransactionDateBetween(JwtClaim userInfo, LocalDateTime start, LocalDateTime end);
+    ApiResponse<OrderResponse> acceptOrder(JwtClaim userInfo, String orderId);
+    ApiResponse<OrderResponse> rejectOrder(JwtClaim userInfo, String orderId);
 }

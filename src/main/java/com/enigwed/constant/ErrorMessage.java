@@ -25,6 +25,8 @@ public class ErrorMessage {
     public static final String INVALID_MIN_MAX_QUANTITY = "Invalid minimum and maximum quantity";
     public static final String INVALID_QUANTITY_MIN = "Default quantity can't lower than minimum quantity";
     public static final String INVALID_QUANTITY_MAX = "Default quantity can't higher than maximum quantity";
+    public static final String INVALID_START_DATE = "Start date cannot be in the future";
+    public static final String INVALID_END_DATE = "End date cannot before start date";
     // Not found
     public static final String CITY_NOT_FOUND = "City not found";
     public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
@@ -32,4 +34,6 @@ public class ErrorMessage {
     public static final String BONUS_PACKAGE_NOT_FOUND = "Bonus package not found";
     public static final String WEDDING_PACKAGE_NOT_FOUND = "Wedding package not found";
     public static final String ORDER_NOT_FOUND = "Order not found";
+    public static final String NO_PAYMENT_IMAGE_FOUND = "No payment image found";
+
 }

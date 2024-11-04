@@ -49,4 +49,15 @@ public class PathApi {
     public static final String PROTECTED_WEDDING_PACKAGE_ID = PROTECTED_WEDDING_PACKAGE + "/{id}";
     public static final String PROTECTED_WEDDING_PACKAGE_ID_IMAGE = PROTECTED_WEDDING_PACKAGE_ID + "/images";
     public static final String PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID = PROTECTED_WEDDING_PACKAGE_ID_IMAGE + "/{image-id}";
+    // Order
+    public static final String PUBLIC_ORDER = PUBLIC + "/orders";
+    public static final String PUBLIC_ORDER_ID = PUBLIC_ORDER + "/{id}";
+    public static final String PUBLIC_ORDER_ID_PAY = PUBLIC_ORDER_ID + "/pay";
+    public static final String PUBLIC_ORDER_ID_CANCEL = PUBLIC_ORDER_ID + "/cancel";
+    public static final String PUBLIC_ORDER_ID_FINISH = PUBLIC_ORDER_ID + "/finish";
+    public static final String PROTECTED_ORDER = PROTECTED + "/orders";
+    public static final String PROTECTED_ORDER_ID = PROTECTED_ORDER + "/{id}";
+    public static final String PROTECTED_ORDER_ID_CONFIRM = PROTECTED_ORDER_ID + "/confirm";
+    public static final String PROTECTED_ORDER_ID_ACCEPT = PROTECTED_ORDER_ID + "/accept";
+    public static final String PROTECTED_ORDER_ID_REJECT = PROTECTED_ORDER_ID + "/reject";
 }

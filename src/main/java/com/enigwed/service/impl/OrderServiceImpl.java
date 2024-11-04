@@ -12,10 +12,7 @@ import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.OrderRepository;
-import com.enigwed.service.BonusPackageService;
-import com.enigwed.service.ImageService;
-import com.enigwed.service.OrderService;
-import com.enigwed.service.WeddingPackageService;
+import com.enigwed.service.*;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private final WeddingPackageService weddingPackageService;
     private final BonusPackageService bonusPackageService;
     private final ImageService imageService;
+    private final WeddingOrganizerService weddingOrganizerService;
     private final ValidationUtil validationUtil;
 
     private String generateBookCode() {
@@ -62,6 +61,14 @@ public class OrderServiceImpl implements OrderService {
     private Order findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
         return orderRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.ORDER_NOT_FOUND));
+    }
+
+    private void validateUserAccess(JwtClaim userInfo, Order order) throws AccessDeniedException {
+        String userCredentialId = order.getWeddingOrganizer().getUserCredential().getId();
+        if (userInfo.getUserId().equals(userCredentialId)) {
+            return;
+        }
+        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -115,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
             // ErrorResponse
             if (bookCode == null || bookCode.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.BOOKING_CODE_IS_REQUIRED);
             // ErrorResponse
-            Order order = orderRepository.findById(bookCode).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.ORDER_NOT_FOUND));
+            Order order = orderRepository.findByBookCode(bookCode).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.ORDER_NOT_FOUND));
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
         } catch (ErrorResponse e) {
@@ -143,7 +150,7 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
-            log.error("Error during uploading payment imager: {}", e.getError());
+            log.error("Error during uploading payment image: {}", e.getError());
             throw e;
         }
     }
@@ -151,90 +158,250 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<OrderResponse> cancelOrder(String orderId) {
-        return null;
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+            order.setStatus(EStatus.CANCELED);
+            order = orderRepository.save(order);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_UPDATED);
+        } catch (ErrorResponse e) {
+            log.error("Error during canceling order: {}", e.getError());
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<OrderResponse> finishOrder(String orderId) {
-        return null;
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+            /*
+                ADD REVIEW
+            */
+            order.setStatus(EStatus.FINISHED);
+            order = orderRepository.save(order);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_UPDATED);
+        } catch (ErrorResponse e) {
+            log.error("Error during finishing order: {}", e.getError());
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<OrderResponse> findOrderById(String id) {
-        return null;
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(id);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading order: {}", e.getError());
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<OrderResponse> acceptPayment(String orderId) {
-        return null;
+    public ApiResponse<OrderResponse> confirmPayment(String orderId) {
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+            // ErrorMessage
+            if (order.getPaymentImage() == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.NO_PAYMENT_IMAGE_FOUND);
+            order.setStatus(EStatus.PAID);
+            order = orderRepository.save(order);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during accepting order payment: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findAllOrders() {
+        List<Order> orderList = orderRepository.findAll();
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerId(String weddingOrganizerId) {
+        List<Order> orderList = orderRepository.findByWeddingOrganizerId(weddingOrganizerId);
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOrdersByWeddingPackageId(String weddingPackageId) {
+        List<Order> orderList = orderRepository.findByWeddingPackageId(weddingPackageId);
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOrdersByStatus(EStatus status) {
+        List<Order> orderList = orderRepository.findByStatus(status);
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerIdAndStatus(String weddingOrganizerId, EStatus status) {
+        List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndStatus(weddingOrganizerId, status);
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOrdersByTransactionDateBetween(LocalDateTime start, LocalDateTime end) {
+        if (start.isAfter(LocalDateTime.now())) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_START_DATE);
+        if(end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
+        List<Order> orderList = orderRepository.findByTransactionDateBetween(start, end);
+        if (orderList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        }
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo) {
+        try {
+            // ErrorResponse
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
+            if (orderList.isEmpty()) {
+                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+            }
+            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+            return ApiResponse.success(responses, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading own orders: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Override
+    public ApiResponse<List<OrderResponse>> findOwnOrdersByTransactionDateBetween(JwtClaim userInfo, LocalDateTime start, LocalDateTime end) {
+        try {
+            if (start.isAfter(LocalDateTime.now())) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_START_DATE);
+            if(end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
+            // ErrorResponse
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), start, end);
+            if (orderList.isEmpty()) {
+                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+            }
+            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+            return ApiResponse.success(responses, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading own orders by transaction date between: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOwnOrdersByStatus(JwtClaim userInfo, EStatus status) {
+        try {
+            // ErrorResponse
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndStatus(wo.getId(), status);
+            if (orderList.isEmpty()) {
+                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+            }
+            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+            return ApiResponse.success(responses, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading own orders by status: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<OrderResponse>> findOwnOrdersByWeddingPackageId(JwtClaim userInfo, String weddingPackageId) {
+        try {
+            // ErrorResponse
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndWeddingPackageId(wo.getId(), weddingPackageId);
+            if (orderList.isEmpty()) {
+                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+            }
+            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+            return ApiResponse.success(responses, Message.ORDER_FOUND);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading own orders by wedding package id: {}", e.getError());
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<OrderResponse> rejectPayment(String orderId) {
-        return null;
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findAllOrders() {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOrdersByWeddingOrganizerId(String weddingOrganizerId) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOrdersByWeddingPackageId(String weddingPackageId) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOrdersByStatus(EStatus status) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOrdersByWeddingOrganizerIdAndStatus(String weddingOrganizerId, EStatus status) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOrdersByTransactionDateBetween(LocalDateTime start, LocalDateTime end) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOwnOrders(JwtClaim userInfo) {
-        return List.of();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<OrderResponse> findOwnOrdersByStatus(JwtClaim userInfo, EStatus status) {
-        return List.of();
+    public ApiResponse<OrderResponse> acceptOrder(JwtClaim userInfo, String orderId) {
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+            // AccessDeniedException
+            validateUserAccess(userInfo, order);
+            order.setStatus(EStatus.WAITING_FOR_PAYMENT);
+            order = orderRepository.save(order);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_UPDATED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied during accepting order: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during accepting order: {}", e.getError());
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public OrderResponse acceptOrder(JwtClaim userInfo, String orderId) {
-        return null;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public OrderResponse rejectOrder(JwtClaim userInfo, String orderId) {
-        return null;
+    public ApiResponse<OrderResponse> rejectOrder(JwtClaim userInfo, String orderId) {
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+            // AccessDeniedException
+            validateUserAccess(userInfo, order);
+            order.setStatus(EStatus.REJECTED);
+            order = orderRepository.save(order);
+            OrderResponse response = OrderResponse.from(order);
+            return ApiResponse.success(response, Message.ORDER_UPDATED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied during rejecting order: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during rejecting order: {}", e.getError());
+            throw e;
+        }
     }
 }

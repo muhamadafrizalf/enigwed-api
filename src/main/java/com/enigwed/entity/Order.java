@@ -44,6 +44,7 @@ public class Order extends BaseEntity{
     private double weddingPackageBasePrice;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @ManyToOne
