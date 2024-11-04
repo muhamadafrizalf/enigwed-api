@@ -63,13 +63,16 @@ public class AuthServiceImpl implements AuthService {
             // JWTCreationException
             String token = jwtUtil.generateToken(userCredential);
             // ErrorResponse
-            WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
-            UserResponse user = UserResponse.fromUser(weddingOrganizer);
             LoginResponse response = LoginResponse.builder()
                     .token(token)
                     .role(userCredential.getRole().name())
-                    .user(user)
                     .build();
+            if (userCredential.getRole() == ERole.ROLE_WO) {
+                WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
+                UserResponse user = UserResponse.fromUser(weddingOrganizer);
+                response.setUser(user);
+            }
+
             return ApiResponse.success(response, Message.LOGIN_SUCCESS);
         } catch (ValidationException e) {
             log.error("Validation error during login: {}", e.getErrors());
