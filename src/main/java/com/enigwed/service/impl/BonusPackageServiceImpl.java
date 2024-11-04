@@ -56,7 +56,12 @@ public class BonusPackageServiceImpl implements BonusPackageService {
     @Transactional(readOnly = true)
     @Override
     public BonusPackage loadBonusPackageById(String id) {
-        return findByIdOrThrow(id);
+        try {
+            return findByIdOrThrow(id);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading bonus package: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -125,7 +130,7 @@ public class BonusPackageServiceImpl implements BonusPackageService {
         try {
             // ErrorResponse
             WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            // ErrorResponse
+            // ValidationException
             validationUtil.validateAndThrow(bonusPackageRequest);
             // ErrorResponse
             if (bonusPackageRequest.getMaxQuantity()<bonusPackageRequest.getMinQuantity()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_MIN_MAX_QUANTITY);
@@ -140,13 +145,14 @@ public class BonusPackageServiceImpl implements BonusPackageService {
             bonusPackage = bonusPackageRepository.save(bonusPackage);
             BonusPackageResponse response = BonusPackageResponse.from(bonusPackage);
             return ApiResponse.success(response, Message.BONUS_PACKAGE_CREATED);
-        } catch (ErrorResponse e) {
-            log.error("Error during creation bonus package: {}", e.getMessage());
+        } catch (ValidationException e) {
+            log.error("Validation error creating bonus: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+        }  catch (ErrorResponse e) {
+            log.error("Error during creating bonus package: {}", e.getMessage());
             throw e;
         }
     }
-
-
 
     @Transactional(rollbackFor = Exception.class)
     @Override

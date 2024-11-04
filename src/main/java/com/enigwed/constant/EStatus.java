@@ -4,6 +4,7 @@ public enum EStatus {
     PENDING,
     REJECTED,
     WAITING_FOR_PAYMENT,
+    CHECKING_PAYMENT,
     PAID,
     CANCELED,
     FINISHED

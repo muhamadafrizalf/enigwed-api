@@ -21,9 +21,9 @@ public class WeddingPackageResponse {
     private String cityName;
     private String weddingOrganizerId;
     private String weddingOrganizerName;
-    List<BonusDetailResponse> bonusDetails;
     private ImageResponse thumbnail;
-    private List<ImageResponse> images;
+    private List<ImageResponse> images = new ArrayList<>();
+    List<BonusDetailResponse> bonusDetails = new ArrayList<>();
 
     public static WeddingPackageResponse from(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = new WeddingPackageResponse();
@@ -37,17 +37,15 @@ public class WeddingPackageResponse {
         response.setCityName(weddingPackage.getCity().getName());
         response.setWeddingOrganizerId(weddingPackage.getWeddingOrganizer().getId());
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
-        if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
-            response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::from).toList());
-        } else {
-            response.setBonusDetails(new ArrayList<>());
-        }
         if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
             response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
-            response.setImages(new ArrayList<>());
+            response.getImages().add(ImageResponse.noImage());
+        }
+        if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
+            response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::from).toList());
         }
         return response;
     }

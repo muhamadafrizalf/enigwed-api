@@ -9,6 +9,7 @@ public class ErrorMessage {
     public static final String EMAIL_IS_REQUIRED = "Email null or empty";
     public static final String TOKEN_IS_BLANK = "Token is blank";
     public static final String IMAGE_IS_NULL = "Image is null";
+    public static final String BOOKING_CODE_IS_REQUIRED = "Booking code is null or empty";
     // Conflict
     public static final String NAME_UNIQUE = "Name already exists";
     public static final String EMAIL_ALREADY_IN_USE = "Email already in use";
@@ -30,4 +31,5 @@ public class ErrorMessage {
     public static final String IMAGE_NOT_FOUND = "Image not found";
     public static final String BONUS_PACKAGE_NOT_FOUND = "Bonus package not found";
     public static final String WEDDING_PACKAGE_NOT_FOUND = "Wedding package not found";
+    public static final String ORDER_NOT_FOUND = "Order not found";
 }

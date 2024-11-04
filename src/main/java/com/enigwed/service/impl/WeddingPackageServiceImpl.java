@@ -54,6 +54,17 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
     @Transactional(readOnly = true)
     @Override
+    public WeddingPackage loadWeddingPackageById(String id) {
+        try {
+            return findByIdOrThrow(id);
+        } catch (ErrorResponse e) {
+            log.error("Error during loading wedding package: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id) {
         try {
             // ErrorResponse
@@ -119,7 +130,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
             // ErrorResponse
             City city = cityService.loadCityById(weddingPackageRequest.getCityId());
-            // ErrorResponse
+            // ValidationException
             validationUtil.validateAndThrow(weddingPackageRequest);
             WeddingPackage weddingPackage = WeddingPackage.builder()
                     .name(weddingPackageRequest.getName())
@@ -134,6 +145,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
                     // ErrorResponse
                     BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(bonusDetailRequest.getBonusPackageId());
                     int quantity;
+                    // ErrorResponse
                     if (bonusDetailRequest.getQuantity() == null) {
                         quantity = bonusPackage.getMinQuantity();
                     } else if (bonusDetailRequest.getQuantity() < bonusPackage.getMinQuantity()) {
@@ -156,6 +168,9 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             weddingPackage = weddingPackageRepository.save(weddingPackage);
             WeddingPackageResponse response = WeddingPackageResponse.from(weddingPackage);
             return ApiResponse.success(response, Message.WEDDING_PACKAGE_CREATED);
+        } catch (ValidationException e) {
+            log.error("Validation error creating wedding package: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error during creating wedding package: {}", e.getMessage());
             throw e;
@@ -246,6 +261,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             WeddingPackage weddingPackage = findByIdOrThrow(id);
             // AccessDeniedException
             validateUserAccess(userInfo, weddingPackage);
+            // ErrorResponse
+            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
             // ErrorResponse
             Image addedImage = imageService.createImage(image);
             if (weddingPackage.getImages() == null) {

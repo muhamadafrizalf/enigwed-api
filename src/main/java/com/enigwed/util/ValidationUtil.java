@@ -21,13 +21,11 @@ public class ValidationUtil {
         return validator.validate(obj);
     }
 
-    public <T> void validateAndThrow(T obj) {
+    public <T> void validateAndThrow(T obj) throws ValidationException {
         Set<ConstraintViolation<T>> violations = validate(obj);
         if (!violations.isEmpty()) {
             List<String> errors = new ArrayList<>();
-//            StringBuilder message = new StringBuilder("Validation failed: ");
             for (ConstraintViolation<T> violation : violations) {
-//                message.append(violation.getPropertyPath()).append(": ").append(violation.getMessage()).append("; ");
                 errors.add(violation.getMessage());
             }
             throw new ValidationException(ErrorMessage.CONSTRAINT_VIOLATION, errors);

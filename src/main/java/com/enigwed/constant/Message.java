@@ -53,4 +53,8 @@ public class Message {
     public static final String WEDDING_PACKAGES_FOUND = "Wedding packages found";
     public static final String WEDDING_PACKAGE_UPDATED = "Wedding package updated";
     public static final String WEDDING_PACKAGE_DELETED = "Wedding package deleted";
+    // Order
+    public static final String ORDER_CREATED = "Order created";
+    public static final String ORDER_FOUND = "Order found";
+    public static final String ORDER_UPDATED = "Order updated";
 }

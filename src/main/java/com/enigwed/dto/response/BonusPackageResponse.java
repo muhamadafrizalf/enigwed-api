@@ -19,10 +19,9 @@ public class BonusPackageResponse {
     private int maxQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String weddingOrganizerId;
-    private String weddingOrganizerName;
+    private WeddingOrganizerResponse weddingOrganizer;
     private ImageResponse thumbnail;
-    List<ImageResponse> images;
+    List<ImageResponse> images = new ArrayList<>();
 
     public static BonusPackageResponse from(BonusPackage bonusPackage) {
         BonusPackageResponse response = new BonusPackageResponse();
@@ -34,14 +33,13 @@ public class BonusPackageResponse {
         response.setMaxQuantity(bonusPackage.getMaxQuantity());
         response.setCreatedAt(bonusPackage.getCreatedAt());
         response.setUpdatedAt(bonusPackage.getUpdatedAt());
-        response.setWeddingOrganizerId(bonusPackage.getWeddingOrganizer().getId());
-        response.setWeddingOrganizerName(bonusPackage.getWeddingOrganizer().getName());
+        response.setWeddingOrganizer(WeddingOrganizerResponse.from(bonusPackage.getWeddingOrganizer()));
         if (bonusPackage.getImages() != null && !bonusPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(bonusPackage.getImages().get(0)));
             response.setImages(bonusPackage.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
-            response.setImages(new ArrayList<>());
+            response.getImages().add(ImageResponse.noImage());
         }
         return response;
     }

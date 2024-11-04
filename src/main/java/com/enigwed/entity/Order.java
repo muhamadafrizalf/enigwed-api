@@ -22,11 +22,20 @@ import java.util.List;
 @Table(name = PathDb.ORDER)
 public class Order extends BaseEntity{
 
+    @Column(name = "book_code", unique = true, nullable = false)
+    private String bookCode;
+
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
 
-    @Column(name = "book_code", unique = true, nullable = false)
-    private String bookCode;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private EStatus status;
+
+    @Column(name = "transaction_finish_date")
+    private LocalDateTime transactionFinishDate;
 
     @Column(name = "wedding_date")
     private LocalDateTime weddingDate;
@@ -34,10 +43,12 @@ public class Order extends BaseEntity{
     @Column(name = "wedding_package_base_price")
     private double weddingPackageBasePrice;
 
-    private EStatus status;
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_image_id")
+    private Image paymentImage;
 
     @ManyToOne
     @JoinColumn(name = "wedding_organizer_id")
@@ -47,16 +58,18 @@ public class Order extends BaseEntity{
     @JoinColumn(name = "wedding_package_id")
     private WeddingPackage weddingPackage;
 
-    @ManyToOne
-    @JoinColumn(name = "payment_image_id")
-    private Image paymentImage;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         transactionDate = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         status = EStatus.PENDING;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

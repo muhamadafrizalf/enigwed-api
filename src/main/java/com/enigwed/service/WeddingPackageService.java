@@ -4,11 +4,13 @@ import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingPackageResponse;
+import com.enigwed.entity.WeddingPackage;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface WeddingPackageService {
+    WeddingPackage loadWeddingPackageById(String id);
 
     ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id);
     ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages();
