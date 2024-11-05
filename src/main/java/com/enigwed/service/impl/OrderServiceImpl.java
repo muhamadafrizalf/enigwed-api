@@ -83,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
                     .name(orderRequest.getCustomer().getName())
                     .email(orderRequest.getCustomer().getEmail())
                     .phone(orderRequest.getCustomer().getPhone())
+                    .address(orderRequest.getCustomer().getAddress())
                     .build();
             order.setCustomer(customer);
             // ErrorResponse

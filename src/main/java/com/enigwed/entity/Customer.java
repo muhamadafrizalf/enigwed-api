@@ -1,6 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.PathDb;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -24,4 +25,6 @@ public class Customer extends BaseEntity {
 
     private String email;
 
+    @Column(length = 1000)
+    private String address;
 }

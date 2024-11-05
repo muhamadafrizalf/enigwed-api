@@ -5,6 +5,7 @@ public class Constraint {
     public static final String NAME_BLANK = "Name cannot be blank";
     public static final String DESCRIPTION_MAX = "Description must be at most 1000 characters";
     public static final String DESCRIPTION_MAX_10000 = "Description must be at most 1000 characters";
+    public static final String ADDRESS_MAX = "Address must be at most 1000 characters";
     // Register Request
     public static final String ADDRESS_BLANK = "Address cannot be blank";
     public static final String NPWP_BLANK = "NPWP cannot be blank";

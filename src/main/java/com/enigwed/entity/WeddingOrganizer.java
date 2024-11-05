@@ -29,6 +29,7 @@ public class WeddingOrganizer extends AuditEntity{
     @Column(length = 1000)
     private String description;
 
+    @Column(length = 1000)
     private String address;
 
     @ManyToOne

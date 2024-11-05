@@ -22,6 +22,7 @@ public class RegisterRequest {
     @Size(max = 1000, message = DESCRIPTION_MAX)
     private String description;
 
+    @Size(max = 1000, message = ADDRESS_MAX)
     @NotBlank(message = ADDRESS_BLANK)
     private String address;
 
