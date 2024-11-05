@@ -1,8 +1,6 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.EStatus;
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.OrderDetailRequest;
 import com.enigwed.dto.request.OrderRequest;
@@ -37,6 +35,8 @@ public class OrderServiceImpl implements OrderService {
     private final BonusPackageService bonusPackageService;
     private final ImageService imageService;
     private final WeddingOrganizerService weddingOrganizerService;
+    private final NotificationService notificationService;
+    private final UserCredentialService userCredentialService;
     private final ValidationUtil validationUtil;
 
     private String generateBookCode() {
@@ -70,6 +70,42 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
+    private void sendNotificationWeddingOrganizer(ENotificationType type, Order order, String message) {
+        Notification notification = Notification.builder()
+                .channel(ENotificationChannel.SYSTEM)
+                .type(type)
+                .receiver(EReceiver.WEDDING_ORGANIZER)
+                .receiverId(order.getWeddingOrganizer().getUserCredential().getId())
+                .dataType(EDataType.ORDER)
+                .dataId(order.getId())
+                .message(message)
+                .build();
+        notificationService.createNotification(notification);
+        /*
+
+            Create notification for channel email
+
+        */
+    }
+
+    private void sendNotificationAdmin(ENotificationType type, Order order, String message) {
+        Notification notification = Notification.builder()
+                .channel(ENotificationChannel.SYSTEM)
+                .type(type)
+                .receiver(EReceiver.ADMIN)
+                .receiverId(userCredentialService.loadAdminId())
+                .dataType(EDataType.ORDER)
+                .dataId(order.getId())
+                .message(message)
+                .build();
+        notificationService.createNotification(notification);
+        /*
+
+            Create notification for channel email
+
+        */
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -146,6 +182,7 @@ public class OrderServiceImpl implements OrderService {
             }
             order.setOrderDetails(orderDetailList);
             order = saveOrder(order);
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_RECEIVED, order, Message.NEW_ORDER_RECEIVED(customer.getName()));
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_CREATED);
         } catch (ValidationException e) {
@@ -189,6 +226,7 @@ public class OrderServiceImpl implements OrderService {
             }
             order.setPaymentImage(paymentImage);
             order = orderRepository.save(order);
+            sendNotificationAdmin(ENotificationType.CONFIRM_PAYMENT, order, Message.CONFIRM_PAYMENT(order.getCustomer().getName()));
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
@@ -206,6 +244,7 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(EStatus.CANCELED);
             order = orderRepository.save(order);
             OrderResponse response = OrderResponse.from(order);
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_CANCELLED, order, Message.ORDER_CANCELED(order.getCustomer().getName()));
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
             log.error("Error during canceling order: {}", e.getError());
@@ -222,6 +261,7 @@ public class OrderServiceImpl implements OrderService {
             /*
                 ADD REVIEW
             */
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, Message.ORDER_FINISHED(order.getCustomer().getName()));
             order.setStatus(EStatus.FINISHED);
             order = orderRepository.save(order);
             OrderResponse response = OrderResponse.from(order);
@@ -256,6 +296,7 @@ public class OrderServiceImpl implements OrderService {
             if (order.getPaymentImage() == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.NO_PAYMENT_IMAGE_FOUND);
             order.setStatus(EStatus.PAID);
             order = orderRepository.save(order);
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_PAID, order, Message.ORDER_PAID(order.getCustomer().getName()));
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
         } catch (ErrorResponse e) {
@@ -415,6 +456,9 @@ public class OrderServiceImpl implements OrderService {
             validateUserAccess(userInfo, order);
             order.setStatus(EStatus.WAITING_FOR_PAYMENT);
             order = orderRepository.save(order);
+            /*
+             Send notification to customer
+            */
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {
@@ -436,6 +480,9 @@ public class OrderServiceImpl implements OrderService {
             validateUserAccess(userInfo, order);
             order.setStatus(EStatus.REJECTED);
             order = orderRepository.save(order);
+            /*
+             Send notification to customer
+            */
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {

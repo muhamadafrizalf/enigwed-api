@@ -1,15 +1,13 @@
 package com.enigwed.service.impl;
 
+import com.enigwed.constant.ERole;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
-import com.enigwed.entity.City;
-import com.enigwed.entity.Image;
-import com.enigwed.entity.UserCredential;
-import com.enigwed.entity.WeddingOrganizer;
+import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.WeddingOrganizerRepository;
@@ -26,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +44,19 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return weddingOrganizerRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
     }
 
+    private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
+        String userCredentialId = weddingOrganizer.getUserCredential().getId();
+        if (userInfo.getUserId().equals(userCredentialId)) {
+            return;
+        } else if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            return;
+        }
+        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void createWeddingOrganizer(WeddingOrganizer weddingOrganizer) {
+    public void createWeddingOrganizer(WeddingOrganizer weddingOrganizer) throws DataIntegrityViolationException {
         // Catch in AuthService
         if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizer.getPhone()) > 0) throw new DataIntegrityViolationException(ErrorMessage.PHONE_ALREADY_EXIST);
         if (weddingOrganizerRepository.countByNibAndDeletedAtIsNull(weddingOrganizer.getNib()) > 0) throw new DataIntegrityViolationException(ErrorMessage.NIB_ALREADY_EXIST);
@@ -62,7 +71,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             // ErrorResponse
             return findByIdOrThrow(id);
         } catch (ErrorResponse e) {
-            log.error("Error during loading wedding organizer: {}", e.getError());
+            log.error("Error while loading wedding organizer: {}", e.getError());
             throw e;
         }
     }
@@ -83,7 +92,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_FOUND);
         } catch (ErrorResponse e) {
-            log.error("Error during loading wedding organizer: {}", e.getError());
+            log.error("Error while loading wedding organizer: {}", e.getError());
             throw e;
         }
     }
@@ -120,9 +129,8 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         try {
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(weddingOrganizerRequest.getId());
-            // ErrorResponse
-            if (!userInfo.getUserId().equals(wo.getUserCredential().getId()) && !userInfo.getRole().equals("ROLE_ADMIN"))
-                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.UPDATE_FAILED, ErrorMessage.ACCESS_DENIED);
+            // AccessDeniedException
+            validateUserAccess(userInfo, wo);
             // ValidationException
             validationUtil.validateAndThrow(weddingOrganizerRequest);
             // DataIntegrityViolationException
@@ -140,14 +148,17 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             wo = weddingOrganizerRepository.saveAndFlush(wo);
             WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_UPDATED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while updating wedding organizer: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ValidationException e) {
-            log.error("Validation error during update wedding organizer: {}", e.getErrors());
+            log.error("Validation error while updating wedding organizer: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, e.getErrors().get(0));
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity error during update wedding organizer: {}", e.getMessage());
+            log.error("Data integrity error while updating wedding organizer: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.CONFLICT, Message.REGISTER_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during update wedding organizer: {}", e.getError());
+            log.error("Error while updating wedding organizer: {}", e.getError());
             throw e;
         }
     }
@@ -158,15 +169,17 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         try {
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
-            // ErrorResponse
-            if (!userInfo.getUserId().equals(wo.getUserCredential().getId()) && !userInfo.getRole().equals("ROLE_ADMIN"))
-                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.DELETE_FAILED, ErrorMessage.ACCESS_DENIED);
+            // AccessDeniedException
+            validateUserAccess(userInfo, wo);
             // ErrorResponse
             wo.setUserCredential(userCredentialService.deleteUser(wo.getUserCredential().getId()));
             wo.setDeletedAt(LocalDateTime.now());
             return ApiResponse.success(Message.WEDDING_ORGANIZER_DELETED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while deleting wedding organizer: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during deletion wedding organizer: {}", e.getError());
+            log.error("Error while deleting wedding organizer: {}", e.getError());
             throw e;
         }
     }
@@ -176,19 +189,21 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         try {
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
+            // AccessDeniedException
+            validateUserAccess(userInfo, wo);
             // ErrorResponse
             if (avatar == null || avatar.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
-            // ErrorResponse
-            if (!userInfo.getUserId().equals(wo.getUserCredential().getId()) && !userInfo.getRole().equals("ROLE_ADMIN"))
-                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.UPDATE_FAILED, ErrorMessage.ACCESS_DENIED);
             // ErrorResponse
             Image newAvatar = imageService.updateImage(wo.getAvatar().getId(), avatar);
             wo.setAvatar(newAvatar);
             wo = weddingOrganizerRepository.saveAndFlush(wo);
             WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_AVATAR_UPDATED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while updating wedding organizer image: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during update wedding organizer image: {}", e.getError());
+            log.error("Error while updating wedding organizer image: {}", e.getError());
             throw e;
         }
     }
@@ -198,16 +213,18 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         try {
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
-            // ErrorResponse
-            if (!userInfo.getUserId().equals(wo.getUserCredential().getId()) && !userInfo.getRole().equals("ROLE_ADMIN"))
-                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.DELETE_FAILED, ErrorMessage.ACCESS_DENIED);
+            // AccessDeniedException
+            validateUserAccess(userInfo, wo);
             // ErrorResponse
             Image deletedImage = imageService.softDeleteImageById(wo.getAvatar().getId());
             wo.setAvatar(deletedImage);
             WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_AVATAR_DELETED);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while deleting wedding organizer image: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during deletion wedding organizer image: {}", e.getError());
+            log.error("Error while deleting wedding organizer image: {}", e.getError());
             throw e;
         }
     }

@@ -1,11 +1,13 @@
 package com.enigwed.controller;
 
+import com.enigwed.constant.ERole;
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.WeddingPackageService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,12 +23,14 @@ public class WeddingPackageController {
     private final WeddingPackageService weddingPackageService;
     private final JwtUtil jwtUtil;
 
+    @Operation(summary = "To get wedding package by wedding_package_id (no authorization needed)")
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
         ApiResponse<?> response = weddingPackageService.findWeddingPackageById(id);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "To get all wedding packages (no authorization needed)")
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> getAllWeddingPackages(
             @RequestParam(required = false) String weddingOrganizerId,
@@ -47,11 +51,18 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('WO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
-    public ResponseEntity<?> getOwnWeddingPackages(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<?> getOwnWeddingPackages(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
+    ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = weddingPackageService.getOwnWeddingPackages(userInfo);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = weddingPackageService.findAllWeddingPackages();
+        } else {
+            response = weddingPackageService.getOwnWeddingPackages(userInfo);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -66,7 +77,7 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> updateWeddingPackage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -88,7 +99,7 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PreAuthorize("hasRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addWeddingPackageImage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

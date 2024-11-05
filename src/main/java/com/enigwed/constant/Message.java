@@ -63,4 +63,22 @@ public class Message {
     public static final String NOTIFICATION_FOUNDS = "Notification founds";
     public static final String READ_FAILED = "Read failed";
     public static final String NOTIFICATION_READ = "Notification read";
+    public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
+        return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";
+    }
+    public static String NEW_ORDER_RECEIVED(String name) {
+        return "New order received: Order receive from customer " + name + ", click to check order detail.";
+    }
+    public static String CONFIRM_PAYMENT(String name) {
+        return "Payment received: Payment receive from " + name + ", click to check order detail.";
+    }
+    public static String ORDER_CANCELED(String name) {
+        return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";
+    }
+    public static String ORDER_FINISHED(String name) {
+        return "Order from " + name + " has been finished, click to check order detail.";
+    }
+    public static String ORDER_PAID(String name) {
+        return "Order from " + name + " has been paid, click to check order detail.";
+    }
 }

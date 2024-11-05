@@ -47,4 +47,10 @@ public class Notification extends BaseEntity {
     private LocalDateTime readAt;
 
     private boolean read;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        read = false;
+    }
 }

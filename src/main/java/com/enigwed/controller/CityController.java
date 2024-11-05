@@ -8,6 +8,7 @@ import com.enigwed.exception.ErrorResponse;
 import com.enigwed.service.CityService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,15 +24,16 @@ public class CityController {
     private final CityService cityService;
     private final ObjectMapper objectMapper;
 
+    @Operation(summary = "To get city by city_id (no authorization needed)")
     @GetMapping(PathApi.PUBLIC_CITY_ID)
     public ResponseEntity<?> getCityById(
             @PathVariable String id
     ) {
         ApiResponse<?> response = cityService.findCityById(id);
-
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "To get all cities (no authorization needed)")
     @GetMapping(PathApi.PUBLIC_CITY)
     public ResponseEntity<?> getCities(
             @RequestParam(required = false) String name
@@ -45,6 +47,7 @@ public class CityController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "To create new city (authorization ADMIN)")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> createCity(
@@ -67,6 +70,7 @@ public class CityController {
         }
     }
 
+    @Operation(summary = "To update existing city (authorization ADMIN)")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = PathApi.PROTECTED_CITY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateCity(
@@ -88,6 +92,7 @@ public class CityController {
         }
     }
 
+    @Operation(summary = "To delete city by city_id (authorization ADMIN)")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(PathApi.PROTECTED_CITY_ID)
     public ResponseEntity<?> deleteCityById(

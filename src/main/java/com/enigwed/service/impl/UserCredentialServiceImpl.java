@@ -46,6 +46,12 @@ public class UserCredentialServiceImpl implements UserCredentialService {
         userCredentialRepository.save(admin);
     }
 
+    @Override
+    public String loadAdminId() {
+        UserCredential admin = userCredentialRepository.findByEmailAndDeletedAtIsNull(emailAdmin).orElse(null);
+        return admin != null ? admin.getId() : "";
+    }
+
     @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

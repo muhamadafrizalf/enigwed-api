@@ -16,13 +16,13 @@ public class NotificationResponse {
 
     private EReceiver receiver;
 
-    private EDataType dataType;
-
-    private String message;
-
     private String receiverId;
 
+    private EDataType dataType;
+
     private String dataId;
+
+    private String message;
 
     private LocalDateTime createdAt;
 

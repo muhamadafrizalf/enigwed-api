@@ -4,6 +4,7 @@ import com.enigwed.entity.UserCredential;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserCredentialService extends UserDetailsService {
+    String loadAdminId();
     UserCredential loadUserById(String id);
     UserCredential createUser(UserCredential userCredential);
     UserCredential updateUser(UserCredential userCredential);

@@ -1,9 +1,7 @@
 package com.enigwed.service.impl;
 
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.enigwed.constant.ERole;
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.RefreshToken;
 import com.enigwed.dto.request.LoginRequest;
@@ -11,10 +9,7 @@ import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.LoginResponse;
 import com.enigwed.dto.response.UserResponse;
-import com.enigwed.entity.City;
-import com.enigwed.entity.Image;
-import com.enigwed.entity.UserCredential;
-import com.enigwed.entity.WeddingOrganizer;
+import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.security.JwtUtil;
@@ -42,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
     private final CityService cityService;
+    private final NotificationService notificationService;
     private final JwtUtil jwtUtil;
     private final ValidationUtil validationUtil;
     private final AuthenticationManager authenticationManager;
@@ -125,6 +121,21 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             // DataIntegrityViolationException
             weddingOrganizerService.createWeddingOrganizer(wo);
+            Notification notification = Notification.builder()
+                    .channel(ENotificationChannel.SYSTEM)
+                    .type(ENotificationType.ACCOUNT_REGISTRATION)
+                    .receiver(EReceiver.ADMIN)
+                    .receiverId(userCredentialService.loadAdminId())
+                    .dataType(EDataType.WEDDING_ORGANIZER)
+                    .dataId(wo.getId())
+                    .message(Message.NEW_ACCOUNT_REGISTRATION(wo.getName()))
+                    .build();
+            notificationService.createNotification(notification);
+            /*
+
+            Create notification for email
+
+            */
             return ApiResponse.success(Message.REGISTER_SUCCESS);
         } catch (ValidationException e) {
             log.error("Validation error during register: {}", e.getErrors());

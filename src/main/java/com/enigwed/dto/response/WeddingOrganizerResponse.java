@@ -16,6 +16,7 @@ public class WeddingOrganizerResponse {
     private String phone;
     private String description;
     private String address;
+    private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ImageResponse avatar;
@@ -31,6 +32,7 @@ public class WeddingOrganizerResponse {
         response.setPhone(weddingOrganizer.getPhone());
         response.setDescription(weddingOrganizer.getDescription());
         response.setAddress(weddingOrganizer.getAddress());
+        response.setEmail(weddingOrganizer.getUserCredential().getEmail());
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));

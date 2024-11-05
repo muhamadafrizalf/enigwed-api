@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createNotification(Notification notification) {
-        notificationRepository.save(notification);
+        notificationRepository.saveAndFlush(notification);
     }
 
     @Transactional(rollbackFor = Exception.class)
