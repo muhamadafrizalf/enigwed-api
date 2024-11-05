@@ -101,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
                     throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.MANDATORY_BONUS_PACKAGE_NOT_FOUND);
                 }
                 for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
-                    Optional<OrderDetailRequest> optionalOrderDetailRequest = orderDetailRequestList.stream().filter(orderDetail -> orderDetail.getBonusPackageId().equals(bonusDetail.getBonusPackage().getId())).findFirst();
+                    Optional<OrderDetailRequest> optionalOrderDetailRequest = orderDetailRequestList.stream().filter(orderDetailRequest -> orderDetailRequest.getBonusPackageId().equals(bonusDetail.getBonusPackage().getId())).findFirst();
                     if (optionalOrderDetailRequest.isPresent()) {
                         //// Get Order Detail Request and remove from Order Detail Request List
                         OrderDetailRequest orderDetailRequest = optionalOrderDetailRequest.get();
