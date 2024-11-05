@@ -18,7 +18,7 @@ public interface WeddingPackageService {
     ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword);
     ApiResponse<List<WeddingPackageResponse>> searchWeddingPackageFromWeddingOrganizerId(String weddingOrganizerId, String keyword);
 
-    ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo);
+    ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo, String keyword);
     ApiResponse<WeddingPackageResponse> createWeddingPackage(JwtClaim userInfo,WeddingPackageRequest weddingPackageRequest);
     ApiResponse<WeddingPackageResponse> updateWeddingPackage(JwtClaim userInfo, WeddingPackageRequest weddingPackageRequest);
     ApiResponse<?> deleteWeddingPackage(JwtClaim userInfo, String id);

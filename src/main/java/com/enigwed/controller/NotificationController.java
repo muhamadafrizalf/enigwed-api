@@ -5,10 +5,13 @@ import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,8 +21,13 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final JwtUtil jwtUtil;
 
+    @Operation(
+            summary = "To get all notification in channel SYSTEM by user (authorization ADMIN, WO)"
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_NOTIFICATION)
     public ResponseEntity<?> getOwnNotification(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -27,6 +35,10 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To update status read to true of notification by user (authorization WO)",
+            description = "Each user can only  read their own notification"
+    )
     @PutMapping(PathApi.PROTECTED_NOTIFICATION_ID)
     public ResponseEntity<?> readNotification(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -38,7 +50,10 @@ public class NotificationController {
     }
 
     // For Development Use
-    @GetMapping(name = "For development only, don't use.", path = PathApi.PROTECTED_NOTIFICATION + "/all")
+    @Operation(
+            summary = "Get all notification in database (For development only, don't use)"
+    )
+    @GetMapping(PathApi.PROTECTED_NOTIFICATION + "/all")
     public ResponseEntity<?> getAllNotifications() {
         return ResponseEntity.ok(notificationService.getAllNotifications());
     }

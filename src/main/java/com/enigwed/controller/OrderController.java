@@ -8,6 +8,8 @@ import com.enigwed.dto.request.OrderRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,10 @@ public class OrderController {
     private final JwtUtil jwtUtil;
 
     // Customer
+    @Operation(
+            summary = "To create order by customer (no authorization needed)",
+            description = "Create order, send notification to wedding organizer"
+    )
     @PostMapping(PathApi.PUBLIC_ORDER)
     public ResponseEntity<?> createOrder(
             @RequestBody OrderRequest orderRequest
@@ -34,6 +40,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "To get order by book_code (no authorization needed)")
     @GetMapping(PathApi.PUBLIC_ORDER)
     public ResponseEntity<?> getOrderByBookCode(
             @RequestParam String bookCode
@@ -42,6 +49,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To upload order payment image, update order by order_id (no authorization needed)",
+            description = "Add payment image, update status to CHECKING_PAYMENT, send notification to ADMIN"
+    )
     @PutMapping(value = PathApi.PUBLIC_ORDER_ID_PAY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateOrder(
             @PathVariable String id,
@@ -51,6 +62,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To cancel order, update order by order_id (no authorization needed)",
+            description = "Update status to CANCELED, send notification to wedding organizer"
+    )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_CANCEL)
     public ResponseEntity<?> cancelOrder(
             @PathVariable String id
@@ -59,6 +74,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To finish order, update order by order_id (no authorization needed)",
+            description = "Update status to FINISHED, post review here [SOON], send notification to wedding organizer"
+    )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_FINISH)
     public ResponseEntity<?> finishOrder(
             @PathVariable String id
@@ -71,6 +90,7 @@ public class OrderController {
     }
 
     // Admin
+    @Operation(summary = "To get order by order_id (authorization ADMIN and WO)")
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_ORDER_ID)
     public ResponseEntity<?> getOrderById(@PathVariable String id) {
@@ -78,37 +98,40 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(PathApi.PROTECTED_ORDER_ID_CONFIRM)
-    public ResponseEntity<?> confirmPayment(@PathVariable String id) {
-        ApiResponse<?> response = orderService.confirmPayment(id);
-        return ResponseEntity.ok(response);
-    }
-
+    @Operation(
+            summary = "To get all orders (authorization ADMIN and WO)",
+            description = "ADMIN can get all orders, WO can only get own orders, filter priority 'woId and Status', 'woId', 'packageId', 'status', 'transDate'"
+    )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_ORDER)
     public ResponseEntity<?> getAllOrders(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "First priority if admin")
             @RequestParam(required = false) String weddingOrganizerId,
-            @RequestParam(required = false) String weddingPackageId,
+            @Parameter(description = "Second priority if admin, can be both filled together with weddingOrganizerId, first priority if WO")
             @RequestParam(required = false) EStatus status,
-            @RequestParam(required = false) LocalDateTime start,
-            @RequestParam(required = false) LocalDateTime end
-            ) {
+            @Parameter(description = "Second priority, if the first two is null order will be filter by this")
+            @RequestParam(required = false) String weddingPackageId,
+            @Parameter(description = "Last priority filter, validation for from_date can only date before LoacalDateime now")
+            @RequestParam(required = false) LocalDateTime from,
+            @Parameter(description = "Validation for to_date must date after from_date, if null will have default value LoacalDateime now")
+            @RequestParam(required = false) LocalDateTime to
+    ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         boolean isWeddingOrganizerId = weddingOrganizerId != null && !weddingOrganizerId.isEmpty();
         boolean isWeddingPackageId = weddingPackageId != null && !weddingPackageId.isEmpty();
         boolean isStatus = status != null;
-        boolean isStart = start != null;
-        boolean isEnd = end != null;
+        boolean isStart = from != null;
+        if (to == null) to = LocalDateTime.now();
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            if (isWeddingPackageId) {
-                response = orderService.findOwnOrdersByWeddingPackageId(userInfo, weddingPackageId);
-            } else if (isStatus) {
+            if (isStatus) {
                 response = orderService.findOwnOrdersByStatus(userInfo, status);
-            } else if (isStart && isEnd) {
-                response = orderService.findOwnOrdersByTransactionDateBetween(userInfo, start, end);
+            } else if (isWeddingPackageId) {
+                response = orderService.findOwnOrdersByWeddingPackageId(userInfo, weddingPackageId);
+            } else if (isStart) {
+                response = orderService.findOwnOrdersByTransactionDateBetween(userInfo, from, to);
             } else {
                 response = orderService.findOwnOrders(userInfo);
             }
@@ -121,8 +144,8 @@ public class OrderController {
                 response = orderService.findOrdersByStatus(status);
             } else if (isWeddingPackageId) {
                 response = orderService.findOrdersByWeddingPackageId(weddingPackageId);
-            } else if (isStart && isEnd) {
-                response = orderService.findOrdersByTransactionDateBetween(start, end);
+            } else if (isStart) {
+                response = orderService.findOrdersByTransactionDateBetween(from, to);
             } else {
                 response = orderService.findAllOrders();
             }
@@ -130,9 +153,27 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "For ADMIN to confirm payment by order_id (authorization ADMIN)",
+            description = "Update status to PAID, send notification to wedding organizer"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(PathApi.PROTECTED_ORDER_ID_CONFIRM)
+    public ResponseEntity<?> confirmPayment(
+            @PathVariable String id
+    ) {
+        ApiResponse<?> response = orderService.confirmPayment(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "For wedding organizer to accept order by order_id (authorization ADMIN)",
+            description = "Update status to WAITING_FOR_PAYMENT, send notification to customer [SOON]"
+    )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_ACCEPT)
     public ResponseEntity<?> acceptOrder(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
     ) {
@@ -141,9 +182,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "For wedding organizer to reject order by order_id (authorization ADMIN)",
+            description = "Update status to REJECTED, send notification to customer [SOON]"
+    )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_REJECT)
     public ResponseEntity<?> rejectOrder(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
     ) {

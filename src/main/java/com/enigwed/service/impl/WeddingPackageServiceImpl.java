@@ -114,12 +114,19 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     }
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo) {
+    public ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo, String keyword) {
+        // ErrorResponse
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-        List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
+        List<WeddingPackage> weddingPackageList = new ArrayList<>();
+        if (keyword != null && !keyword.isEmpty()){
+            weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndKeyword(wo.getId(), keyword);
+        } else {
+            weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
+        }
         if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::from).toList();
         return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+
     }
 
     @Transactional(rollbackFor = Exception.class)

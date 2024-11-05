@@ -225,6 +225,7 @@ public class OrderServiceImpl implements OrderService {
                 imageService.deleteImage(order.getPaymentImage().getId());
             }
             order.setPaymentImage(paymentImage);
+            order.setStatus(EStatus.CHECKING_PAYMENT);
             order = orderRepository.save(order);
             sendNotificationAdmin(ENotificationType.CONFIRM_PAYMENT, order, Message.CONFIRM_PAYMENT(order.getCustomer().getName()));
             OrderResponse response = OrderResponse.from(order);
@@ -395,7 +396,7 @@ public class OrderServiceImpl implements OrderService {
     public ApiResponse<List<OrderResponse>> findOwnOrdersByTransactionDateBetween(JwtClaim userInfo, LocalDateTime start, LocalDateTime end) {
         try {
             if (start.isAfter(LocalDateTime.now())) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_START_DATE);
-            if(end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
+            if (end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
             // ErrorResponse
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
             List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), start, end);

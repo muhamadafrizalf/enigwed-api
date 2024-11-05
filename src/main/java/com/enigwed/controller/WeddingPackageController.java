@@ -8,6 +8,7 @@ import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.WeddingPackageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,17 +24,24 @@ public class WeddingPackageController {
     private final WeddingPackageService weddingPackageService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "To get wedding package by wedding_package_id (no authorization needed)")
+    @Operation(
+            summary = "To get wedding package by wedding_package_id (no authorization needed)"
+    )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
         ApiResponse<?> response = weddingPackageService.findWeddingPackageById(id);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get all wedding packages (no authorization needed)")
+    @Operation(
+            summary = "To get all wedding packages (no authorization needed)",
+            description = "wedding_organizer_id and keyword can both be empty and filled"
+    )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> getAllWeddingPackages(
+            @Parameter(description = "To filter by wedding_organizer_id", required = false)
             @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "Keyword can filter result by name, description, city name, and wedding organizer name", required = false)
             @RequestParam(required = false) String keyword
     ) {
         ApiResponse<?> response;
@@ -51,24 +59,31 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @Operation(
+            summary = "To get all wedding packages own by wedding organizer (authorization WO)",
+            description = "keyword can both be empty and filled to filter"
+    )
+    @PreAuthorize("hasAnyRole('WO')")
     @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> getOwnWeddingPackages(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Keyword can filter result by name, description, and city name", required = false)
+            @RequestParam(required = false) String keyword
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = weddingPackageService.findAllWeddingPackages();
-        } else {
-            response = weddingPackageService.getOwnWeddingPackages(userInfo);
-        }
+        ApiResponse<?> response = weddingPackageService.getOwnWeddingPackages(userInfo, keyword);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To create wedding package (authorization WO)",
+            description = "Only wedding organizer can create wedding package"
+    )
     @PreAuthorize("hasRole('WO')")
     @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> createWeddingPackage(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
@@ -77,9 +92,14 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To update wedding package (authorization WO)",
+            description = "Only wedding organizer can update wedding package and wedding organizer can only update their own wedding package"
+    )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> updateWeddingPackage(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
@@ -88,9 +108,14 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To delete wedding package by wedding_package_id (authorization ADMIN and WO)",
+            description = "Admin can delete all wedding packages and wedding organizer can only delete their own wedding package"
+    )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> deleteWeddingPackage(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
     ) {
@@ -99,9 +124,14 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To add wedding package image (authorization WO)",
+            description = "Only wedding organizer can add wedding package image and wedding organizer can only update their own wedding package"
+    )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addWeddingPackageImage(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,
             @RequestPart(name = "image") MultipartFile image
@@ -111,9 +141,14 @@ public class WeddingPackageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "To delete wedding package image by wedding_package_id and image_id (authorization ADMIN and WO)",
+            description = "Admin can delete all wedding package images and wedding organizer can only delete their own wedding package images"
+    )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)
     public ResponseEntity<?> deleteWeddingPackageImage(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id,
             @PathVariable(value = "image-id") String imageId
