@@ -60,4 +60,7 @@ public class PathApi {
     public static final String PROTECTED_ORDER_ID_CONFIRM = PROTECTED_ORDER_ID + "/confirm";
     public static final String PROTECTED_ORDER_ID_ACCEPT = PROTECTED_ORDER_ID + "/accept";
     public static final String PROTECTED_ORDER_ID_REJECT = PROTECTED_ORDER_ID + "/reject";
+    // Notification
+    public static final String PROTECTED_NOTIFICATION = PROTECTED + "/notifications";
+    public static final String PROTECTED_NOTIFICATION_ID = PROTECTED_NOTIFICATION + "/{id}";
 }

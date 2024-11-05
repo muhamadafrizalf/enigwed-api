@@ -39,4 +39,5 @@ public class ErrorMessage {
     public static final String MANDATORY_BONUS_PACKAGE_NOT_FOUND = "Mandatory bonus package not found";
     public static final String BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE = "Bonus package quantity not adjustable";
     public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
 }

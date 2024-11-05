@@ -32,7 +32,7 @@ public class Message {
     public static final String IMAGE_FOUND = "Image found";
     // Wedding Organization
     public static final String WEDDING_ORGANIZER_FOUND = "Wedding organizer found";
-    public static final String WEDDING_ORGANIZERS_FOUND = "Wedding organizer found";
+    public static final String WEDDING_ORGANIZERS_FOUND = "Wedding organizers found";
     public static final String WEDDING_ORGANIZER_UPDATED = "Wedding organizer updated";
     public static final String WEDDING_ORGANIZER_DELETED = "Wedding organizer deleted";
     public static final String NO_WEDDING_ORGANIZER_FOUND = "No wedding organizer found";
@@ -58,4 +58,9 @@ public class Message {
     public static final String ORDER_FOUND = "Order found";
     public static final String ORDER_UPDATED = "Order updated";
     public static final String NO_ORDER_FOUND = "No order found";
+    // Notification
+    public static final String NO_NOTIFICATION_FOUND = "No notification found";
+    public static final String NOTIFICATION_FOUNDS = "Notification founds";
+    public static final String READ_FAILED = "Read failed";
+    public static final String NOTIFICATION_READ = "Notification read";
 }

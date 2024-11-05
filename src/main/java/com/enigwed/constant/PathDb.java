@@ -11,5 +11,6 @@ public class PathDb {
     public static final String ORDER = "tbl_order";
     public static final String ORDER_DETAIL = "tbl_order_detail";
     public static final String CUSTOMER = "tbl_customer";
+    public static final String NOTIFICATION = "tbl_notification";
 }
 
