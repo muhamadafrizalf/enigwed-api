@@ -2,10 +2,7 @@ package com.enigwed.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import static com.enigwed.constant.Constraint.BONUS_PACKAGE_ID_BLANK;
 import static com.enigwed.constant.Constraint.QUANTITY_POSITIVE;
@@ -13,6 +10,7 @@ import static com.enigwed.constant.Constraint.QUANTITY_POSITIVE;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class OrderDetailRequest {
 

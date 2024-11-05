@@ -36,4 +36,7 @@ public class ErrorMessage {
     public static final String ORDER_NOT_FOUND = "Order not found";
     public static final String NO_PAYMENT_IMAGE_FOUND = "No payment image found";
 
+    public static final String MANDATORY_BONUS_PACKAGE_NOT_FOUND = "Mandatory bonus package not found";
+    public static final String BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE = "Bonus package quantity not adjustable";
+    public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
 }

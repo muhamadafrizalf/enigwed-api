@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -91,19 +92,59 @@ public class OrderServiceImpl implements OrderService {
             order.setWeddingPackageBasePrice(weddingPackage.getBasePrice());
             order.setWeddingPackage(weddingPackage);
             order.setWeddingOrganizer(weddingPackage.getWeddingOrganizer());
-            List<OrderDetail> orderDetails = new ArrayList<>();
-            if (orderRequest.getOrderDetails() != null && !orderRequest.getOrderDetails().isEmpty()) {
-                for (OrderDetailRequest orderDetailRequest : orderRequest.getOrderDetails()) {
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setOrder(order);
-                    BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(orderDetailRequest.getBonusPackageId());
-                    orderDetail.setBonusPackage(bonusPackage);
-                    orderDetail.setPrice(bonusPackage.getPrice());
-                    orderDetail.setQuantity(orderDetailRequest.getQuantity());
-                    orderDetails.add(orderDetail);
+            List<OrderDetail> orderDetailList = new ArrayList<>();
+            List<OrderDetailRequest> orderDetailRequestList = new ArrayList<>();
+            //// Mandatory Bonus Package
+            if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
+                orderDetailRequestList = orderRequest.getOrderDetails();
+                if (orderDetailRequestList == null || orderDetailRequestList.isEmpty()) {
+                    throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.MANDATORY_BONUS_PACKAGE_NOT_FOUND);
+                }
+                for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
+                    Optional<OrderDetailRequest> optionalOrderDetailRequest = orderDetailRequestList.stream().filter(orderDetail -> orderDetail.getBonusPackageId().equals(bonusDetail.getBonusPackage().getId())).findFirst();
+                    if (optionalOrderDetailRequest.isPresent()) {
+                        //// Get Order Detail Request and remove from Order Detail Request List
+                        OrderDetailRequest orderDetailRequest = optionalOrderDetailRequest.get();
+                        orderDetailRequestList.remove(orderDetailRequest);
+                        // ErrorResponse
+                        BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(orderDetailRequest.getBonusPackageId());
+                        //// Check if the quantity is valid
+                        if (!bonusDetail.isAdjustable() && bonusDetail.getQuantity() != orderDetailRequest.getQuantity()) {
+                            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE);
+                        } else if (orderDetailRequest.getQuantity() < bonusPackage.getMinQuantity() || orderDetailRequest.getQuantity() > bonusPackage.getMaxQuantity()) {
+                            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_BONUS_PACKAGE_QUANTITY);
+                        } else {
+                            OrderDetail orderDetail = new OrderDetail();
+                            orderDetail.setOrder(order);
+                            orderDetail.setBonusPackage(bonusPackage);
+                            orderDetail.setPrice(bonusPackage.getPrice());
+                            orderDetail.setQuantity(orderDetailRequest.getQuantity());
+                            orderDetailList.add(orderDetail);
+                        }
+                    } else {
+                        throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.MANDATORY_BONUS_PACKAGE_NOT_FOUND);
+                    }
                 }
             }
-            order.setOrderDetails(orderDetails);
+            //// Subsidiary Bonus Package
+            if (!orderDetailRequestList.isEmpty()) {
+                for (OrderDetailRequest orderDetailRequest : orderRequest.getOrderDetails()) {
+                    // ErrorResponse
+                    BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(orderDetailRequest.getBonusPackageId());
+                    //// Check if the quantity is valid
+                    if (orderDetailRequest.getQuantity() < bonusPackage.getMinQuantity() || orderDetailRequest.getQuantity() > bonusPackage.getMaxQuantity()) {
+                        throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_BONUS_PACKAGE_QUANTITY);
+                    } else {
+                        OrderDetail orderDetail = new OrderDetail();
+                        orderDetail.setOrder(order);
+                        orderDetail.setBonusPackage(bonusPackage);
+                        orderDetail.setPrice(bonusPackage.getPrice());
+                        orderDetail.setQuantity(orderDetailRequest.getQuantity());
+                        orderDetailList.add(orderDetail);
+                    }
+                }
+            }
+            order.setOrderDetails(orderDetailList);
             order = saveOrder(order);
             OrderResponse response = OrderResponse.from(order);
             return ApiResponse.success(response, Message.ORDER_CREATED);
