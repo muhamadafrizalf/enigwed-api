@@ -22,7 +22,7 @@ public class NotificationController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "To get all notification in channel SYSTEM by user (authorization ADMIN, WO)"
+            summary = "To get all notification in channel SYSTEM by user [ADMIN, WO] (WEB)"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_NOTIFICATION)
@@ -36,9 +36,10 @@ public class NotificationController {
     }
 
     @Operation(
-            summary = "To update status read to true of notification by user (authorization WO)",
+            summary = "To update status read to true of notification by user [ADMIN, WO] (WEB)",
             description = "Each user can only  read their own notification"
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @PutMapping(PathApi.PROTECTED_NOTIFICATION_ID)
     public ResponseEntity<?> readNotification(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -53,7 +54,7 @@ public class NotificationController {
     @Operation(
             summary = "Get all notification in database (For development only, don't use)"
     )
-    @GetMapping(PathApi.PROTECTED_NOTIFICATION + "/all")
+    @GetMapping(PathApi.PUBLIC_NOTIFICATION + "/dev")
     public ResponseEntity<?> getAllNotifications() {
         return ResponseEntity.ok(notificationService.getAllNotifications());
     }

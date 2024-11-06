@@ -91,7 +91,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To get order by order_id (authorization ADMIN and WO)",
+            summary = "To get order by order_id [ADMIN, WO] (WEB)",
             description = "Admin can get all order, WO can only get if it's their own order"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -113,8 +113,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To get all orders (authorization ADMIN and WO)",
-            description = "ADMIN can get all orders, WO can only get own orders, filter priority 'woId and Status', 'woId', 'packageId', 'status', 'transDate'"
+            summary = "To get all orders [ADMIN, WO] (WEB)",
+            description = "ADMIN can get all orders, WO can only get own orders"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_ORDER)
@@ -146,7 +146,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For WO to confirm payment by order_id (authorization WO)",
+            summary = "For WO to confirm payment by order_id [WO] (MOBILE)",
             description = "Update status to PAID, send notification to wedding organizer"
     )
     @PreAuthorize("hasRole('WO')")
@@ -162,7 +162,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For wedding organizer to accept order by order_id (authorization ADMIN)",
+            summary = "For wedding organizer to accept order by order_id [WO] (WEB)",
             description = "Update status to WAITING_FOR_PAYMENT, send notification to customer [SOON]"
     )
     @PreAuthorize("hasRole('WO')")
@@ -178,7 +178,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For wedding organizer to reject order by order_id (authorization ADMIN)",
+            summary = "For wedding organizer to reject order by order_id [WO] (WEB)",
             description = "Update status to REJECTED, send notification to customer [SOON]"
     )
     @PreAuthorize("hasRole('WO')")
@@ -194,7 +194,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For wedding organizer to finish order by order_id (authorization ADMIN)",
+            summary = "For wedding organizer to finish order by order_id [WO] (WEB)",
             description = "Update status to FINISHED, send notification to customer [SOON]"
     )
     @PreAuthorize("hasRole('WO')")
@@ -208,4 +208,5 @@ public class OrderController {
         ApiResponse<?> response = orderService.finishOrder(userInfo, id);
         return ResponseEntity.ok(response);
     }
+
 }

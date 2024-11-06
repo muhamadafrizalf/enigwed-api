@@ -54,7 +54,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get own product by product_id (authorization WO)")
+    @Operation(summary = "To get own product by product_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_PRODUCT_ID)
     public ResponseEntity<?> getOwnProductById(
@@ -68,7 +68,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To get all products own by wedding organizer (authorization WO)",
+            summary = "To get all products own by wedding organizer [WO] (WEB)",
             description = "WO can only receive their own products"
     )
     @PreAuthorize("hasRole('WO')")
@@ -82,7 +82,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To create new product (authorization WO)")
+    @Operation(summary = "To create new product [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @PostMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> createBonusPackage(
@@ -96,7 +96,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To update existing product (authorization WO)",
+            summary = "To update existing product [WO] (WEB)",
             description = "WO can only update their own product"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -112,7 +112,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id (authorization WO)",
+            summary = "To delete product by product_id [WO] (WEB)",
             description = "WO can only update their own product"
     )
     @PreAuthorize("hasRole('WO')")
@@ -128,7 +128,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id (authorization WO)",
+            summary = "To delete product by product_id [WO] (WEB)",
             description = "WO can only add image to their own product"
     )
     @PreAuthorize("hasRole('WO')")
@@ -145,7 +145,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id (authorization WO)",
+            summary = "To delete product by product_id [WO] (WEB)",
             description = "WO can only delete image from their own product"
     )
     @PreAuthorize("hasRole('WO')")
@@ -163,8 +163,7 @@ public class ProductController {
 
     // FOR DEVELOPMENT
     @Operation(
-            summary = "FOR DEVELOPMENT DON'T USE",
-            description = "GET ALL PRODUCTS"
+            summary = "Get all products in database (For development only, don't use)"
     )
     @GetMapping(PathApi.PUBLIC_PRODUCT + "/dev")
     public ResponseEntity<?> dev() {

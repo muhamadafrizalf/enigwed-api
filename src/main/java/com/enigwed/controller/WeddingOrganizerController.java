@@ -59,7 +59,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To get wedding organizers (WEB) (authorization WO, ADMIN)",
+            summary = "To get wedding organizers [ADMIN, WO] (WEB)",
             description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -110,7 +110,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To delete wedding organizer by wedding_organizer_id (authorization ADMIN and WO)",
+            summary = "To delete wedding organizer by wedding_organizer_id [ADMIN, WO] (WEB)",
             description = "Admin can delete all wedding organizer and each wedding organizer can only delete their own account"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -126,7 +126,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To update wedding organizer image by wedding_organizer_id (authorization WO)",
+            summary = "To update wedding organizer image by wedding_organizer_id [WO] (WEB)",
             description = "Only WO can update wedding organizer image and each wedding organizer can only access their own account"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -143,7 +143,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To delete wedding organizer image by wedding_organizer_id (authorization WO)",
+            summary = "To delete wedding organizer image by wedding_organizer_id [WO] (WEB)",
             description = "Only WO can delete wedding organizer image and each wedding organizer can only access their own account"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -159,7 +159,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To activate wedding organizer account by wedding_organizer_id (authorization ADMIN)",
+            summary = "To activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
             description = "Only ADMIN can activate wedding organizer account"
     )
     @PreAuthorize("hasRole('ADMIN')")

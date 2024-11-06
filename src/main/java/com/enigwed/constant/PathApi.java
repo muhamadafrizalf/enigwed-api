@@ -61,4 +61,5 @@ public class PathApi {
     public static final String PUBLIC_IMAGE_ID = PUBLIC_IMAGE + "/{id}";
     public static final String PROTECTED_IMAGE = PROTECTED + "/images";
     public static final String PROTECTED_IMAGE_ID = PROTECTED_IMAGE + "/{id}";
+    public static final String PUBLIC_NOTIFICATION = PUBLIC + "/notifications";
 }

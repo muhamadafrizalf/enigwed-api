@@ -65,7 +65,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To get wedding package by wedding_package_id (WEB) (authorization ADMIN, WO)",
+            summary = "To get wedding package by wedding_package_id [ADMIN, WO] (WEB)",
             description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -86,7 +86,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To get all wedding packages (WEB) (authorization ADMIN, WO)",
+            summary = "To get all wedding packages [ADMIN, WO] (WEB)",
             description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -128,7 +128,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To create wedding package (WEB) (authorization WO)",
+            summary = "To create wedding package [WO] (WEB)",
             description = "Only wedding organizer can create wedding package"
     )
     @PreAuthorize("hasRole('WO')")
@@ -144,7 +144,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To update wedding package (authorization WO)",
+            summary = "To update wedding package [WO] (WEB)",
             description = "Only wedding organizer can update wedding package and wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
@@ -160,7 +160,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To delete wedding package by wedding_package_id (authorization ADMIN and WO)",
+            summary = "To delete wedding package by wedding_package_id [WO] (WEB)",
             description = "Only wedding organizer can delete wedding package and wedding organizer can only delete their own wedding package"
     )
     @PreAuthorize("hasAnyRole('WO')")
@@ -176,7 +176,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To add wedding package image (authorization WO)",
+            summary = "To add wedding package image [WO] (WEB)",
             description = "Only wedding organizer can add wedding package image and wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
@@ -193,7 +193,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To delete wedding package image by wedding_package_id and image_id (WEB) (authorization WO)",
+            summary = "To delete wedding package image by wedding_package_id and image_id [WO] (WEB)",
             description = "Only WO can delete wedding package images and wedding organizer can only delete their own wedding package images"
     )
     @PreAuthorize("hasAnyRole('WO')")
