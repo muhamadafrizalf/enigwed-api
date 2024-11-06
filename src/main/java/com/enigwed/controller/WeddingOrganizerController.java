@@ -58,11 +58,20 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(PathApi.PROTECTED_WO_ID)
+    public ResponseEntity<?> getWeddingOrganizerById(
+            @PathVariable String id
+    ) {
+        ApiResponse<?> response = weddingOrganizerService.findWeddingOrganizerById(id);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(
             summary = "To get wedding organizers [ADMIN, WO] (WEB)",
             description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
     )
-    @PreAuthorize("hasAnyRole('WO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_WO)
     public ResponseEntity<?> getWeddingOrganizerProfile(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)

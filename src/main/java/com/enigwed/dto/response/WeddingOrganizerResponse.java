@@ -53,7 +53,7 @@ public class WeddingOrganizerResponse {
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setDeletedAt(weddingOrganizer.getDeletedAt());
-        if (weddingOrganizer.getDeletedAt() == null) {
+        if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {
             response.setStatus(EUserStatus.ACTIVE);
@@ -88,4 +88,20 @@ public class WeddingOrganizerResponse {
         return response;
     }
 
+    public static WeddingOrganizerResponse simpleAdmin(WeddingOrganizer weddingOrganizer) {
+        WeddingOrganizerResponse response = new WeddingOrganizerResponse();
+        response.setId(weddingOrganizer.getId());
+        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
+        response.setName(weddingOrganizer.getName());
+        response.setRegencyName(weddingOrganizer.getRegency().getName());
+        if (weddingOrganizer.getDeletedAt() != null) {
+            response.setStatus(EUserStatus.DELETED);
+        } else if (weddingOrganizer.getUserCredential().isActive()) {
+            response.setStatus(EUserStatus.ACTIVE);
+        } else {
+            response.setStatus(EUserStatus.INACTIVE);
+        }
+        /* RATING[SOON] */
+        return response;
+    }
 }

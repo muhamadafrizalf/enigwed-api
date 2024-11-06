@@ -85,6 +85,7 @@ public class WeddingPackageResponse {
         }
         response.setName(weddingPackage.getName());
         response.setPrice(weddingPackage.getPrice());
+        response.setRegencyName(weddingPackage.getRegency().getName());
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
         /* RATING[SOON] */
         return response;

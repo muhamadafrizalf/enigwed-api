@@ -32,6 +32,7 @@ public interface WeddingOrganizerService {
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);
 
     // ADMIN
+    ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
     ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id);
     ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter);
     ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter);

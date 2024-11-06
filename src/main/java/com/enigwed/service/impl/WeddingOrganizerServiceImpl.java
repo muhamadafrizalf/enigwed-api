@@ -112,7 +112,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId) {
         if (userCredentialId == null || userCredentialId.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return weddingOrganizerRepository.findByIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userCredentialId)
+        return weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userCredentialId)
                 .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
     }
 
@@ -304,6 +304,8 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         }
     }
 
+    // ADMIN
+
     @Override
     public ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id) {
         try {
@@ -336,10 +338,18 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     }
 
     @Override
+    public ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id) {
+        WeddingOrganizer wo = weddingOrganizerRepository.findById(id)
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
+        return ApiResponse.success(response, Message.WEDDING_ORGANIZER_FOUND);
+    }
+
+    @Override
     public ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id) {
         /* LOAD WEDDING ORGANIZER */
         // ErrorResponse
-        WeddingOrganizer wo = findByIdOrThrow(id);
+        WeddingOrganizer wo = weddingOrganizerRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.UPDATE_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
 
         /* ACTIVATE USER */
         UserCredential user = userCredentialService.activateUser(wo.getUserCredential());
@@ -362,7 +372,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         woList = filterResult(filter, woList);
 
         /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::all).toList();
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
         return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
@@ -376,7 +386,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         woList = filterResult(filter, woList);
 
         /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::all).toList();
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
         return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 }
