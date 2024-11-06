@@ -36,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserCredentialService userCredentialService;
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
-    private final CityService cityService;
+    private final AddressService addressService;
     private final NotificationService notificationService;
     private final JwtUtil jwtUtil;
     private final ValidationUtil validationUtil;
@@ -92,11 +92,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<?> register(RegisterRequest registerRequest) {
         try {
+            /* VALIDATE INPUT */
             // ValidationException
             validationUtil.validateAndThrow(registerRequest);
             // ErrorResponse
             if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
                 throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, ErrorMessage.CONFIRM_PASSWORD_MISMATCH);
+
+            /* CREATE AND SAVE USER CREDENTIAL */
             UserCredential userCredential = UserCredential.builder()
                     .email(registerRequest.getEmail())
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
@@ -104,10 +107,19 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             // DataIntegrityViolationException
             userCredential = userCredentialService.createUser(userCredential);
+
+            /* CREATE OR LOAD ADDRESS */
+            Province province = addressService.saveOrLoadProvince(registerRequest.getProvince());
             // ErrorResponse
-            City city = cityService.loadCityById(registerRequest.getCityId());
+            Regency regency = addressService.saveOrLoadRegency(registerRequest.getRegency());
+            // ErrorResponse
+            District district = addressService.saveOrLoadDistrict(registerRequest.getDistrict());
+
+            /* INITIALIZE AVATAR */
             // ErrorResponse
             Image avatar = imageService.createImage(null);
+
+            /* CREATE WEDDING ORGANIZER */
             WeddingOrganizer wo = WeddingOrganizer.builder()
                     .name(registerRequest.getName())
                     .description(registerRequest.getDescription())
@@ -115,12 +127,17 @@ public class AuthServiceImpl implements AuthService {
                     .npwp(registerRequest.getNpwp())
                     .nib(registerRequest.getNib())
                     .phone(registerRequest.getPhone())
-                    .city(city)
+                    .province(province)
+                    .regency(regency)
+                    .district(district)
                     .avatar(avatar)
                     .userCredential(userCredential)
                     .build();
+            /* VALIDATE DATA INTEGRITY AND SAVE WEDDING ORGANIZER */
             // DataIntegrityViolationException
             weddingOrganizerService.createWeddingOrganizer(wo);
+
+            /* CREATE NOTIFICATION FOR ADMIN */
             Notification notification = Notification.builder()
                     .channel(ENotificationChannel.SYSTEM)
                     .type(ENotificationType.ACCOUNT_REGISTRATION)
@@ -133,10 +150,12 @@ public class AuthServiceImpl implements AuthService {
             notificationService.createNotification(notification);
             /*
 
-            Create notification for email
+            Create notification for email [SOON]
 
             */
+
             return ApiResponse.success(Message.REGISTER_SUCCESS);
+
         } catch (ValidationException e) {
             log.error("Validation error during register: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REGISTER_FAILED, e.getErrors().get(0));
@@ -152,22 +171,33 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<RefreshToken> refresh(RefreshToken refreshToken) {
         try {
+            /* VALIDATE INPUT */
             // ValidationException
             validationUtil.validateAndThrow(refreshToken);
-            if (jwtUtil.verifyJwtToken(refreshToken.getToken())) {
-                JwtClaim userInfo = jwtUtil.getUserInfoByToken(refreshToken.getToken());
-                // ErrorResponse
-                if (userInfo == null) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
-                // UsernameNotFoundException
-                UserCredential user = userCredentialService.loadUserById(userInfo.getUserId());
-                // JWTCreationException
-                String token = jwtUtil.generateToken(user);
-                RefreshToken newToken = RefreshToken.builder().token(token).build();
-                return ApiResponse.success(newToken, Message.REFRESH_TOKEN_SUCCESS);
-            } else {
-                // ErrorResponse
-                throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
-            }
+
+            /* VALIDATE TOKEN */
+            // ErrorResponse
+            if (!jwtUtil.verifyJwtToken(refreshToken.getToken())) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
+
+            /* GET USER INFO */
+            JwtClaim userInfo = jwtUtil.getUserInfoByToken(refreshToken.getToken());
+            // ErrorResponse
+            if (userInfo == null) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, Message.REFRESH_TOKEN_FAILED, ErrorMessage.INVALID_TOKEN);
+
+            /* LOAD USER */
+            // UsernameNotFoundException
+            UserCredential user = userCredentialService.loadUserById(userInfo.getUserId());
+
+            /* CREATE NEW TOKEN */
+            // JWTCreationException
+            String token = jwtUtil.generateToken(user);
+            
+            RefreshToken newToken = RefreshToken.builder()
+                    .token(token)
+                    .build();
+
+            return ApiResponse.success(newToken, Message.REFRESH_TOKEN_SUCCESS);
+
         } catch (ValidationException e) {
             log.error("Validation error during refresh token: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.REFRESH_TOKEN_FAILED, e.getErrors().get(0));

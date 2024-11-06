@@ -39,13 +39,13 @@ public class Message {
     public static final String WEDDING_ORGANIZER_AVATAR_UPDATED = "Wedding organizer avatar updated";
     public static final String WEDDING_ORGANIZER_AVATAR_DELETED = "Wedding organizer avatar deleted";
     public static final String WEDDING_ORGANIZERS_ACTIVATED = "Wedding organizer activated";
-    // Bonus Package
-    public static final String BONUS_PACKAGE_CREATED = "Bonus package created";
-    public static final String BONUS_PACKAGE_FOUND = "Bonus package found";
-    public static final String NO_BONUS_PACKAGE_FOUND = "No bonus package found";
-    public static final String BONUS_PACKAGES_FOUND = "Bonus packages found";
-    public static final String BONUS_PACKAGE_UPDATED = "Bonus package updated";
-    public static final String BONUS_PACKAGE_DELETED = "Bonus package deleted";
+    // Product
+    public static final String PRODUCT_CREATED = "Product created";
+    public static final String PRODUCT_FOUND = "Product found";
+    public static final String NO_PRODUCT_FOUND = "No product found";
+    public static final String PRODUCTS_FOUND = "Products found";
+    public static final String PRODUCT_UPDATED = "Product updated";
+    public static final String PRODUCT_DELETED = "Product deleted";
     // Wedding Package
     public static final String WEDDING_PACKAGE_CREATED = "Wedding package created";
     public static final String WEDDING_PACKAGE_FOUND = "Wedding package found";
@@ -63,6 +63,9 @@ public class Message {
     public static final String NOTIFICATION_FOUNDS = "Notification founds";
     public static final String READ_FAILED = "Read failed";
     public static final String NOTIFICATION_READ = "Notification read";
+    // Address
+    public static final String DATA_NOT_FOUND = "Data not found";
+
     public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
         return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";
     }

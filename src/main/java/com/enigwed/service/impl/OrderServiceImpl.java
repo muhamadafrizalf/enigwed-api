@@ -2,7 +2,8 @@ package com.enigwed.service.impl;
 
 import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
-import com.enigwed.dto.request.OrderDetailRequest;
+import com.enigwed.dto.request.AdditionalProduct;
+import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.OrderResponse;
@@ -24,7 +25,6 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final WeddingPackageService weddingPackageService;
-    private final BonusPackageService bonusPackageService;
+    private final ProductService productService;
     private final ImageService imageService;
     private final WeddingOrganizerService weddingOrganizerService;
     private final NotificationService notificationService;
@@ -72,6 +72,25 @@ public class OrderServiceImpl implements OrderService {
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
     }
 
+    private List<Order> filterResult(FilterRequest filter, List<Order> orderList) {
+        if (filter.getWeddingOrganizerId() != null) {
+            orderList = orderList.stream().filter(item -> item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())).toList();
+        }
+        if (filter.getOrderStatus() != null) {
+            orderList = orderList.stream().filter(item -> item.getStatus().equals(filter.getOrderStatus())).toList();
+        }
+        if (filter.getStartDate() != null) {
+            orderList = orderList.stream().filter(item -> item.getTransactionDate().isAfter(filter.getStartDate())).toList();
+        }
+        if (filter.getEndDate() != null) {
+            orderList = orderList.stream().filter(item -> item.getTransactionDate().isBefore(filter.getEndDate())).toList();
+        }
+        if (filter.getWeddingPackageId() != null) {
+            orderList = orderList.stream().filter(item -> item.getWeddingPackage().getId().equals(filter.getWeddingPackageId())).toList();
+        }
+        return orderList;
+    }
+
     private void sendNotificationWeddingOrganizer(ENotificationType type, Order order, String message) {
         Notification notification = Notification.builder()
                 .channel(ENotificationChannel.SYSTEM)
@@ -90,32 +109,17 @@ public class OrderServiceImpl implements OrderService {
         */
     }
 
-    private void sendNotificationAdmin(ENotificationType type, Order order, String message) {
-        Notification notification = Notification.builder()
-                .channel(ENotificationChannel.SYSTEM)
-                .type(type)
-                .receiver(EReceiver.ADMIN)
-                .receiverId(userCredentialService.loadAdminId())
-                .dataType(EDataType.ORDER)
-                .dataId(order.getId())
-                .message(message)
-                .build();
-        notificationService.createNotification(notification);
-        /*
-
-            Create notification for channel email
-
-        */
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<OrderResponse> createOrder(OrderRequest orderRequest) {
         try {
             // ValidationException
             validationUtil.validateAndThrow(orderRequest);
+
             Order order = new Order();
+
             order.setWeddingDate(orderRequest.getWeddingDate());
+
             Customer customer = Customer.builder()
                     .name(orderRequest.getCustomer().getName())
                     .email(orderRequest.getCustomer().getEmail())
@@ -123,68 +127,56 @@ public class OrderServiceImpl implements OrderService {
                     .address(orderRequest.getCustomer().getAddress())
                     .build();
             order.setCustomer(customer);
+
             // ErrorResponse
             WeddingPackage weddingPackage = weddingPackageService.loadWeddingPackageById(orderRequest.getWeddingPackageId());
-            order.setWeddingPackageBasePrice(weddingPackage.getBasePrice());
+            order.setBasePrice(weddingPackage.getPrice());
+            order.setTotalPrice(weddingPackage.getPrice());
             order.setWeddingPackage(weddingPackage);
             order.setWeddingOrganizer(weddingPackage.getWeddingOrganizer());
+
             List<OrderDetail> orderDetailList = new ArrayList<>();
-            List<OrderDetailRequest> orderDetailRequestList = new ArrayList<>();
-            //// Mandatory Bonus Package
+            //// Bonus Products
             if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
-                orderDetailRequestList = orderRequest.getOrderDetails();
-                if (orderDetailRequestList == null || orderDetailRequestList.isEmpty()) {
-                    throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.MANDATORY_BONUS_PACKAGE_NOT_FOUND);
-                }
                 for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
-                    Optional<OrderDetailRequest> optionalOrderDetailRequest = orderDetailRequestList.stream().filter(orderDetailRequest -> orderDetailRequest.getBonusPackageId().equals(bonusDetail.getBonusPackage().getId())).findFirst();
-                    if (optionalOrderDetailRequest.isPresent()) {
-                        //// Get Order Detail Request and remove from Order Detail Request List
-                        OrderDetailRequest orderDetailRequest = optionalOrderDetailRequest.get();
-                        orderDetailRequestList.remove(orderDetailRequest);
-                        // ErrorResponse
-                        BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(orderDetailRequest.getBonusPackageId());
-                        //// Check if the quantity is valid
-                        if (!bonusDetail.isAdjustable() && bonusDetail.getQuantity() != orderDetailRequest.getQuantity()) {
-                            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE);
-                        } else if (orderDetailRequest.getQuantity() < bonusPackage.getMinQuantity() || orderDetailRequest.getQuantity() > bonusPackage.getMaxQuantity()) {
-                            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_BONUS_PACKAGE_QUANTITY);
-                        } else {
-                            OrderDetail orderDetail = new OrderDetail();
-                            orderDetail.setOrder(order);
-                            orderDetail.setBonusPackage(bonusPackage);
-                            orderDetail.setPrice(bonusPackage.getPrice());
-                            orderDetail.setQuantity(orderDetailRequest.getQuantity());
-                            orderDetailList.add(orderDetail);
-                        }
-                    } else {
-                        throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.MANDATORY_BONUS_PACKAGE_NOT_FOUND);
-                    }
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setProduct(bonusDetail.getProduct());
+                    orderDetail.setPrice(bonusDetail.getProduct().getPrice());
+                    orderDetail.setQuantity(bonusDetail.getQuantity());
+                    orderDetail.setBonus(true);
+                    orderDetailList.add(orderDetail);
                 }
             }
-            //// Subsidiary Bonus Package
-            if (!orderDetailRequestList.isEmpty()) {
-                for (OrderDetailRequest orderDetailRequest : orderRequest.getOrderDetails()) {
+            //// Additional Products
+            List<AdditionalProduct> additionalProductList = orderRequest.getAdditionalProducts();
+            if (additionalProductList != null && !additionalProductList.isEmpty()) {
+                double additionalPrice = 0;
+                for (AdditionalProduct additionalProduct : orderRequest.getAdditionalProducts()) {
                     // ErrorResponse
-                    BonusPackage bonusPackage = bonusPackageService.loadBonusPackageById(orderDetailRequest.getBonusPackageId());
-                    //// Check if the quantity is valid
-                    if (orderDetailRequest.getQuantity() < bonusPackage.getMinQuantity() || orderDetailRequest.getQuantity() > bonusPackage.getMaxQuantity()) {
-                        throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, ErrorMessage.INVALID_BONUS_PACKAGE_QUANTITY);
-                    } else {
-                        OrderDetail orderDetail = new OrderDetail();
-                        orderDetail.setOrder(order);
-                        orderDetail.setBonusPackage(bonusPackage);
-                        orderDetail.setPrice(bonusPackage.getPrice());
-                        orderDetail.setQuantity(orderDetailRequest.getQuantity());
-                        orderDetailList.add(orderDetail);
-                    }
+                    Product product = productService.loadProductById(additionalProduct.getBonusPackageId());
+
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setProduct(product);
+                    orderDetail.setPrice(product.getPrice());
+                    orderDetail.setQuantity(additionalProduct.getQuantity());
+                    orderDetail.setBonus(false);
+                    orderDetailList.add(orderDetail);
+
+                    additionalPrice += product.getPrice() * additionalProduct.getQuantity();
                 }
+                order.setTotalPrice(order.getTotalPrice() + additionalPrice);
             }
             order.setOrderDetails(orderDetailList);
+
             order = saveOrder(order);
+
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_RECEIVED, order, Message.NEW_ORDER_RECEIVED(customer.getName()));
-            OrderResponse response = OrderResponse.from(order);
+
+            OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_CREATED);
+
         } catch (ValidationException e) {
             log.error("Validation error during creating order: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
@@ -202,8 +194,10 @@ public class OrderServiceImpl implements OrderService {
             if (bookCode == null || bookCode.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.BOOKING_CODE_IS_REQUIRED);
             // ErrorResponse
             Order order = orderRepository.findByBookCode(bookCode).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.ORDER_NOT_FOUND));
-            OrderResponse response = OrderResponse.from(order);
+
+            OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
+
         } catch (ErrorResponse e) {
             log.error("Error during loading order: {}", e.getError());
             throw e;
@@ -217,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
             // ErrorResponse
             Order order = findByIdOrThrow(orderId);
             // ErrorResponse
-            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.NO_PAYMENT_IMAGE_FOUND);
             // ErrorResponse
             Image paymentImage = imageService.createImage(image);
             // ErrorResponse
@@ -227,8 +221,8 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentImage(paymentImage);
             order.setStatus(EStatus.CHECKING_PAYMENT);
             order = orderRepository.save(order);
-            sendNotificationAdmin(ENotificationType.CONFIRM_PAYMENT, order, Message.CONFIRM_PAYMENT(order.getCustomer().getName()));
-            OrderResponse response = OrderResponse.from(order);
+            sendNotificationWeddingOrganizer(ENotificationType.CONFIRM_PAYMENT, order, Message.CONFIRM_PAYMENT(order.getCustomer().getName()));
+            OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
             log.error("Error during uploading payment image: {}", e.getError());
@@ -244,7 +238,8 @@ public class OrderServiceImpl implements OrderService {
             Order order = findByIdOrThrow(orderId);
             order.setStatus(EStatus.CANCELED);
             order = orderRepository.save(order);
-            OrderResponse response = OrderResponse.from(order);
+
+            OrderResponse response = OrderResponse.information(order);
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_CANCELLED, order, Message.ORDER_CANCELED(order.getCustomer().getName()));
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
@@ -255,17 +250,20 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<OrderResponse> finishOrder(String orderId) {
+    public ApiResponse<OrderResponse> reviewOrder(String orderId) {
         try {
             // ErrorResponse
             Order order = findByIdOrThrow(orderId);
             /*
                 ADD REVIEW
             */
-            sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, Message.ORDER_FINISHED(order.getCustomer().getName()));
-            order.setStatus(EStatus.FINISHED);
+
+            order.setReviewed(true);
             order = orderRepository.save(order);
-            OrderResponse response = OrderResponse.from(order);
+
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_REVIEWED, order, Message.ORDER_FINISHED(order.getCustomer().getName()));
+
+            OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
             log.error("Error during finishing order: {}", e.getError());
@@ -279,7 +277,7 @@ public class OrderServiceImpl implements OrderService {
         try {
             // ErrorResponse
             Order order = findByIdOrThrow(id);
-            OrderResponse response = OrderResponse.from(order);
+            OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
         } catch (ErrorResponse e) {
             log.error("Error during loading order: {}", e.getError());
@@ -287,164 +285,50 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ApiResponse<OrderResponse> confirmPayment(String orderId) {
-        try {
-            // ErrorResponse
-            Order order = findByIdOrThrow(orderId);
-            // ErrorMessage
-            if (order.getPaymentImage() == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.NO_PAYMENT_IMAGE_FOUND);
-            order.setStatus(EStatus.PAID);
-            order = orderRepository.save(order);
-            sendNotificationWeddingOrganizer(ENotificationType.ORDER_PAID, order, Message.ORDER_PAID(order.getCustomer().getName()));
-            OrderResponse response = OrderResponse.from(order);
-            return ApiResponse.success(response, Message.ORDER_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during accepting order payment: {}", e.getError());
-            throw e;
-        }
-    }
-
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<OrderResponse>> findAllOrders() {
+    public ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter) {
         List<Order> orderList = orderRepository.findAll();
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+
+        filterResult(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
         return ApiResponse.success(responses, Message.ORDER_FOUND);
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerId(String weddingOrganizerId) {
-        List<Order> orderList = orderRepository.findByWeddingOrganizerId(weddingOrganizerId);
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOrdersByWeddingPackageId(String weddingPackageId) {
-        List<Order> orderList = orderRepository.findByWeddingPackageId(weddingPackageId);
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOrdersByStatus(EStatus status) {
-        List<Order> orderList = orderRepository.findByStatus(status);
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOrdersByWeddingOrganizerIdAndStatus(String weddingOrganizerId, EStatus status) {
-        List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndStatus(weddingOrganizerId, status);
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOrdersByTransactionDateBetween(LocalDateTime start, LocalDateTime end) {
-        if (start.isAfter(LocalDateTime.now())) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_START_DATE);
-        if(end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
-        List<Order> orderList = orderRepository.findByTransactionDateBetween(start, end);
-        if (orderList.isEmpty()) {
-            return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-        }
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo) {
+    public ApiResponse<OrderResponse> findOwnOrderById(JwtClaim userInfo, String id) {
         try {
             // ErrorResponse
-            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
-            if (orderList.isEmpty()) {
-                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-            }
-            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-            return ApiResponse.success(responses, Message.ORDER_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during loading own orders: {}", e.getError());
+            Order order = findByIdOrThrow(id);
+
+            validateUserAccess(userInfo, order);
+
+            OrderResponse response = OrderResponse.all(order);
+            return ApiResponse.success(response, Message.ORDER_FOUND);
+        } catch (AccessDeniedException e) {
+            log.error("Access denied during loading order: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+        }  catch (ErrorResponse e) {
+            log.error("Error during loading order: {}", e.getError());
             throw e;
         }
     }
 
     @Override
-    public ApiResponse<List<OrderResponse>> findOwnOrdersByTransactionDateBetween(JwtClaim userInfo, LocalDateTime start, LocalDateTime end) {
-        try {
-            if (start.isAfter(LocalDateTime.now())) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_START_DATE);
-            if (end.isBefore(start)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_END_DATE);
-            // ErrorResponse
-            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), start, end);
-            if (orderList.isEmpty()) {
-                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-            }
-            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-            return ApiResponse.success(responses, Message.ORDER_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during loading own orders by transaction date between: {}", e.getError());
-            throw e;
-        }
-    }
+    public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter) {
+        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOwnOrdersByStatus(JwtClaim userInfo, EStatus status) {
-        try {
-            // ErrorResponse
-            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndStatus(wo.getId(), status);
-            if (orderList.isEmpty()) {
-                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-            }
-            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-            return ApiResponse.success(responses, Message.ORDER_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during loading own orders by status: {}", e.getError());
-            throw e;
-        }
-    }
+        List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<OrderResponse>> findOwnOrdersByWeddingPackageId(JwtClaim userInfo, String weddingPackageId) {
-        try {
-            // ErrorResponse
-            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            List<Order> orderList = orderRepository.findByWeddingOrganizerIdAndWeddingPackageId(wo.getId(), weddingPackageId);
-            if (orderList.isEmpty()) {
-                return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
-            }
-            List<OrderResponse> responses = orderList.stream().map(OrderResponse::from).toList();
-            return ApiResponse.success(responses, Message.ORDER_FOUND);
-        } catch (ErrorResponse e) {
-            log.error("Error during loading own orders by wedding package id: {}", e.getError());
-            throw e;
-        }
+        filterResult(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
+        return ApiResponse.success(responses, Message.ORDER_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -460,7 +344,7 @@ public class OrderServiceImpl implements OrderService {
             /*
              Send notification to customer
             */
-            OrderResponse response = OrderResponse.from(order);
+            OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {
             log.error("Access denied during accepting order: {}", e.getMessage());
@@ -477,20 +361,71 @@ public class OrderServiceImpl implements OrderService {
         try {
             // ErrorResponse
             Order order = findByIdOrThrow(orderId);
+
             // AccessDeniedException
             validateUserAccess(userInfo, order);
+
             order.setStatus(EStatus.REJECTED);
             order = orderRepository.save(order);
             /*
              Send notification to customer
             */
-            OrderResponse response = OrderResponse.from(order);
+            OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {
             log.error("Access denied during rejecting order: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during rejecting order: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<OrderResponse> confirmPayment(JwtClaim userInfo, String orderId) {
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+
+            order.setStatus(EStatus.PAID);
+
+            order = orderRepository.save(order);
+
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_PAID, order, Message.ORDER_PAID(order.getCustomer().getName()));
+
+            OrderResponse response = OrderResponse.all(order);
+            return ApiResponse.success(response, Message.ORDER_FOUND);
+
+        } catch (ErrorResponse e) {
+            log.error("Error during accepting order payment: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Override
+    public ApiResponse<OrderResponse> finishOrder(JwtClaim userInfo, String orderId) {
+        try {
+            // ErrorResponse
+            Order order = findByIdOrThrow(orderId);
+
+            // AccessDeniedException
+            validateUserAccess(userInfo, order);
+
+            order.setStatus(EStatus.FINISHED);
+
+            order = orderRepository.save(order);
+
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, Message.ORDER_PAID(order.getCustomer().getName()));
+
+            OrderResponse response = OrderResponse.all(order);
+            return ApiResponse.success(response, Message.ORDER_FOUND);
+
+        } catch (AccessDeniedException e) {
+            log.error("Access denied during finishing order: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error during finishing order: {}", e.getError());
             throw e;
         }
     }

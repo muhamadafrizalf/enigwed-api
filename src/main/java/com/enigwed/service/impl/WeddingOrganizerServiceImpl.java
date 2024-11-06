@@ -1,9 +1,11 @@
 package com.enigwed.service.impl;
 
 import com.enigwed.constant.ERole;
+import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
@@ -11,10 +13,7 @@ import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.WeddingOrganizerRepository;
-import com.enigwed.service.CityService;
-import com.enigwed.service.ImageService;
-import com.enigwed.service.UserCredentialService;
-import com.enigwed.service.WeddingOrganizerService;
+import com.enigwed.service.*;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,17 +33,50 @@ import java.util.List;
 @Slf4j
 public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     private final WeddingOrganizerRepository weddingOrganizerRepository;
-    private final CityService cityService;
     private final UserCredentialService userCredentialService;
     private final ImageService imageService;
+    private final AddressService addressService;
     private final ValidationUtil validationUtil;
 
     private WeddingOrganizer findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return weddingOrganizerRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_ID_IS_REQUIRED);
+        return weddingOrganizerRepository.findByIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(id)
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+    }
+
+    private List<WeddingOrganizer> filterResult(FilterRequest filter, List<WeddingOrganizer> woList) {
+        if (filter.getUserStatus() != null) {
+            if (filter.getUserStatus() == EUserStatus.ACTIVE) {
+                woList = woList.stream().filter(wo -> wo.getUserCredential().isActive()).toList();
+            }
+            if (filter.getUserStatus() == EUserStatus.INACTIVE) {
+                woList = woList.stream().filter(wo -> !wo.getUserCredential().isActive() && wo.getDeletedAt() == null).toList();
+            }
+            if (filter.getUserStatus() == EUserStatus.DELETED) {
+                woList = woList.stream().filter(wo -> wo.getDeletedAt() != null).toList();
+            }
+        }
+        if (filter.getProvinceId() != null) {
+            woList = woList.stream().filter(wo -> wo.getProvince().getId().equals(filter.getProvinceId())).toList();
+        }
+        if (filter.getRegencyId() != null) {
+            woList = woList.stream().filter(wo -> wo.getRegency().getId().equals(filter.getRegencyId())).toList();
+        }
+        if (filter.getDistrictId() != null) {
+            woList = woList.stream().filter(wo -> wo.getDistrict().getId().equals(filter.getDistrictId())).toList();
+        }
+        return woList;
     }
 
     private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
+        String userCredentialId = weddingOrganizer.getUserCredential().getId();
+        if (userInfo.getUserId().equals(userCredentialId)) {
+            return;
+        }
+        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
+    private void validateUserAccessDelete(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
         String userCredentialId = weddingOrganizer.getUserCredential().getId();
         if (userInfo.getUserId().equals(userCredentialId)) {
             return;
@@ -80,16 +112,20 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId) {
         if (userCredentialId == null || userCredentialId.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNull(userCredentialId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        return weddingOrganizerRepository.findByIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userCredentialId)
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id) {
+    public ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id) {
         try {
+            /* FIND ACTIVE WEDDING ORGANIZER */
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
-            WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+
+            /* MAP RESULT */
+            WeddingOrganizerResponse response = WeddingOrganizerResponse.information(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_FOUND);
         } catch (ErrorResponse e) {
             log.error("Error while loading wedding organizer: {}", e.getError());
@@ -99,27 +135,42 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers() {
-        List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNull();
+    public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter) {
+        /* LOAD ONLY ACTIVE WEDDING ORGANIZERS */
+        List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::from).toList();
+
+        /* FILTER RESULT */
+        woList = filterResult(filter, woList);
+
+        /* MAP RESULT */
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::information).toList();
         return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword) {
-        List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
+    public ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter) {
+        /* SEARCH ACTIVE WEDDING ORGANIZERS BY KEYWORD */
+        List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizerCustomer(keyword);
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::from).toList();
+
+        /* FILTER RESULT */
+        woList = filterResult(filter, woList);
+
+        /* MAP RESULT */
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::information).toList();
         return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
     @Override
     public ApiResponse<WeddingOrganizerResponse> getOwnWeddingOrganizer(JwtClaim userInfo) {
-        if (userInfo.getUserId() == null || userInfo.getUserId().isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        WeddingOrganizer wo = weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNull(userInfo.getUserId()).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
-        WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+        /* LOAD ACTIVE WEDDING ORGANIZER BY USER ID */
+        WeddingOrganizer wo = weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userInfo.getUserId())
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+
+        /* MAP RESULT */
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
         return ApiResponse.success(response, Message.WEDDING_ORGANIZER_FOUND);
     }
 
@@ -127,27 +178,51 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer(JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest) {
         try {
+            /* LOAD WEDDING ORGANIZER */
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(weddingOrganizerRequest.getId());
+
+            /* VALIDATE ACCESS */
             // AccessDeniedException
             validateUserAccess(userInfo, wo);
+
+            /* VALIDATE INPUT */
             // ValidationException
             validationUtil.validateAndThrow(weddingOrganizerRequest);
             // DataIntegrityViolationException
             if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizerRequest.getPhone()) > 0 && !wo.getPhone().equals(weddingOrganizerRequest.getPhone()))
                 throw new DataIntegrityViolationException(ErrorMessage.PHONE_ALREADY_EXIST);
+
+            /* UPDATE WEDDING ORGANIZER */
             wo.setName(weddingOrganizerRequest.getName());
             wo.setPhone(weddingOrganizerRequest.getPhone());
             wo.setDescription(weddingOrganizerRequest.getDescription());
             wo.setAddress(weddingOrganizerRequest.getAddress());
-            if (!wo.getCity().getId().equals(weddingOrganizerRequest.getCityId())) {
+
+            /* CREATE OR LOAD ADDRESS */
+            if (!wo.getProvince().getId().equals(weddingOrganizerRequest.getProvince().getId())) {
                 // ErrorResponse
-                City city = cityService.loadCityById(weddingOrganizerRequest.getCityId());
-                wo.setCity(city);
+                Province province = addressService.saveOrLoadProvince(weddingOrganizerRequest.getProvince());
+                wo.setProvince(province);
             }
+            if (!wo.getRegency().getId().equals(weddingOrganizerRequest.getRegency().getId())) {
+                // ErrorResponse
+                Regency regency = addressService.saveOrLoadRegency(weddingOrganizerRequest.getRegency());
+                wo.setRegency(regency);
+            }
+            if (!wo.getDistrict().getId().equals(weddingOrganizerRequest.getDistrict().getId())) {
+                // ErrorResponse
+                District district = addressService.saveOrLoadDistrict(weddingOrganizerRequest.getDistrict());
+                wo.setDistrict(district);
+            }
+            wo.setAddress(weddingOrganizerRequest.getAddress());
+
+            /* SAVE WEDDING ORGANIZER */
             wo = weddingOrganizerRepository.saveAndFlush(wo);
-            WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+
+            WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_UPDATED);
+
         } catch (AccessDeniedException e) {
             log.error("Access denied while updating wedding organizer: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
@@ -167,14 +242,24 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id) {
         try {
+            /* LOAD WEDDING ORGANIZER */
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
+
+            /* VALIDATE ACCESS */
             // AccessDeniedException
-            validateUserAccess(userInfo, wo);
+            validateUserAccessDelete(userInfo, wo);
+
+            /* SOFT DELETE WEDDING ORGANIZER */
             // ErrorResponse
             wo.setUserCredential(userCredentialService.deleteUser(wo.getUserCredential().getId()));
             wo.setDeletedAt(LocalDateTime.now());
+
+            /* SAVE WEDDING ORGANIZER */
+            weddingOrganizerRepository.save(wo);
+
             return ApiResponse.success(Message.WEDDING_ORGANIZER_DELETED);
+
         } catch (AccessDeniedException e) {
             log.error("Access denied while deleting wedding organizer: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
@@ -187,18 +272,29 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizerImage(JwtClaim userInfo, String id, MultipartFile avatar) {
         try {
+            /* LOAD WEDDING ORGANIZER */
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
+
+            /* VALIDATE ACCESS */
             // AccessDeniedException
             validateUserAccess(userInfo, wo);
+
+            /* VALIDATE INPUT */
             // ErrorResponse
             if (avatar == null || avatar.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+
+            /* UPDATE IMAGE */
             // ErrorResponse
             Image newAvatar = imageService.updateImage(wo.getAvatar().getId(), avatar);
             wo.setAvatar(newAvatar);
-            wo = weddingOrganizerRepository.saveAndFlush(wo);
-            WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+
+            /* SAVE WEDDING ORGANIZER */
+            wo = weddingOrganizerRepository.save(wo);
+
+            WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_AVATAR_UPDATED);
+
         } catch (AccessDeniedException e) {
             log.error("Access denied while updating wedding organizer image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
@@ -211,15 +307,25 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Override
     public ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id) {
         try {
+            /* LOAD WEDDING ORGANIZER */
             // ErrorResponse
             WeddingOrganizer wo = findByIdOrThrow(id);
+
+            /* VALIDATE ACCESS */
             // AccessDeniedException
             validateUserAccess(userInfo, wo);
+
+            /* DELETE IMAGE */
             // ErrorResponse
             Image deletedImage = imageService.softDeleteImageById(wo.getAvatar().getId());
             wo.setAvatar(deletedImage);
-            WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+
+            /* SAVE WEDDING ORGANIZER */
+            wo = weddingOrganizerRepository.save(wo);
+
+            WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
             return ApiResponse.success(response, Message.WEDDING_ORGANIZER_AVATAR_DELETED);
+
         } catch (AccessDeniedException e) {
             log.error("Access denied while deleting wedding organizer image: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
@@ -231,12 +337,46 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Override
     public ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id) {
+        /* LOAD WEDDING ORGANIZER */
         // ErrorResponse
         WeddingOrganizer wo = findByIdOrThrow(id);
+
+        /* ACTIVATE USER */
         UserCredential user = userCredentialService.activateUser(wo.getUserCredential());
         wo.setUserCredential(user);
-        weddingOrganizerRepository.saveAndFlush(wo);
-        WeddingOrganizerResponse response = WeddingOrganizerResponse.from(wo);
+
+        /* SAVE WEDDING ORGANIZER */
+        weddingOrganizerRepository.save(wo);
+
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
         return ApiResponse.success(response, Message.WEDDING_ORGANIZERS_ACTIVATED);
+    }
+
+    @Override
+    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter) {
+        /* LOAD ALL WEDDING ORGANIZERS */
+        List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+
+        /* FILTER RESULT */
+        woList = filterResult(filter, woList);
+
+        /* MAP RESULT */
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::all).toList();
+        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
+    }
+
+    @Override
+    public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter) {
+        /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
+        List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+
+        /* FILTER RESULT */
+        woList = filterResult(filter, woList);
+
+        /* MAP RESULT */
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::all).toList();
+        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
     }
 }

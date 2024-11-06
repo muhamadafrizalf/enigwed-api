@@ -2,10 +2,10 @@ package com.enigwed.controller;
 
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
-import com.enigwed.dto.request.BonusPackageRequest;
+import com.enigwed.dto.request.ProductRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
-import com.enigwed.service.BonusPackageService;
+import com.enigwed.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,111 +19,120 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
-public class BonusPackageController {
-    private final BonusPackageService bonusPackageService;
+public class ProductController {
+    private final ProductService productService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "To get bonus package by bonus_package_id (no authorization needed)")
-    @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE_ID)
-    public ResponseEntity<?> getBonusPackageById(
+    @Operation(summary = "To get product by product_id (MOBILE)")
+    @GetMapping(PathApi.PUBLIC_PRODUCT_ID)
+    public ResponseEntity<?> customerGetBonusPackageById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = bonusPackageService.findBonusPackageById(id);
+        ApiResponse<?> response = productService.findProductById(id);
         return ResponseEntity.ok(response);
     }
 
+    /* IMPLEMENT PAGING [SOON] */
     @Operation(
-            summary = "To get all bonus packages, it receive wedding_organizer_id and keyword as param (no authorization needed)",
-            description = "wedding_organizer_id and keyword can both be empty and filled"
+            summary = "To search product own by one wedding organizer (MOBILE)",
+            description = "wedding_organizer_id is mandatory and keyword is optional (USE PAGING[SOON])"
     )
-    @GetMapping(PathApi.PUBLIC_BONUS_PACKAGE)
-    public ResponseEntity<?> getAllBonusPackages(
-            @Parameter(description = "To filter by wedding_organizer_id", required = false)
+    @GetMapping(PathApi.PUBLIC_PRODUCT)
+    public ResponseEntity<?> customerGetAllBonusPackages(
+            @Parameter(description = "To filter by wedding_organizer_id", required = true)
             @RequestParam(required = false) String weddingOrganizerId,
             @Parameter(description = "Keyword can filter result by name, and description", required = false)
             @RequestParam(required = false) String keyword
     ) {
         ApiResponse<?> response;
-        boolean isWoId = weddingOrganizerId != null && !weddingOrganizerId.isEmpty();
         boolean isKeyword = keyword != null && !keyword.isEmpty();
-        if (isWoId && isKeyword) {
-            response = bonusPackageService.searchBonusPackageFromWeddingOrganizerId(weddingOrganizerId, keyword);
-        } else if (isWoId) {
-            response = bonusPackageService.findAllBonusPackagesByWeddingOrganizerId(weddingOrganizerId);
-        } else if (isKeyword) {
-            response = bonusPackageService.searchBonusPackage(keyword);
+        if (isKeyword) {
+            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword);
         } else {
-            response = bonusPackageService.findAllBonusPackages();
+            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId);
         }
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "To get own product by product_id (authorization WO)")
+    @PreAuthorize("hasRole('WO')")
+    @GetMapping(PathApi.PROTECTED_PRODUCT_ID)
+    public ResponseEntity<?> getOwnProductById(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable String id
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = productService.getOwnProductById(userInfo, id);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(
-            summary = "To get all bonus packages own by wedding organizer (authorization WO)",
-            description = "WO can only receive their own bonus packages"
+            summary = "To get all products own by wedding organizer (authorization WO)",
+            description = "WO can only receive their own products"
     )
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_BONUS_PACKAGE)
+    @GetMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> getOwnBonusPackages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.getOwnWeddingPackages(userInfo);
+        ApiResponse<?> response = productService.getOwnProducts(userInfo);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To create new bonus package (authorization WO)")
+    @Operation(summary = "To create new product (authorization WO)")
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_BONUS_PACKAGE)
+    @PostMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> createBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody BonusPackageRequest bonusPackageRequest
+            @RequestBody ProductRequest productRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.createBonusPackage(userInfo, bonusPackageRequest);
+        ApiResponse<?> response = productService.createProduct(userInfo, productRequest);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To update existing bonus package (authorization WO)",
-            description = "WO can only update their own bonus package"
+            summary = "To update existing product (authorization WO)",
+            description = "WO can only update their own product"
     )
     @PreAuthorize("hasAnyRole('WO')")
-    @PutMapping(PathApi.PROTECTED_BONUS_PACKAGE)
+    @PutMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> updateBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody BonusPackageRequest bonusPackageRequest
+            @RequestBody ProductRequest productRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.updateBonusPackage(userInfo, bonusPackageRequest);
+        ApiResponse<?> response = productService.updateProduct(userInfo, productRequest);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To delete bonus package by bonus_package_id (authorization ADMIN and WO)",
-            description = "Admin can delete all bonus package and WO can only update their own bonus package"
+            summary = "To delete product by product_id (authorization WO)",
+            description = "WO can only update their own product"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @DeleteMapping(PathApi.PROTECTED_BONUS_PACKAGE_ID)
+    @PreAuthorize("hasRole('WO')")
+    @DeleteMapping(PathApi.PROTECTED_PRODUCT_ID)
     public ResponseEntity<?> deleteBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.deleteBonusPackage(userInfo, id);
+        ApiResponse<?> response = productService.deleteProduct(userInfo, id);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To delete bonus package by bonus_package_id (authorization WO)",
-            description = "WO can only add image to their own bonus package"
+            summary = "To delete product by product_id (authorization WO)",
+            description = "WO can only add image to their own product"
     )
-    @PreAuthorize("hasAnyRole('WO')")
-    @PutMapping(value = PathApi.PROTECTED_BONUS_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('WO')")
+    @PutMapping(value = PathApi.PROTECTED_PRODUCT_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -131,16 +140,16 @@ public class BonusPackageController {
             @RequestPart(name = "image") MultipartFile image
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.addBonusPackageImage(userInfo, id, image);
+        ApiResponse<?> response = productService.addProductImage(userInfo, id, image);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To delete bonus package by bonus_package_id (authorization ADMIN and WO)",
-            description = "Admin can delete all bonus package images WO can only delete image from their own bonus package"
+            summary = "To delete product by product_id (authorization WO)",
+            description = "WO can only delete image from their own product"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @DeleteMapping(PathApi.PROTECTED_BONUS_PACKAGE_ID_IMAGE_ID)
+    @PreAuthorize("hasRole('WO')")
+    @DeleteMapping(PathApi.PROTECTED_PRODUCT_ID_IMAGE_ID)
     public ResponseEntity<?> deleteBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -148,7 +157,20 @@ public class BonusPackageController {
             @PathVariable(value = "image-id") String imageId
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bonusPackageService.deleteBonusPackageImage(userInfo, id, imageId);
+        ApiResponse<?> response = productService.deleteProductImage(userInfo, id, imageId);
         return ResponseEntity.ok(response);
     }
+
+    // FOR DEVELOPMENT
+    @Operation(
+            summary = "FOR DEVELOPMENT DON'T USE",
+            description = "GET ALL PRODUCTS"
+    )
+    @GetMapping(PathApi.PUBLIC_PRODUCT + "/dev")
+    public ResponseEntity<?> dev() {
+        ApiResponse<?> response = productService.findAllProducts();
+        return ResponseEntity.ok(response);
+    }
+
+
 }

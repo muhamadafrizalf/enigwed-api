@@ -29,5 +29,5 @@ public class OrderRequest {
     @NotBlank(message = WEDDING_PACKAGE_ID_BLANK)
     private String weddingPackageId;
 
-    private List<OrderDetailRequest> orderDetails;
+    private List<AdditionalProduct> additionalProducts;
 }

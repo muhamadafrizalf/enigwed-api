@@ -2,6 +2,7 @@ package com.enigwed.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import static com.enigwed.constant.Constraint.*;
 @Builder
 public class RegisterRequest {
 
-    @NotBlank(message = NAME_BLANK)
+    @NotBlank(message = WEDDING_ORGANIZER_NAME_BLANK)
     private String name;
 
     @Size(max = 1000, message = DESCRIPTION_MAX)
@@ -32,9 +33,6 @@ public class RegisterRequest {
     @NotBlank(message = NIB_BLANK)
     private String nib;
 
-    @NotBlank(message = CITY_ID_BLANK)
-    private String cityId;
-
     @NotBlank(message = PHONE_BLANK)
     private String phone;
 
@@ -48,4 +46,13 @@ public class RegisterRequest {
 
     @NotBlank(message = CONFIRM_PASSWORD_BLANK)
     private String confirmPassword;
+
+    @NotNull
+    private ProvinceRequest province;
+
+    @NotNull
+    private RegencyRequest regency;
+
+    @NotNull
+    private DistrictRequest district;
 }

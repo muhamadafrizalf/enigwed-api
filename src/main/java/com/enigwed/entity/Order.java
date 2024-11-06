@@ -40,8 +40,13 @@ public class Order extends BaseEntity{
     @Column(name = "wedding_date")
     private LocalDateTime weddingDate;
 
-    @Column(name = "wedding_package_base_price")
-    private double weddingPackageBasePrice;
+    @Column(name = "base_price")
+    private double basePrice;
+
+    @Column(name = "total_price")
+    private double totalPrice;
+
+    private boolean reviewed;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "customer_id")

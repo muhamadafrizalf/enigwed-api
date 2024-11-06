@@ -25,12 +25,9 @@ public class BonusDetail extends BaseEntity{
     private WeddingPackage weddingPackage;
 
     @ManyToOne
-    @JoinColumn(name = "bonus_package_id")
-    private BonusPackage bonusPackage;
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     private int quantity;
-
-    private boolean adjustable;
-
 
 }

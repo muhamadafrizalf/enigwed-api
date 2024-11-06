@@ -9,4 +9,5 @@ public enum ENotificationType {
     CONFIRM_PAYMENT,
     ORDER_PAID,
     ORDER_FINISHED,
+    ORDER_REVIEWED,
 }

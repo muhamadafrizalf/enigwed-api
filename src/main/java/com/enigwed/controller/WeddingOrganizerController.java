@@ -1,7 +1,10 @@
 package com.enigwed.controller;
 
+import com.enigwed.constant.ERole;
+import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -23,39 +26,70 @@ public class WeddingOrganizerController {
     private final WeddingOrganizerService weddingOrganizerService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "To get wedding organizer by wedding_organizer_id (no authorization needed)")
+    @Operation(summary = "To get wedding organizer by wedding_organizer_id (MOBILE)")
     @GetMapping(PathApi.PUBLIC_WO_ID)
-    public ResponseEntity<?> getWeddingOrganizerById(
+    public ResponseEntity<?> customerGetWeddingOrganizerById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = weddingOrganizerService.findWeddingOrganizerById(id);
+        ApiResponse<?> response = weddingOrganizerService.customerFindWeddingOrganizerById(id);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get all wedding organizers (no authorization needed)")
+    @Operation(summary = "To get all wedding organizers (MOBILE)")
     @GetMapping(PathApi.PUBLIC_WO)
-    public ResponseEntity<?> getAllWeddingOrganizers(
+    public ResponseEntity<?> customerGetAllWeddingOrganizers(
             @Parameter(description = "Keyword can filter result by name, phone, description, address, and city name", required = false)
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String provinceId,
+            @RequestParam(required = false) String regencyId,
+            @RequestParam(required = false) String districtId
     ) {
+        FilterRequest filter = new FilterRequest();
+        if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
+        if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
+        if (districtId != null && !districtId.isEmpty()) filter.setDistrictId(districtId);
+
         ApiResponse<?> response;
         if (keyword != null && !keyword.isEmpty()) {
-            response = weddingOrganizerService.searchWeddingOrganizer(keyword);
+            response = weddingOrganizerService.customerSearchWeddingOrganizer(keyword, filter);
         } else {
-            response = weddingOrganizerService.findAllWeddingOrganizers();
+            response = weddingOrganizerService.customerFindAllWeddingOrganizers(filter);
         }
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get own wedding organizer (authorization WO)")
+    @Operation(
+            summary = "To get wedding organizers (WEB) (authorization WO, ADMIN)",
+            description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
+    )
     @PreAuthorize("hasAnyRole('WO')")
     @GetMapping(PathApi.PROTECTED_WO)
     public ResponseEntity<?> getWeddingOrganizerProfile(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Keyword can filter result by name, phone, description, address, province name, city name, and district name", required = false)
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) EUserStatus status,
+            @RequestParam(required = false) String provinceId,
+            @RequestParam(required = false) String regencyId,
+            @RequestParam(required = false) String districtId
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = weddingOrganizerService.getOwnWeddingOrganizer(userInfo);
+        FilterRequest filter = new FilterRequest();
+        if (status != null) filter.setUserStatus(status);
+        if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
+        if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
+        if (districtId != null && !districtId.isEmpty()) filter.setDistrictId(districtId);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = weddingOrganizerService.getOwnWeddingOrganizer(userInfo);
+        } else {
+            if (keyword != null && !keyword.isEmpty()) {
+                response = weddingOrganizerService.searchWeddingOrganizer(keyword, filter);
+            } else {
+                response = weddingOrganizerService.findAllWeddingOrganizers(filter);
+            }
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -95,7 +129,7 @@ public class WeddingOrganizerController {
             summary = "To update wedding organizer image by wedding_organizer_id (authorization WO)",
             description = "Only WO can update wedding organizer image and each wedding organizer can only access their own account"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PreAuthorize("hasAnyRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_WO_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateWeddingOrganizerImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
@@ -125,7 +159,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To activate wedding organizer account by wedding_organizer_id (authorization WO)",
+            summary = "To activate wedding organizer account by wedding_organizer_id (authorization ADMIN)",
             description = "Only ADMIN can activate wedding organizer account"
     )
     @PreAuthorize("hasRole('ADMIN')")

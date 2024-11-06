@@ -29,20 +29,26 @@ public class WeddingOrganizer extends AuditEntity{
     @Column(length = 1000)
     private String description;
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "province_id")
+    private Province province;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "regency_id")
+    private Regency regency;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "district_id")
+    private District district;
+
     @Column(length = 1000)
     private String address;
 
-    @ManyToOne
-    @JoinColumn(name = "city_id")
-    private City city;
-
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "avatar_id")
-    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     private Image avatar;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_credential_id")
-    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     private UserCredential userCredential;
 }

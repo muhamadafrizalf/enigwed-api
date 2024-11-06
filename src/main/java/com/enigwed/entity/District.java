@@ -4,25 +4,23 @@ import com.enigwed.constant.PathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.CITY)
-public class City extends AuditEntity{
+@Table(name = PathDb.DISTRICT)
+public class District {
+
+    @Id
+    private String id;
+
+    @ManyToOne
+    @JoinColumn(name = "regency_id")
+    private Regency regency;
 
     private String name;
-
-    @Column(length = 1000)
-    private String description;
-
-    @OneToOne
-    @JoinColumn(name = "thumbnail_id")
-    Image thumbnail;
 }

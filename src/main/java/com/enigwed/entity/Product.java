@@ -17,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.BONUS_PACKAGE)
-public class BonusPackage extends AuditEntity{
+@Table(name = PathDb.PRODUCT)
+public class Product extends AuditEntity{
 
     private String name;
 
@@ -26,12 +26,6 @@ public class BonusPackage extends AuditEntity{
     private String description;
 
     private double price;
-
-    @Column(name = "min_quantity")
-    private int minQuantity;
-
-    @Column(name = "max_quantity")
-    private int maxQuantity;
 
     @ManyToOne
     @JoinColumn(name = "wedding_organizer_id")

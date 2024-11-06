@@ -1,6 +1,6 @@
 package com.enigwed.dto;
 
-import com.enigwed.constant.ErrorMessage;
+import com.enigwed.constant.Constraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RefreshToken {
 
-    @NotBlank(message = ErrorMessage.TOKEN_IS_BLANK)
+    @NotBlank(message = Constraint.TOKEN_IS_BLANK)
     private String token;
 }

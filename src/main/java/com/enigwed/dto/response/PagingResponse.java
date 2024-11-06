@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @Data
 @AllArgsConstructor
@@ -14,4 +15,13 @@ public class PagingResponse {
     private Integer size;
     private Long totalElements;
     private Integer totalPages;
+
+    public static <T> PagingResponse from(Page<T> data) {
+        PagingResponse response = new PagingResponse();
+        response.setPage(data.getNumber()+1);
+        response.setSize(data.getSize());
+        response.setTotalElements(data.getTotalElements());
+        response.setTotalPages(data.getTotalPages());
+        return response;
+    }
 }

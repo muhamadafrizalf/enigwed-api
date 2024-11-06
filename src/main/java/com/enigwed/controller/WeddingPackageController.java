@@ -3,6 +3,7 @@ package com.enigwed.controller;
 import com.enigwed.constant.ERole;
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -25,43 +26,68 @@ public class WeddingPackageController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "To get wedding package by wedding_package_id (no authorization needed)"
+            summary = "To get wedding package by wedding_package_id (MOBILE)"
     )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
-        ApiResponse<?> response = weddingPackageService.findWeddingPackageById(id);
+        ApiResponse<?> response = weddingPackageService.customerFindWeddingPackageById(id);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To get all wedding packages (no authorization needed)",
-            description = "wedding_organizer_id and keyword can both be empty and filled"
+            summary = "To get all wedding packages (MOBILE)",
+            description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
     )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
-    public ResponseEntity<?> getAllWeddingPackages(
-            @Parameter(description = "To filter by wedding_organizer_id", required = false)
-            @RequestParam(required = false) String weddingOrganizerId,
+    public ResponseEntity<?> customerGetAllWeddingPackages(
             @Parameter(description = "Keyword can filter result by name, description, city name, and wedding organizer name", required = false)
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String weddingOrganizerId,
+            @RequestParam(required = false) String provinceId,
+            @RequestParam(required = false) String regencyId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice
     ) {
+        FilterRequest filter = new FilterRequest();
+        if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
+        if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
+        if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
+        if (minPrice != null) filter.setMinPrice(minPrice);
+        if (maxPrice != null) filter.setMaxPrice(maxPrice);
+
         ApiResponse<?> response;
-        boolean isWoId = weddingOrganizerId != null && !weddingOrganizerId.isEmpty();
-        boolean isKeyword = keyword != null && !keyword.isEmpty();
-        if (isWoId && isKeyword) {
-            response = weddingPackageService.searchWeddingPackageFromWeddingOrganizerId(weddingOrganizerId, keyword);
-        } else if (isWoId) {
-            response = weddingPackageService.findAllWeddingPackagesByWeddingOrganizerId(weddingOrganizerId);
-        } else if (isKeyword) {
-            response = weddingPackageService.searchWeddingPackage(keyword);
+        if (keyword != null && !keyword.isEmpty()) {
+            response = weddingPackageService.customerSearchWeddingPackage(keyword, filter);
         } else {
-            response = weddingPackageService.findAllWeddingPackages();
+            response = weddingPackageService.customerFindAllWeddingPackages(filter);
         }
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To get all wedding packages own by wedding organizer (authorization WO)",
-            description = "keyword can both be empty and filled to filter"
+            summary = "To get wedding package by wedding_package_id (WEB) (authorization ADMIN, WO)",
+            description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
+    public ResponseEntity<?> getOwnWeddingPackageById(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable String id
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = weddingPackageService.getOwnWeddingPackageById(userInfo, id);
+        } else {
+            response = weddingPackageService.findWeddingPackageById(id);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "To get all wedding packages (WEB) (authorization ADMIN, WO)",
+            description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
@@ -69,15 +95,40 @@ public class WeddingPackageController {
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @Parameter(description = "Keyword can filter result by name, description, and city name", required = false)
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String weddingOrganizerId,
+            @RequestParam(required = false) String provinceId,
+            @RequestParam(required = false) String regencyId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice
     ) {
+        FilterRequest filter = new FilterRequest();
+        if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
+        if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
+        if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
+        if (minPrice != null) filter.setMinPrice(minPrice);
+        if (maxPrice != null) filter.setMaxPrice(maxPrice);
+
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = weddingPackageService.getOwnWeddingPackages(userInfo, keyword);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            if (keyword != null && !keyword.isEmpty()) {
+                response = weddingPackageService.searchOwnWeddingPackages(userInfo, keyword, filter);
+            } else {
+                response = weddingPackageService.getOwnWeddingPackages(userInfo, filter);
+            }
+        } else {
+            if (keyword != null && !keyword.isEmpty()) {
+                response = weddingPackageService.searchWeddingPackage(keyword, filter);
+            } else {
+                response = weddingPackageService.findAllWeddingPackages(filter);
+            }
+        }
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To create wedding package (authorization WO)",
+            summary = "To create wedding package (WEB) (authorization WO)",
             description = "Only wedding organizer can create wedding package"
     )
     @PreAuthorize("hasRole('WO')")
@@ -110,9 +161,9 @@ public class WeddingPackageController {
 
     @Operation(
             summary = "To delete wedding package by wedding_package_id (authorization ADMIN and WO)",
-            description = "Admin can delete all wedding packages and wedding organizer can only delete their own wedding package"
+            description = "Only wedding organizer can delete wedding package and wedding organizer can only delete their own wedding package"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PreAuthorize("hasAnyRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> deleteWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
@@ -142,10 +193,10 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To delete wedding package image by wedding_package_id and image_id (authorization ADMIN and WO)",
-            description = "Admin can delete all wedding package images and wedding organizer can only delete their own wedding package images"
+            summary = "To delete wedding package image by wedding_package_id and image_id (WEB) (authorization WO)",
+            description = "Only WO can delete wedding package images and wedding organizer can only delete their own wedding package images"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @PreAuthorize("hasAnyRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)
     public ResponseEntity<?> deleteWeddingPackageImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)

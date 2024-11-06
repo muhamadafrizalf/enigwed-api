@@ -1,6 +1,7 @@
 package com.enigwed.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,10 +28,13 @@ public class WeddingPackageRequest {
     private String description;
 
     @Positive(message = PRICE_POSITIVE)
-    private double basePrice;
+    private double price;
 
-    @NotBlank(message = CITY_ID_BLANK)
-    private String cityId;
+    @NotNull
+    private ProvinceRequest province;
+
+    @NotNull
+    private RegencyRequest regency;
 
     private List<BonusDetailRequest> bonusDetails;
 }

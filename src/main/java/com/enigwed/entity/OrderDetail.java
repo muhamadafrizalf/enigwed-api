@@ -25,10 +25,12 @@ public class OrderDetail extends BaseEntity {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "bonu_package_id")
-    private BonusPackage bonusPackage;
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     private double price;
 
     private int quantity;
+
+    private boolean bonus;
 }

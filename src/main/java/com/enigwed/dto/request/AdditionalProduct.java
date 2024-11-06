@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
-import static com.enigwed.constant.Constraint.BONUS_PACKAGE_ID_BLANK;
+import static com.enigwed.constant.Constraint.PRODUCT_ID_BLANK;
 import static com.enigwed.constant.Constraint.QUANTITY_POSITIVE;
 
 @Data
@@ -12,9 +12,9 @@ import static com.enigwed.constant.Constraint.QUANTITY_POSITIVE;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Builder
-public class OrderDetailRequest {
+public class AdditionalProduct {
 
-    @NotBlank(message = BONUS_PACKAGE_ID_BLANK)
+    @NotBlank(message = PRODUCT_ID_BLANK)
     private String bonusPackageId;
 
     @Positive(message = QUANTITY_POSITIVE)

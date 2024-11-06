@@ -25,15 +25,18 @@ public class WeddingPackage extends AuditEntity {
     @Column(length = 10000)
     private String description;
 
-    @Column(name = "base_price")
-    private double basePrice;
+    private double price;
 
     @Column(name = "order_count")
     private int orderCount = 0;
 
-    @ManyToOne
-    @JoinColumn(name = "city_id")
-    private City city;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "province_id")
+    private Province province;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "regency_id")
+    private Regency regency;
 
     @ManyToOne
     @JoinColumn(name = "wedding_organizer_id")

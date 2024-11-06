@@ -1,6 +1,8 @@
 package com.enigwed.dto.response;
 
+import com.enigwed.constant.EUserStatus;
 import com.enigwed.entity.WeddingOrganizer;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,36 +10,82 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeddingOrganizerResponse {
     private String id;
+    private ImageResponse avatar;
     private String name;
     private String npwp;
     private String nib;
     private String phone;
-    private String description;
-    private String address;
     private String email;
+    private String description;
+    private String provinceId;
+    private String provinceName;
+    private String regencyId;
+    private String regencyName;
+    private String districtId;
+    private String districtName;
+    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private ImageResponse avatar;
-    private CityResponse city;
-    private boolean active;
+    private LocalDateTime deletedAt;
+    private EUserStatus status;
+    /* RATING[SOON] */
 
-    public static WeddingOrganizerResponse from(WeddingOrganizer weddingOrganizer) {
+    public static WeddingOrganizerResponse all(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = new WeddingOrganizerResponse();
         response.setId(weddingOrganizer.getId());
+        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
         response.setNpwp(weddingOrganizer.getNpwp());
         response.setNib(weddingOrganizer.getNib());
         response.setPhone(weddingOrganizer.getPhone());
-        response.setDescription(weddingOrganizer.getDescription());
-        response.setAddress(weddingOrganizer.getAddress());
         response.setEmail(weddingOrganizer.getUserCredential().getEmail());
+        response.setDescription(weddingOrganizer.getDescription());
+        response.setProvinceId(weddingOrganizer.getProvince().getId());
+        response.setProvinceName(weddingOrganizer.getProvince().getName());
+        response.setRegencyId(weddingOrganizer.getRegency().getId());
+        response.setRegencyName(weddingOrganizer.getRegency().getName());
+        response.setDistrictId(weddingOrganizer.getDistrict().getId());
+        response.setDistrictName(weddingOrganizer.getDistrict().getName());
+        response.setAddress(weddingOrganizer.getAddress());
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
-        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
-        response.setCity(CityResponse.from(weddingOrganizer.getCity()));
-        response.setActive(weddingOrganizer.getUserCredential().isActive());
+        response.setDeletedAt(weddingOrganizer.getDeletedAt());
+        if (weddingOrganizer.getDeletedAt() == null) {
+            response.setStatus(EUserStatus.DELETED);
+        } else if (weddingOrganizer.getUserCredential().isActive()) {
+            response.setStatus(EUserStatus.ACTIVE);
+        } else {
+            response.setStatus(EUserStatus.INACTIVE);
+        }
+        /* RATING[SOON] */
         return response;
     }
+
+    public static WeddingOrganizerResponse information(WeddingOrganizer weddingOrganizer) {
+        WeddingOrganizerResponse response = new WeddingOrganizerResponse();
+        response.setId(weddingOrganizer.getId());
+        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
+        response.setName(weddingOrganizer.getName());
+        response.setPhone(weddingOrganizer.getPhone());
+        response.setDescription(weddingOrganizer.getDescription());
+        response.setProvinceName(weddingOrganizer.getProvince().getName());
+        response.setRegencyName(weddingOrganizer.getRegency().getName());
+        response.setDistrictName(weddingOrganizer.getDistrict().getName());
+        response.setAddress(weddingOrganizer.getAddress());
+        return response;
+    }
+
+    public static WeddingOrganizerResponse simple(WeddingOrganizer weddingOrganizer) {
+        WeddingOrganizerResponse response = new WeddingOrganizerResponse();
+        response.setId(weddingOrganizer.getId());
+        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
+        response.setName(weddingOrganizer.getName());
+        response.setRegencyName(weddingOrganizer.getRegency().getName());
+        /* RATING[SOON] */
+        return response;
+    }
+
 }
