@@ -80,7 +80,7 @@ public class OrderController {
             description = "Update order reviewed true, post review here [SOON], send notification to wedding organizer"
     )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_REVIEW)
-    public ResponseEntity<?> reviewhOrder(
+    public ResponseEntity<?> reviewOrder(
             @PathVariable String id
             /*
                 ADD REVIEW HERE
@@ -146,7 +146,7 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For WO to confirm payment by order_id [WO] (MOBILE)",
+            summary = "For WO to confirm payment by order_id [WO] (WEB)",
             description = "Update status to PAID, send notification to wedding organizer"
     )
     @PreAuthorize("hasRole('WO')")
