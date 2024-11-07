@@ -52,6 +52,9 @@ public class WeddingOrganizer extends AuditEntity{
     private Image avatar;
 
     @OneToMany(mappedBy = "weddingOrganizer")
+    List<WeddingPackage> weddingPackages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "weddingOrganizer")
     List<Review> reviews = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.PERSIST)

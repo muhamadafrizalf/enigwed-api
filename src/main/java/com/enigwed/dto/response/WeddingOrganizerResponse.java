@@ -34,6 +34,7 @@ public class WeddingOrganizerResponse {
     private LocalDateTime deletedAt;
     private EUserStatus status;
     private Double rating;
+    private Integer weddingPackageCount;
 
     public static WeddingOrganizerResponse all(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = new WeddingOrganizerResponse();
@@ -55,6 +56,7 @@ public class WeddingOrganizerResponse {
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setDeletedAt(weddingOrganizer.getDeletedAt());
+        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
         if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {
@@ -79,6 +81,7 @@ public class WeddingOrganizerResponse {
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
         response.setAddress(weddingOrganizer.getAddress());
+        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
             response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
         }
@@ -91,6 +94,7 @@ public class WeddingOrganizerResponse {
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
+        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
             response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
         }
@@ -103,6 +107,7 @@ public class WeddingOrganizerResponse {
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
+        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
         if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {
