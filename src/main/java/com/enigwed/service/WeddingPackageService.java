@@ -2,6 +2,7 @@ package com.enigwed.service;
 
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingPackageResponse;
@@ -17,13 +18,13 @@ public interface WeddingPackageService {
 
     // Customer
     ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id);
-    ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter);
-    ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter);
+    ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest);
 
     // WO
     ApiResponse<WeddingPackageResponse> getOwnWeddingPackageById(JwtClaim userInfo, String id);
-    ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo,FilterRequest filter);
-    ApiResponse<List<WeddingPackageResponse>> searchOwnWeddingPackages(JwtClaim userInfo, String keyword, FilterRequest filter);
+    ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo,FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingPackageResponse>> searchOwnWeddingPackages(JwtClaim userInfo, String keyword, FilterRequest filter, PagingRequest pagingRequest);
     ApiResponse<WeddingPackageResponse> createWeddingPackage(JwtClaim userInfo,WeddingPackageRequest weddingPackageRequest);
     ApiResponse<WeddingPackageResponse> updateWeddingPackage(JwtClaim userInfo, WeddingPackageRequest weddingPackageRequest);
     ApiResponse<?> deleteWeddingPackage(JwtClaim userInfo, String id);
@@ -32,6 +33,6 @@ public interface WeddingPackageService {
 
     // ADMIN
     ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id);
-    ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter);
-    ApiResponse<List<WeddingPackageResponse>>searchWeddingPackage(String keyword, FilterRequest filter);
+    ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingPackageResponse>>searchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest);
 }

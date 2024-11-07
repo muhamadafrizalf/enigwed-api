@@ -5,6 +5,7 @@ import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.BonusDetailRequest;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingPackageResponse;
@@ -103,26 +104,26 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByDeletedAtIsNull();
         if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchWeddingPackage(keyword);
         if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Override
@@ -146,7 +147,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     }
 
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo, FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
@@ -155,12 +156,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> searchOwnWeddingPackages(JwtClaim userInfo, String keyword, FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> searchOwnWeddingPackages(JwtClaim userInfo, String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         // ErrorResponse
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
@@ -170,7 +171,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -386,23 +387,23 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     }
 
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll();
         if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 
     @Override
-    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword, FilterRequest filter) {
+    public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchAllWeddingPackages(keyword);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
     }
 }

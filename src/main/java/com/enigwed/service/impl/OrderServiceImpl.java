@@ -2,10 +2,7 @@ package com.enigwed.service.impl;
 
 import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
-import com.enigwed.dto.request.AdditionalProduct;
-import com.enigwed.dto.request.FilterRequest;
-import com.enigwed.dto.request.OrderRequest;
-import com.enigwed.dto.request.ReviewRequest;
+import com.enigwed.dto.request.*;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.OrderResponse;
 import com.enigwed.entity.*;
@@ -312,7 +309,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter) {
+    public ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest) {
         List<Order> orderList = orderRepository.findAll();
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
@@ -320,7 +317,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);
     }
 
     @Override
@@ -343,7 +340,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter) {
+    public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
@@ -353,7 +350,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, Message.ORDER_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)

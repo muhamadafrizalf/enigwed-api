@@ -2,6 +2,7 @@ package com.enigwed.service;
 
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
@@ -21,8 +22,8 @@ public interface WeddingOrganizerService {
 
     // Customer
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);
-    ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter);
-    ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter);
+    ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest);
 
     // WO
     ApiResponse<WeddingOrganizerResponse> getOwnWeddingOrganizer(JwtClaim userInfo);
@@ -34,6 +35,6 @@ public interface WeddingOrganizerService {
     // ADMIN
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
     ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id);
-    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter);
-    ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter);
+    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest);
 }

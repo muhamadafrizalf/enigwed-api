@@ -5,6 +5,7 @@ import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -38,12 +39,16 @@ public class WeddingOrganizerController {
     @Operation(summary = "To get all wedding organizers (MOBILE)")
     @GetMapping(PathApi.PUBLIC_WO)
     public ResponseEntity<?> customerGetAllWeddingOrganizers(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+
             @Parameter(description = "Keyword can filter result by name, phone, description, address, and city name", required = false)
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String provinceId,
             @RequestParam(required = false) String regencyId,
             @RequestParam(required = false) String districtId
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
         FilterRequest filter = new FilterRequest();
         if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
         if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
@@ -51,9 +56,9 @@ public class WeddingOrganizerController {
 
         ApiResponse<?> response;
         if (keyword != null && !keyword.isEmpty()) {
-            response = weddingOrganizerService.customerSearchWeddingOrganizer(keyword, filter);
+            response = weddingOrganizerService.customerSearchWeddingOrganizer(keyword, filter, pagingRequest);
         } else {
-            response = weddingOrganizerService.customerFindAllWeddingOrganizers(filter);
+            response = weddingOrganizerService.customerFindAllWeddingOrganizers(filter, pagingRequest);
         }
         return ResponseEntity.ok(response);
     }
@@ -76,6 +81,9 @@ public class WeddingOrganizerController {
     public ResponseEntity<?> getWeddingOrganizerProfile(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+
             @Parameter(description = "Keyword can filter result by name, phone, description, address, province name, city name, and district name", required = false)
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) EUserStatus status,
@@ -83,6 +91,7 @@ public class WeddingOrganizerController {
             @RequestParam(required = false) String regencyId,
             @RequestParam(required = false) String districtId
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         FilterRequest filter = new FilterRequest();
         if (status != null) filter.setUserStatus(status);
@@ -94,9 +103,9 @@ public class WeddingOrganizerController {
             response = weddingOrganizerService.getOwnWeddingOrganizer(userInfo);
         } else {
             if (keyword != null && !keyword.isEmpty()) {
-                response = weddingOrganizerService.searchWeddingOrganizer(keyword, filter);
+                response = weddingOrganizerService.searchWeddingOrganizer(keyword, filter, pagingRequest);
             } else {
-                response = weddingOrganizerService.findAllWeddingOrganizers(filter);
+                response = weddingOrganizerService.findAllWeddingOrganizers(filter, pagingRequest);
             }
         }
         return ResponseEntity.ok(response);

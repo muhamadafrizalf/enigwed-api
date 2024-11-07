@@ -2,6 +2,7 @@ package com.enigwed.controller;
 
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ProductRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -39,17 +40,21 @@ public class ProductController {
     )
     @GetMapping(PathApi.PUBLIC_PRODUCT)
     public ResponseEntity<?> customerGetAllBonusPackages(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+
             @Parameter(description = "To filter by wedding_organizer_id", required = true)
             @RequestParam(required = false) String weddingOrganizerId,
             @Parameter(description = "Keyword can filter result by name, and description", required = false)
             @RequestParam(required = false) String keyword
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
         ApiResponse<?> response;
         boolean isKeyword = keyword != null && !keyword.isEmpty();
         if (isKeyword) {
-            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword);
+            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword, pagingRequest);
         } else {
-            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId);
+            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId, pagingRequest);
         }
         return ResponseEntity.ok(response);
     }
@@ -74,11 +79,15 @@ public class ProductController {
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> getOwnBonusPackages(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = productService.getOwnProducts(userInfo);
+        ApiResponse<?> response = productService.getOwnProducts(userInfo, pagingRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -166,8 +175,12 @@ public class ProductController {
             summary = "Get all products in database (For development only, don't use)"
     )
     @GetMapping(PathApi.PUBLIC_PRODUCT + "/dev")
-    public ResponseEntity<?> dev() {
-        ApiResponse<?> response = productService.findAllProducts();
+    public ResponseEntity<?> dev(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size
+    ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        ApiResponse<?> response = productService.findAllProducts(pagingRequest);
         return ResponseEntity.ok(response);
     }
 

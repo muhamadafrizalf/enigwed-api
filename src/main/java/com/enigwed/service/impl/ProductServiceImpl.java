@@ -3,6 +3,7 @@ package com.enigwed.service.impl;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ProductRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.ProductResponse;
@@ -77,20 +78,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId) {
+    public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest) {
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
         if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword) {
+    public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
         if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
 
     @Override
@@ -113,12 +114,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo) {
+    public ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
         if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-        return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -271,15 +272,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> findAllProducts() {
+    public ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest) {
         try {
             // ValidationException
 //            validationUtil.validateAndThrow(pagingRequest);
             List<Product> productList = productRepository.findByDeletedAtIsNull();
             if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
             List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-        return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
-//            return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
+            return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
         } catch (ValidationException e) {
             log.error("Validation error while loading products: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
@@ -291,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> searchProducts(String keyword) {
+    public ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest) {
         List<Product> productList = productRepository.searchBonusPackage(keyword);
         if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();

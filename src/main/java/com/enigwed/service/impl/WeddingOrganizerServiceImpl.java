@@ -6,6 +6,7 @@ import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
@@ -135,7 +136,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter) {
+    public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
         /* LOAD ONLY ACTIVE WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -145,12 +146,12 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::information).toList();
-        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter) {
+    public ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         /* SEARCH ACTIVE WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizerCustomer(keyword);
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -160,7 +161,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::information).toList();
-        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
     @Override
@@ -363,7 +364,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     }
 
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter) {
+    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
         /* LOAD ALL WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -373,11 +374,11 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
-        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
     }
 
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter) {
+    public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -387,6 +388,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
-        return ApiResponse.success(responseList, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
     }
 }

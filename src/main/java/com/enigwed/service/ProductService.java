@@ -1,6 +1,7 @@
 package com.enigwed.service;
 
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ProductRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.ProductResponse;
@@ -15,12 +16,12 @@ public interface ProductService {
 
     // Customer
     ApiResponse<ProductResponse> findProductById(String id);
-    ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId);
-    ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword);
+    ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest);
 
     // WO
     ApiResponse<ProductResponse> getOwnProductById(JwtClaim userInfo, String id);
-    ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo);
+    ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest);
     ApiResponse<ProductResponse> createProduct(JwtClaim userInfo, ProductRequest productRequest);
     ApiResponse<ProductResponse> updateProduct(JwtClaim userInfo, ProductRequest productRequest);
     ApiResponse<?> deleteProduct(JwtClaim userInfo, String id);
@@ -28,6 +29,6 @@ public interface ProductService {
     ApiResponse<ProductResponse> deleteProductImage(JwtClaim userInfo, String id, String imageId);
 
     // FOR DEVELOPMENT DONT USE
-    ApiResponse<List<ProductResponse>> findAllProducts();
-    ApiResponse<List<ProductResponse>> searchProducts(String keyword);
+    ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest);
 }

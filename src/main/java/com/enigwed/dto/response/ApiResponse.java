@@ -1,14 +1,19 @@
 package com.enigwed.dto.response;
 
+import com.enigwed.constant.ErrorMessage;
+import com.enigwed.constant.Message;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.mapper.PagingMapper;
+import com.enigwed.exception.ErrorResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -24,19 +29,26 @@ public class ApiResponse <T> {
     private T data;
     private String error;
 
-    public static <T> ApiResponse<List<T>> success(Page<T> data, String message) {
+    public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
+        int page = pagingRequest.getPage() - 1;
+        int size = pagingRequest.getSize();
+        int start = page * size <= data.size() ? page * size : -1;
+        if (start == -1) {
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
+        }
+        int end = Math.min((start + size), data.size());
+
+        List<T> pageData = data.subList(start, end);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<T> pageImpl = new PageImpl<>(pageData, pageable, data.size());
+
         return ApiResponse.<List<T>>builder()
                 .success(true)
                 .message(message)
-                .data(data.getContent())
-                .paging(PagingResponse.from(data))
+                .data(pageImpl.getContent())
+                .paging(PagingResponse.from(pageImpl))
                 .build();
-    }
-
-    public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
-        Pageable pageable = PagingMapper.getPageable(pagingRequest);
-        Page<T> page = PagingMapper.listToPage(data, pageable);
-        return success(page, message);
     }
 
     public static <T> ApiResponse<T> success(T data, String message) {

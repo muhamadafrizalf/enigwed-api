@@ -4,6 +4,7 @@ import com.enigwed.constant.ERole;
 import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingPackageRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -40,6 +41,8 @@ public class WeddingPackageController {
     )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> customerGetAllWeddingPackages(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
             @Parameter(description = "Keyword can filter result by name, description, city name, and wedding organizer name", required = false)
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String weddingOrganizerId,
@@ -48,6 +51,8 @@ public class WeddingPackageController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+
         FilterRequest filter = new FilterRequest();
         if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
         if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
@@ -57,9 +62,9 @@ public class WeddingPackageController {
 
         ApiResponse<?> response;
         if (keyword != null && !keyword.isEmpty()) {
-            response = weddingPackageService.customerSearchWeddingPackage(keyword, filter);
+            response = weddingPackageService.customerSearchWeddingPackage(keyword, filter, pagingRequest);
         } else {
-            response = weddingPackageService.customerFindAllWeddingPackages(filter);
+            response = weddingPackageService.customerFindAllWeddingPackages(filter, pagingRequest);
         }
         return ResponseEntity.ok(response);
     }
@@ -94,6 +99,9 @@ public class WeddingPackageController {
     public ResponseEntity<?> getOwnWeddingPackages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+
             @Parameter(description = "Keyword can filter result by name, description, and city name", required = false)
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String weddingOrganizerId,
@@ -102,6 +110,8 @@ public class WeddingPackageController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+
         FilterRequest filter = new FilterRequest();
         if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
         if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
@@ -113,15 +123,15 @@ public class WeddingPackageController {
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
             if (keyword != null && !keyword.isEmpty()) {
-                response = weddingPackageService.searchOwnWeddingPackages(userInfo, keyword, filter);
+                response = weddingPackageService.searchOwnWeddingPackages(userInfo, keyword, filter, pagingRequest);
             } else {
-                response = weddingPackageService.getOwnWeddingPackages(userInfo, filter);
+                response = weddingPackageService.getOwnWeddingPackages(userInfo, filter, pagingRequest);
             }
         } else {
             if (keyword != null && !keyword.isEmpty()) {
-                response = weddingPackageService.searchWeddingPackage(keyword, filter);
+                response = weddingPackageService.searchWeddingPackage(keyword, filter, pagingRequest);
             } else {
-                response = weddingPackageService.findAllWeddingPackages(filter);
+                response = weddingPackageService.findAllWeddingPackages(filter, pagingRequest);
             }
         }
         return ResponseEntity.ok(response);

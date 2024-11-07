@@ -30,6 +30,7 @@ public class ErrorMessage {
 
     public static final String WEDDING_ORGANIZER_ID_IS_REQUIRED = "Wedding organizer id is null or empty";
     public static final String WEDDING_PACKAGE_ID_IS_REQUIRED = "Wedding package id is required";
+    public static final String PAGE_OUT_OF_BOUND = "Requested page is out of bounds";
 
     public static String PROVINCE_NOT_FOUND(String id) {
         return "Province with id: " + id + " not found";

@@ -6,6 +6,7 @@ import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
+import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ReviewRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -120,13 +121,15 @@ public class OrderController {
     public ResponseEntity<?> getAllOrders(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @Parameter(description = "First priority if admin")
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
             @RequestParam(required = false) String weddingOrganizerId,
             @RequestParam(required = false) EStatus status,
             @RequestParam(required = false) String weddingPackageId,
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate
     ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
         FilterRequest filter = new FilterRequest();
         if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
         if (status != null) filter.setOrderStatus(status);
@@ -137,9 +140,9 @@ public class OrderController {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = orderService.findOwnOrders(userInfo, filter);
+            response = orderService.findOwnOrders(userInfo, filter, pagingRequest);
         } else {
-            response = orderService.findAllOrders(filter);
+            response = orderService.findAllOrders(filter, pagingRequest);
         }
         return ResponseEntity.ok(response);
     }
