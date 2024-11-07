@@ -56,7 +56,7 @@ public class ProductResponse {
             response.setImages(product.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
-            response.getImages().add(ImageResponse.noImage());
+            response.setImages(List.of(ImageResponse.noImage()));
         }
         return response;
     }

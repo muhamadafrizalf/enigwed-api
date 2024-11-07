@@ -55,7 +55,7 @@ public class WeddingPackageResponse {
             response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
-            response.getImages().add(ImageResponse.noImage());
+            response.setImages(List.of(ImageResponse.noImage()));
         }
         if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
             response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::simple).toList());
