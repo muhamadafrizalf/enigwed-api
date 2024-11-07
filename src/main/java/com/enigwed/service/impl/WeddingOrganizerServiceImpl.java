@@ -140,7 +140,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ONLY ACTIVE WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);
@@ -156,7 +156,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ACTIVE WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizerCustomer(keyword);
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);
@@ -370,7 +370,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ALL WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);
@@ -385,7 +385,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
+        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);

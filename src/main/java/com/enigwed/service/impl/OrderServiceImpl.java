@@ -313,10 +313,10 @@ public class OrderServiceImpl implements OrderService {
         validationUtil.validateAndThrow(pagingRequest);
 
         List<Order> orderList = orderRepository.findAll();
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);
@@ -348,10 +348,10 @@ public class OrderServiceImpl implements OrderService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);

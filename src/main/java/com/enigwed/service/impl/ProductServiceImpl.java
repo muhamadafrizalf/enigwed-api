@@ -81,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
@@ -91,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(),pagingRequest, Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
         validationUtil.validateAndThrow(pagingRequest);
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
         return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
     }
@@ -280,7 +280,7 @@ public class ProductServiceImpl implements ProductService {
             // ValidationException
             validationUtil.validateAndThrow(pagingRequest);
             List<Product> productList = productRepository.findByDeletedAtIsNull();
-            if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
+            if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
             List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
             return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
         } catch (ValidationException e) {
@@ -297,7 +297,7 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.searchBonusPackage(keyword);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
         return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
     }

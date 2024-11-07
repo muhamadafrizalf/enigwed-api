@@ -107,7 +107,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByDeletedAtIsNull();
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
@@ -120,7 +120,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchWeddingPackage(keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
@@ -154,7 +154,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
@@ -170,7 +170,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndKeyword(wo.getId(), keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
@@ -394,7 +394,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll();
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
@@ -406,6 +406,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchAllWeddingPackages(keyword);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
