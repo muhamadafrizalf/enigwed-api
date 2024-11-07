@@ -87,23 +87,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<Order> filterResult(FilterRequest filter, List<Order> orderList) {
-        if (filter.getWeddingOrganizerId() != null) {
-            orderList = orderList.stream().filter(item -> item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())).toList();
-        }
-        if (filter.getOrderStatus() != null) {
-            orderList = orderList.stream().filter(item -> item.getStatus().equals(filter.getOrderStatus())).toList();
-        }
-        if (filter.getStartDate() != null) {
-            orderList = orderList.stream().filter(item -> item.getTransactionDate().isAfter(filter.getStartDate())).toList();
-        }
-        if (filter.getEndDate() != null) {
-            orderList = orderList.stream().filter(item -> item.getTransactionDate().isBefore(filter.getEndDate())).toList();
-        }
-        if (filter.getWeddingPackageId() != null) {
-            orderList = orderList.stream().filter(item -> item.getWeddingPackage().getId().equals(filter.getWeddingPackageId())).toList();
-        }
-        return orderList;
+        return orderList.stream()
+                .filter(item ->
+                        (filter.getWeddingOrganizerId() == null || item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())) &&
+                                (filter.getOrderStatus() == null || item.getStatus().equals(filter.getOrderStatus())) &&
+                                (filter.getStartDate() == null || !item.getTransactionDate().isBefore(filter.getStartDate())) &&
+                                (filter.getEndDate() == null || !item.getTransactionDate().isAfter(filter.getEndDate())) &&
+                                (filter.getWeddingPackageId() == null || item.getWeddingPackage().getId().equals(filter.getWeddingPackageId()))
+                )
+                .toList();
     }
+
 
     private Map<EStatus, Integer> countByStatus(List<Order> orderList) {
         Map<EStatus, Integer> map = new HashMap<>();

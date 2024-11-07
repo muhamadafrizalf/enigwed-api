@@ -44,23 +44,17 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     }
 
     private List<WeddingPackage> filterResult(FilterRequest filter, List<WeddingPackage> list) {
-        if (filter.getWeddingOrganizerId() != null) {
-            list = list.stream().filter(item -> item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())).toList();
-        }
-        if (filter.getProvinceId() != null) {
-            list = list.stream().filter(item -> item.getProvince().getId().equals(filter.getProvinceId())).toList();
-        }
-        if (filter.getRegencyId() != null) {
-            list = list.stream().filter(item -> item.getRegency().getId().equals(filter.getRegencyId())).toList();
-        }
-        if (filter.getMinPrice() != null) {
-            list = list.stream().filter(item -> item.getPrice() >= filter.getMinPrice()).toList();
-        }
-        if (filter.getMaxPrice() != null) {
-            list = list.stream().filter(item -> item.getPrice() <= filter.getMaxPrice()).toList();
-        }
-        return list;
+        return list.stream()
+                .filter(item -> (filter.getWeddingOrganizerId() == null || item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())) &&
+                                (filter.getProvinceId() == null || item.getProvince().getId().equals(filter.getProvinceId())) &&
+                                (filter.getRegencyId() == null || item.getRegency().getId().equals(filter.getRegencyId())) &&
+                                (filter.getMinPrice() == null || item.getPrice() >= filter.getMinPrice()) &&
+                                (filter.getMaxPrice() == null || item.getPrice() <= filter.getMaxPrice())
+                )
+                .toList();
     }
+
+
 
     private void validateUserAccess(JwtClaim userInfo, WeddingPackage weddingPackage) throws AccessDeniedException {
         String userCredentialId = weddingPackage.getWeddingOrganizer().getUserCredential().getId();

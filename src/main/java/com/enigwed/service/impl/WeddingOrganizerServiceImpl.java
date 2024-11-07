@@ -46,28 +46,20 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     }
 
     private List<WeddingOrganizer> filterResult(FilterRequest filter, List<WeddingOrganizer> woList) {
-        if (filter.getUserStatus() != null) {
-            if (filter.getUserStatus() == EUserStatus.ACTIVE) {
-                woList = woList.stream().filter(wo -> wo.getUserCredential().isActive()).toList();
-            }
-            if (filter.getUserStatus() == EUserStatus.INACTIVE) {
-                woList = woList.stream().filter(wo -> !wo.getUserCredential().isActive() && wo.getDeletedAt() == null).toList();
-            }
-            if (filter.getUserStatus() == EUserStatus.DELETED) {
-                woList = woList.stream().filter(wo -> wo.getDeletedAt() != null).toList();
-            }
-        }
-        if (filter.getProvinceId() != null) {
-            woList = woList.stream().filter(wo -> wo.getProvince().getId().equals(filter.getProvinceId())).toList();
-        }
-        if (filter.getRegencyId() != null) {
-            woList = woList.stream().filter(wo -> wo.getRegency().getId().equals(filter.getRegencyId())).toList();
-        }
-        if (filter.getDistrictId() != null) {
-            woList = woList.stream().filter(wo -> wo.getDistrict().getId().equals(filter.getDistrictId())).toList();
-        }
-        return woList;
+        return woList.stream()
+                .filter(wo ->
+                        (filter.getUserStatus() == null || switch (filter.getUserStatus()) {
+                            case ACTIVE -> wo.getUserCredential().isActive();
+                            case INACTIVE -> !wo.getUserCredential().isActive() && wo.getDeletedAt() == null;
+                            case DELETED -> wo.getDeletedAt() != null;
+                        }) &&
+                                (filter.getProvinceId() == null || wo.getProvince().getId().equals(filter.getProvinceId())) &&
+                                (filter.getRegencyId() == null || wo.getRegency().getId().equals(filter.getRegencyId())) &&
+                                (filter.getDistrictId() == null || wo.getDistrict().getId().equals(filter.getDistrictId()))
+                )
+                .toList();
     }
+
 
     private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
         String userCredentialId = weddingOrganizer.getUserCredential().getId();
