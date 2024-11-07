@@ -21,7 +21,9 @@ public class PagingResponse {
         response.setPage(data.getNumber()+1);
         response.setSize(data.getSize());
         response.setTotalElements(data.getTotalElements());
-        response.setTotalPages(data.getTotalPages());
+        response.setTotalPages(Math.max(data.getTotalPages(), 1));
         return response;
     }
+
+
 }

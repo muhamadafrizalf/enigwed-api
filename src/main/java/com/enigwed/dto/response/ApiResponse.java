@@ -32,22 +32,26 @@ public class ApiResponse <T> {
     public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
+        int maxPage = data.size() / size;
         int start = page * size <= data.size() ? page * size : 0;
 //        if (start == -1) {
 //            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
 //        }
+        if (page > maxPage) {
+            page = maxPage;
+        }
         int end = Math.min((start + size), data.size());
 
         List<T> pageData = data.subList(start, end);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<T> pageImpl;
-        if (data.isEmpty()) {
-            pageImpl = new PageImpl<>(pageData, pageable, 1);
-        } else {
-            pageImpl = new PageImpl<>(pageData, pageable, data.size());
-        }
+        Page<T> pageImpl = new PageImpl<>(pageData, pageable, data.size());
+//        if (data.isEmpty()) {
+//            pageImpl = new PageImpl<>(pageData, pageable, 1);
+//        } else {
+//            pageImpl = new PageImpl<>(pageData, pageable, data.size());
+//        }
 
         return ApiResponse.<List<T>>builder()
                 .success(true)
