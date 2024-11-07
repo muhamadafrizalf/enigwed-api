@@ -32,10 +32,10 @@ public class ApiResponse <T> {
     public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
-        int start = page * size <= data.size() ? page * size : -1;
-        if (start == -1) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
-        }
+        int start = page * size <= data.size() ? page * size : 0;
+//        if (start == -1) {
+//            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
+//        }
         int end = Math.min((start + size), data.size());
 
         List<T> pageData = data.subList(start, end);
