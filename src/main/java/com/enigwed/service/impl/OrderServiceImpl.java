@@ -21,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.AccessDeniedException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +103,17 @@ public class OrderServiceImpl implements OrderService {
             orderList = orderList.stream().filter(item -> item.getWeddingPackage().getId().equals(filter.getWeddingPackageId())).toList();
         }
         return orderList;
+    }
+
+    private Map<EStatus, Integer> countByStatus(List<Order> orderList) {
+        Map<EStatus, Integer> map = new HashMap<>();
+        for (EStatus status : EStatus.values()) {
+            map.put(status, 0);
+        }
+        for (Order order : orderList) {
+            map.put(order.getStatus(), map.get(order.getStatus()) + 1);
+        }
+        return map;
     }
 
     private void sendNotificationWeddingOrganizer(ENotificationType type, Order order, String message) {
@@ -313,13 +326,14 @@ public class OrderServiceImpl implements OrderService {
         validationUtil.validateAndThrow(pagingRequest);
 
         List<Order> orderList = orderRepository.findAll();
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
+        Map<EStatus, Integer> countByStatus = countByStatus(orderList);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
     }
 
     @Override
@@ -348,13 +362,14 @@ public class OrderServiceImpl implements OrderService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
+        Map<EStatus, Integer> countByStatus = countByStatus(orderList);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND);
+        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND);
+        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
     }
 
     @Transactional(rollbackFor = Exception.class)

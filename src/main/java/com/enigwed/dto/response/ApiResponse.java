@@ -1,5 +1,6 @@
 package com.enigwed.dto.response;
 
+import com.enigwed.constant.EStatus;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.request.PagingRequest;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +28,7 @@ public class ApiResponse <T> {
     private boolean success;
     private String message;
     private PagingResponse paging;
+    private Map<EStatus, Integer> countByStatus;
     private T data;
     private String error;
 
@@ -34,7 +37,7 @@ public class ApiResponse <T> {
         int size = pagingRequest.getSize();
         int maxPages = (int) Math.ceil((double) data.size() / size) -1 ;
         int start = Math.min(page * size, maxPages * size);
-//        if (start == -1) {
+//        if (page * size > data.size()) {
 //            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
 //        }
         if (page > maxPages) {
@@ -54,6 +57,13 @@ public class ApiResponse <T> {
                 .data(pageImpl.getContent())
                 .paging(PagingResponse.from(pageImpl))
                 .build();
+    }
+
+    public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message, Map<EStatus, Integer> countByStatus) {
+        ApiResponse<List<T>> response = success(data, pagingRequest, message);
+        response.setCountByStatus(countByStatus);
+
+        return response;
     }
 
     public static <T> ApiResponse<T> success(T data, String message) {
