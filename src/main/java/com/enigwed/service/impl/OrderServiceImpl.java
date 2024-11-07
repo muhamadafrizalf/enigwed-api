@@ -90,11 +90,16 @@ public class OrderServiceImpl implements OrderService {
         return orderList.stream()
                 .filter(item ->
                         (filter.getWeddingOrganizerId() == null || item.getWeddingOrganizer().getId().equals(filter.getWeddingOrganizerId())) &&
-                                (filter.getOrderStatus() == null || item.getStatus().equals(filter.getOrderStatus())) &&
                                 (filter.getStartDate() == null || !item.getTransactionDate().isBefore(filter.getStartDate())) &&
                                 (filter.getEndDate() == null || !item.getTransactionDate().isAfter(filter.getEndDate())) &&
                                 (filter.getWeddingPackageId() == null || item.getWeddingPackage().getId().equals(filter.getWeddingPackageId()))
                 )
+                .toList();
+    }
+
+    private List<Order> filterByStatus(FilterRequest filter, List<Order> orderList) {
+        return orderList.stream()
+                .filter(item -> filter.getOrderStatus() == null || item.getStatus().equals(filter.getOrderStatus()))
                 .toList();
     }
 
@@ -326,6 +331,9 @@ public class OrderServiceImpl implements OrderService {
         orderList = filterResult(filter, orderList);
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
+        countByStatus = countByStatus(orderList);
+        orderList = filterByStatus(filter, orderList);
+
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
     }
@@ -361,6 +369,9 @@ public class OrderServiceImpl implements OrderService {
 
         orderList = filterResult(filter, orderList);
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
+
+        countByStatus = countByStatus(orderList);
+        orderList = filterByStatus(filter, orderList);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
         return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
