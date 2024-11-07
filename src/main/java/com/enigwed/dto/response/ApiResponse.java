@@ -33,7 +33,7 @@ public class ApiResponse <T> {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
         int maxPages = (int) Math.ceil((double) data.size() / size) -1 ;
-        int start = Math.min(page * size, data.size());
+        int start = Math.min(page * size, maxPages * size);
 //        if (start == -1) {
 //            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
 //        }
@@ -47,11 +47,6 @@ public class ApiResponse <T> {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<T> pageImpl = new PageImpl<>(pageData, pageable, data.size());
-//        if (data.isEmpty()) {
-//            pageImpl = new PageImpl<>(pageData, pageable, 1);
-//        } else {
-//            pageImpl = new PageImpl<>(pageData, pageable, data.size());
-//        }
 
         return ApiResponse.<List<T>>builder()
                 .success(true)
