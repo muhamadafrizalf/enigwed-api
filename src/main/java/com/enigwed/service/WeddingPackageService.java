@@ -13,6 +13,7 @@ import java.util.List;
 public interface WeddingPackageService {
     // Use in other service
     WeddingPackage loadWeddingPackageById(String id);
+    WeddingPackage addOrderCount(WeddingPackage weddingPackage);
 
     // Customer
     ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id);

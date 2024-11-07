@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Cascade;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
@@ -47,6 +50,9 @@ public class WeddingOrganizer extends AuditEntity{
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "avatar_id")
     private Image avatar;
+
+    @OneToMany(mappedBy = "weddingOrganizer")
+    List<Review> reviews = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_credential_id")

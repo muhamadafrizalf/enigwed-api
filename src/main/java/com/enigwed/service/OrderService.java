@@ -3,19 +3,23 @@ package com.enigwed.service;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
+import com.enigwed.dto.request.ReviewRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.OrderResponse;
+import com.enigwed.entity.Order;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface OrderService {
+    // Use In Other Service
+    Order loadOrderById(String id);
     // Customer
     ApiResponse<OrderResponse> createOrder(OrderRequest orderRequest);
     ApiResponse<OrderResponse> findOrderByBookCode(String bookCode);
     ApiResponse<OrderResponse> payOrder(MultipartFile image, String orderId);
     ApiResponse<OrderResponse> cancelOrder(String orderId);
-    ApiResponse<OrderResponse> reviewOrder(String orderId); // Add review later
+    ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest); // Add review later
     // Admin
     ApiResponse<OrderResponse> findOrderById(String id);
     ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter);

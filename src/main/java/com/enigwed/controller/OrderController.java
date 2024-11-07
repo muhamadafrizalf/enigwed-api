@@ -6,6 +6,7 @@ import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
+import com.enigwed.dto.request.ReviewRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.OrderService;
@@ -81,12 +82,10 @@ public class OrderController {
     )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_REVIEW)
     public ResponseEntity<?> reviewOrder(
-            @PathVariable String id
-            /*
-                ADD REVIEW HERE
-             */
+            @PathVariable String id,
+            @RequestBody ReviewRequest reviewRequest
     ) {
-        ApiResponse<?> response = orderService.reviewOrder(id);
+        ApiResponse<?> response = orderService.reviewOrder(id, reviewRequest);
         return ResponseEntity.ok(response);
     }
 

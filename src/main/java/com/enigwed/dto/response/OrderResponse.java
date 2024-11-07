@@ -1,5 +1,6 @@
 package com.enigwed.dto.response;
 
+import com.enigwed.constant.EStatus;
 import com.enigwed.entity.Order;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -27,6 +28,8 @@ public class OrderResponse {
     private WeddingOrganizerResponse weddingOrganizer;
     private WeddingPackageResponse weddingPackage;
     private List<OrderDetailResponse> orderDetails = new ArrayList<>();
+    private Boolean reviewed;
+    private ReviewResponse review;
 
     public static OrderResponse all(Order order) {
         OrderResponse response = new OrderResponse();
@@ -47,6 +50,10 @@ public class OrderResponse {
         response.setWeddingPackage(WeddingPackageResponse.order(order.getWeddingPackage()));
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
             response.setOrderDetails(order.getOrderDetails().stream().map(OrderDetailResponse::simple).toList());
+        }
+        response.setReviewed(order.isReviewed());
+        if (order.getReview() != null) {
+            response.setReview(ReviewResponse.simple(order.getReview()));
         }
         return response;
     }
@@ -70,6 +77,12 @@ public class OrderResponse {
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
             response.setOrderDetails(order.getOrderDetails().stream().map(OrderDetailResponse::simple).toList());
         }
+        if (order.getStatus() == EStatus.FINISHED && !order.isReviewed()) {
+            response.setReviewed(false);
+        } else if (order.getStatus() == EStatus.FINISHED) {
+            response.setReviewed(true);
+            response.setReview(ReviewResponse.simple(order.getReview()));
+        }
         return response;
     }
 
@@ -83,6 +96,7 @@ public class OrderResponse {
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(order.getWeddingOrganizer()));
         response.setStatus(order.getStatus().name());
         response.setCustomer(CustomerResponse.all(order.getCustomer()));
+        response.setReviewed(order.isReviewed());
         return response;
     }
 }

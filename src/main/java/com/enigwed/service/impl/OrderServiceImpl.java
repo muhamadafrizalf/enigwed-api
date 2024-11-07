@@ -5,6 +5,7 @@ import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.AdditionalProduct;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
+import com.enigwed.dto.request.ReviewRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.OrderResponse;
 import com.enigwed.entity.*;
@@ -35,7 +36,6 @@ public class OrderServiceImpl implements OrderService {
     private final ImageService imageService;
     private final WeddingOrganizerService weddingOrganizerService;
     private final NotificationService notificationService;
-    private final UserCredentialService userCredentialService;
     private final ValidationUtil validationUtil;
 
     private String generateBookCode() {
@@ -69,6 +69,22 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
+    private Review createReview(ReviewRequest reviewRequest, Order order) {
+        Review review = Review.builder()
+                .order(order)
+                .weddingOrganizer(order.getWeddingOrganizer())
+                .weddingPackage(order.getWeddingPackage())
+                .rating(reviewRequest.getRating())
+                .build();
+        if (reviewRequest.getComment()!=null) {
+            review.setComment(reviewRequest.getComment());
+        }
+        if (reviewRequest.getCustomerName() !=null && !reviewRequest.getCustomerName().isEmpty()) {
+            review.setCustomerName(reviewRequest.getCustomerName());
+        }
+        return review;
     }
 
     private List<Order> filterResult(FilterRequest filter, List<Order> orderList) {
@@ -106,6 +122,11 @@ public class OrderServiceImpl implements OrderService {
             Create notification for channel email
 
         */
+    }
+
+    @Override
+    public Order loadOrderById(String id) {
+        return findByIdOrThrow(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -177,10 +198,10 @@ public class OrderServiceImpl implements OrderService {
             return ApiResponse.success(response, Message.ORDER_CREATED);
 
         } catch (ValidationException e) {
-            log.error("Validation error during creating order: {}", e.getErrors());
+            log.error("Validation error while creating order: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
-            log.error("Error during creating order: {}", e.getError());
+            log.error("Error while creating order: {}", e.getError());
             throw e;
         }
     }
@@ -198,7 +219,7 @@ public class OrderServiceImpl implements OrderService {
             return ApiResponse.success(response, Message.ORDER_FOUND);
 
         } catch (ErrorResponse e) {
-            log.error("Error during loading order: {}", e.getError());
+            log.error("Error while loading order: {}", e.getError());
             throw e;
         }
     }
@@ -224,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
-            log.error("Error during uploading payment image: {}", e.getError());
+            log.error("Error while uploading payment image: {}", e.getError());
             throw e;
         }
     }
@@ -242,30 +263,35 @@ public class OrderServiceImpl implements OrderService {
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_CANCELLED, order, Message.ORDER_CANCELED(order.getCustomer().getName()));
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (ErrorResponse e) {
-            log.error("Error during canceling order: {}", e.getError());
+            log.error("Error while canceling order: {}", e.getError());
             throw e;
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<OrderResponse> reviewOrder(String orderId) {
+    public ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest) {
         try {
             // ErrorResponse
             Order order = findByIdOrThrow(orderId);
-            /*
-                ADD REVIEW
-            */
 
+            validationUtil.validateAndThrow(reviewRequest);
+
+            Review review = createReview(reviewRequest, order);
+            order.setReview(review);
             order.setReviewed(true);
+
             order = orderRepository.save(order);
 
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_REVIEWED, order, Message.ORDER_FINISHED(order.getCustomer().getName()));
 
             OrderResponse response = OrderResponse.information(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
-        } catch (ErrorResponse e) {
-            log.error("Error during finishing order: {}", e.getError());
+        } catch (ValidationException e) {
+            log.error("Validation error while creating review: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+        }  catch (ErrorResponse e) {
+            log.error("Error while creating review: {}", e.getError());
             throw e;
         }
     }
@@ -279,7 +305,7 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
         } catch (ErrorResponse e) {
-            log.error("Error during loading order: {}", e.getError());
+            log.error("Error while loading order: {}", e.getError());
             throw e;
         }
     }
@@ -290,7 +316,7 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orderList = orderRepository.findAll();
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
-        filterResult(filter, orderList);
+        orderList = filterResult(filter, orderList);
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
@@ -308,10 +334,10 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_FOUND);
         } catch (AccessDeniedException e) {
-            log.error("Access denied during loading order: {}", e.getMessage());
+            log.error("Access denied while loading order: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         }  catch (ErrorResponse e) {
-            log.error("Error during loading order: {}", e.getError());
+            log.error("Error while loading order: {}", e.getError());
             throw e;
         }
     }
@@ -323,7 +349,7 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
-        filterResult(filter, orderList);
+        orderList = filterResult(filter, orderList);
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
@@ -346,10 +372,10 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {
-            log.error("Access denied during accepting order: {}", e.getMessage());
+            log.error("Access denied while accepting order: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during accepting order: {}", e.getError());
+            log.error("Error while accepting order: {}", e.getError());
             throw e;
         }
     }
@@ -372,10 +398,10 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, Message.ORDER_UPDATED);
         } catch (AccessDeniedException e) {
-            log.error("Access denied during rejecting order: {}", e.getMessage());
+            log.error("Access denied while rejecting order: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during rejecting order: {}", e.getError());
+            log.error("Error while rejecting order: {}", e.getError());
             throw e;
         }
     }
@@ -397,7 +423,7 @@ public class OrderServiceImpl implements OrderService {
             return ApiResponse.success(response, Message.ORDER_FOUND);
 
         } catch (ErrorResponse e) {
-            log.error("Error during accepting order payment: {}", e.getError());
+            log.error("Error while accepting order payment: {}", e.getError());
             throw e;
         }
     }
@@ -413,6 +439,9 @@ public class OrderServiceImpl implements OrderService {
 
             order.setStatus(EStatus.FINISHED);
 
+            WeddingPackage weddingPackage = weddingPackageService.addOrderCount(order.getWeddingPackage());
+            order.setWeddingPackage(weddingPackage);
+
             order = orderRepository.save(order);
 
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, Message.ORDER_PAID(order.getCustomer().getName()));
@@ -421,10 +450,10 @@ public class OrderServiceImpl implements OrderService {
             return ApiResponse.success(response, Message.ORDER_FOUND);
 
         } catch (AccessDeniedException e) {
-            log.error("Access denied during finishing order: {}", e.getMessage());
+            log.error("Access denied while finishing order: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
-            log.error("Error during finishing order: {}", e.getError());
+            log.error("Error while finishing order: {}", e.getError());
             throw e;
         }
     }

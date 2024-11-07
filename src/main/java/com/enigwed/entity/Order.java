@@ -46,6 +46,10 @@ public class Order extends BaseEntity{
     @Column(name = "total_price")
     private double totalPrice;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "review_id")
+    private Review review;
+
     private boolean reviewed;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

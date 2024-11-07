@@ -42,4 +42,7 @@ public class Constraint {
     public static final String PRODUCT_NAME_BLANK = "Product name is required";
     public static final String PRODUCT_DESCRIPTION_BLANK = "Product description is required";
     public static final String QUANTITY_NULL = "Quantity is required";
+    public static final String COMMENT_MAX_500 = "Comment must be at most 500 characters";
+    public static final String RATING_NULL = "Rating is required";
+    public static final String INVALID_RATING = "Rating can only contains integer number from 0 to 5";
 }

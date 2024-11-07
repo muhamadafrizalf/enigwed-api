@@ -1,12 +1,14 @@
 package com.enigwed.dto.response;
 
 import com.enigwed.constant.EUserStatus;
+import com.enigwed.entity.Review;
 import com.enigwed.entity.WeddingOrganizer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -31,7 +33,7 @@ public class WeddingOrganizerResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private EUserStatus status;
-    /* RATING[SOON] */
+    private Double rating;
 
     public static WeddingOrganizerResponse all(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = new WeddingOrganizerResponse();
@@ -60,7 +62,9 @@ public class WeddingOrganizerResponse {
         } else {
             response.setStatus(EUserStatus.INACTIVE);
         }
-        /* RATING[SOON] */
+        if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
+            response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        }
         return response;
     }
 
@@ -75,6 +79,9 @@ public class WeddingOrganizerResponse {
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
         response.setAddress(weddingOrganizer.getAddress());
+        if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
+            response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        }
         return response;
     }
 
@@ -84,7 +91,9 @@ public class WeddingOrganizerResponse {
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
-        /* RATING[SOON] */
+        if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
+            response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        }
         return response;
     }
 
@@ -101,7 +110,9 @@ public class WeddingOrganizerResponse {
         } else {
             response.setStatus(EUserStatus.INACTIVE);
         }
-        /* RATING[SOON] */
+        if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
+            response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        }
         return response;
     }
 }

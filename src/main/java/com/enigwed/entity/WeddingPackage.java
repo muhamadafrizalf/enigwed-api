@@ -42,6 +42,9 @@ public class WeddingPackage extends AuditEntity {
     @JoinColumn(name = "wedding_organizer_id")
     private WeddingOrganizer weddingOrganizer;
 
+    @OneToMany(mappedBy = "weddingPackage")
+    List<Review> reviews = new ArrayList<>();
+
     @OneToMany(mappedBy = "weddingPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BonusDetail> bonusDetails = new ArrayList<>();
 

@@ -80,6 +80,13 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public WeddingPackage addOrderCount(WeddingPackage weddingPackage) {
+        weddingPackage.setOrderCount(weddingPackage.getOrderCount() + 1);
+        return weddingPackageRepository.saveAndFlush(weddingPackage);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id) {
