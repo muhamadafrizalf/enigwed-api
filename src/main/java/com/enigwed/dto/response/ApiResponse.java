@@ -41,7 +41,13 @@ public class ApiResponse <T> {
         List<T> pageData = data.subList(start, end);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<T> pageImpl = new PageImpl<>(pageData, pageable, data.size());
+
+        Page<T> pageImpl;
+        if (data.isEmpty()) {
+            pageImpl = new PageImpl<>(pageData, pageable, 1);
+        } else {
+            pageImpl = new PageImpl<>(pageData, pageable, data.size());
+        }
 
         return ApiResponse.<List<T>>builder()
                 .success(true)
