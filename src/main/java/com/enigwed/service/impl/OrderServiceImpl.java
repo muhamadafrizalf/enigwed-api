@@ -326,16 +326,17 @@ public class OrderServiceImpl implements OrderService {
 
         List<Order> orderList = orderRepository.findAll();
         Map<EStatus, Integer> countByStatus = countByStatus(orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         countByStatus = countByStatus(orderList);
         orderList = filterByStatus(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
+        return ApiResponse.successOrders(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
     }
 
     @Override
@@ -365,16 +366,17 @@ public class OrderServiceImpl implements OrderService {
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
         Map<EStatus, Integer> countByStatus = countByStatus(orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);
-        if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         countByStatus = countByStatus(orderList);
         orderList = filterByStatus(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
+        return ApiResponse.successOrders(responses, pagingRequest, Message.ORDER_FOUND, countByStatus);
     }
 
     @Transactional(rollbackFor = Exception.class)

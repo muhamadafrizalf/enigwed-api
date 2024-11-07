@@ -1,10 +1,8 @@
 package com.enigwed.dto.response;
 
 import com.enigwed.constant.EStatus;
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.EUserStatus;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.exception.ErrorResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -28,14 +25,15 @@ public class ApiResponse <T> {
     private boolean success;
     private String message;
     private PagingResponse paging;
-    private Map<EStatus, Integer> countByStatus;
+    private Map<EStatus, Integer> countOrderByStatus;
+    private Map<EUserStatus, Integer> countUserStatus;
     private T data;
     private String error;
 
     public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
-        int maxPages = (int) Math.ceil((double) data.size() / size) -1 ;
+        int maxPages = Math.max((int) Math.ceil((double) data.size() / size) - 1, 1);
         int start = Math.min(page * size, maxPages * size);
 //        if (page * size > data.size()) {
 //            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
@@ -59,9 +57,16 @@ public class ApiResponse <T> {
                 .build();
     }
 
-    public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message, Map<EStatus, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successOrders(List<T> data, PagingRequest pagingRequest, String message, Map<EStatus, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
-        response.setCountByStatus(countByStatus);
+        response.setCountOrderByStatus(countByStatus);
+
+        return response;
+    }
+
+    public static <T> ApiResponse<List<T>> successWo(List<T> data, PagingRequest pagingRequest, String message, Map<EUserStatus, Integer> countByStatus) {
+        ApiResponse<List<T>> response = success(data, pagingRequest, message);
+        response.setCountUserStatus(countByStatus);
 
         return response;
     }

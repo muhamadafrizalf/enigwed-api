@@ -56,7 +56,11 @@ public class WeddingOrganizerResponse {
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setDeletedAt(weddingOrganizer.getDeletedAt());
-        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
+        response.setWeddingPackageCount(
+                (int) weddingOrganizer.getWeddingPackages().stream()
+                        .filter(weddingPackage -> weddingPackage.getDeletedAt() != null)
+                        .count()
+        );
         if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {

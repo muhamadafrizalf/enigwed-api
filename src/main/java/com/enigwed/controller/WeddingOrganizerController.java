@@ -83,7 +83,6 @@ public class WeddingOrganizerController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-
             @Parameter(description = "Keyword can filter result by name, phone, description, address, province name, city name, and district name", required = false)
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) EUserStatus status,

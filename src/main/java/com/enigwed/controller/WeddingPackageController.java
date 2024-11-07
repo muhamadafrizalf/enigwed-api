@@ -94,7 +94,7 @@ public class WeddingPackageController {
             summary = "To get all wedding packages [ADMIN, WO] (WEB)",
             description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
     )
-    @PreAuthorize("hasAnyRole('WO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> getOwnWeddingPackages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)

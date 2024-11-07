@@ -27,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -48,18 +50,41 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     private List<WeddingOrganizer> filterResult(FilterRequest filter, List<WeddingOrganizer> woList) {
         return woList.stream()
                 .filter(wo ->
-                        (filter.getUserStatus() == null || switch (filter.getUserStatus()) {
-                            case ACTIVE -> wo.getUserCredential().isActive();
-                            case INACTIVE -> !wo.getUserCredential().isActive() && wo.getDeletedAt() == null;
-                            case DELETED -> wo.getDeletedAt() != null;
-                        }) &&
-                                (filter.getProvinceId() == null || wo.getProvince().getId().equals(filter.getProvinceId())) &&
+                        (filter.getProvinceId() == null || wo.getProvince().getId().equals(filter.getProvinceId())) &&
                                 (filter.getRegencyId() == null || wo.getRegency().getId().equals(filter.getRegencyId())) &&
                                 (filter.getDistrictId() == null || wo.getDistrict().getId().equals(filter.getDistrictId()))
                 )
                 .toList();
     }
 
+    private EUserStatus getUserStatus(WeddingOrganizer wo) {
+        if (wo.getUserCredential().isActive()) {
+            return EUserStatus.ACTIVE;
+        } else if (wo.getDeletedAt() == null) {
+            return EUserStatus.INACTIVE;
+        } else {
+            return EUserStatus.DELETED;
+        }
+    }
+
+    private List<WeddingOrganizer> filterByStatus(FilterRequest filter, List<WeddingOrganizer> woList) {
+        return woList.stream()
+                .filter(wo -> filter.getUserStatus() == null || getUserStatus(wo) == filter.getUserStatus())
+                .toList();
+    }
+
+    private Map<EUserStatus, Integer> countByStatus(List<WeddingOrganizer> woList) {
+        Map<EUserStatus, Integer> map = new HashMap<>();
+        for (EUserStatus status : EUserStatus.values()) {
+            map.put(status, 0);
+        }
+
+        for (WeddingOrganizer wo : woList) {
+            EUserStatus status = getUserStatus(wo);
+            map.put(status, map.get(status) + 1);
+        }
+        return map;
+    }
 
     private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
         String userCredentialId = weddingOrganizer.getUserCredential().getId();
@@ -362,14 +387,20 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ALL WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
+        Map<EUserStatus, Integer> countByStatus = countByStatus(woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+
+        countByStatus = countByStatus(woList);
+        woList = filterByStatus(filter, woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
-        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.successWo(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND, countByStatus);
     }
 
     @Override
@@ -377,13 +408,19 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
-        if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND);
+        Map<EUserStatus, Integer> countByStatus = countByStatus(woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+
+        countByStatus = countByStatus(woList);
+        woList = filterByStatus(filter, woList);
+        if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* MAP RESULT */
         List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
-        return ApiResponse.success(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND);
+        return ApiResponse.successWo(responseList, pagingRequest, Message.WEDDING_ORGANIZERS_FOUND, countByStatus);
     }
 }
