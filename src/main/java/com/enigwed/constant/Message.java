@@ -65,6 +65,8 @@ public class Message {
     public static final String NOTIFICATION_READ = "Notification read";
     // Address
     public static final String DATA_NOT_FOUND = "Data not found";
+    public static final String PAGE_INVALID = "Page must be a positive number";
+    public static final String SIZE_INVALID = "Size must be a positive number";
 
     public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
         return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";

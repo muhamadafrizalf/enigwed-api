@@ -137,6 +137,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ONLY ACTIVE WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -152,6 +153,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ACTIVE WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizerCustomer(keyword);
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -365,6 +367,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ALL WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);
@@ -379,6 +382,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
         if (woList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_WEDDING_ORGANIZER_FOUND);

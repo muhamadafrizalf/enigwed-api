@@ -310,6 +310,8 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
+
         List<Order> orderList = orderRepository.findAll();
         if (orderList.isEmpty()) return ApiResponse.success(new ArrayList<>(), Message.NO_ORDER_FOUND);
 
@@ -341,6 +343,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest) {
+        validationUtil.validateAndThrow(pagingRequest);
+
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
