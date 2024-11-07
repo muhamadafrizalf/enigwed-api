@@ -33,7 +33,7 @@ public class ApiResponse <T> {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
         int maxPage = data.size() / size;
-        int start = page * size <= data.size() ? page * size : 0;
+        int start = Math.min(page * size, data.size());
 //        if (start == -1) {
 //            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
 //        }
