@@ -19,8 +19,8 @@ public class OrderResponse {
     private LocalDateTime transactionFinishDate;
     private String bookCode;
     private LocalDateTime weddingDate;
-    private double basePrice;
-    private double totalPrice;
+    private Double basePrice;
+    private Double totalPrice;
     private String status;
     private CustomerResponse customer;
     private ImageResponse paymentImage;
@@ -76,9 +76,13 @@ public class OrderResponse {
     public static OrderResponse simple(Order order) {
         OrderResponse response = new OrderResponse();
         response.setId(order.getId());
+        response.setBookCode(order.getBookCode());
+        response.setTotalPrice(order.getTotalPrice());
         response.setTransactionDate(order.getTransactionDate());
         response.setWeddingPackage(WeddingPackageResponse.order(order.getWeddingPackage()));
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(order.getWeddingOrganizer()));
+        response.setStatus(order.getStatus().name());
+        response.setCustomer(CustomerResponse.all(order.getCustomer()));
         return response;
     }
 }
