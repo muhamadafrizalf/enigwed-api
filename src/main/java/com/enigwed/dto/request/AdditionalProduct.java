@@ -15,7 +15,7 @@ import static com.enigwed.constant.Constraint.QUANTITY_POSITIVE;
 public class AdditionalProduct {
 
     @NotBlank(message = PRODUCT_ID_BLANK)
-    private String bonusPackageId;
+    private String productId;
 
     @Positive(message = QUANTITY_POSITIVE)
     private int quantity;

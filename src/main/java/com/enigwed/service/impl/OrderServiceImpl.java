@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,7 +153,7 @@ public class OrderServiceImpl implements OrderService {
                 double additionalPrice = 0;
                 for (AdditionalProduct additionalProduct : orderRequest.getAdditionalProducts()) {
                     // ErrorResponse
-                    Product product = productService.loadProductById(additionalProduct.getBonusPackageId());
+                    Product product = productService.loadProductById(additionalProduct.getProductId());
 
                     OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);

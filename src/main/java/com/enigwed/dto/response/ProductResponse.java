@@ -66,6 +66,7 @@ public class ProductResponse {
         response.setId(product.getId());
         response.setName(product.getName());
         response.setPrice(product.getPrice());
+        response.setDescription(product.getDescription());
         if (product.getImages() != null && !product.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(product.getImages().get(0)));
         } else {
