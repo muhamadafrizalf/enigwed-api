@@ -104,13 +104,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-    private Map<EStatus, Integer> countByStatus(List<Order> orderList) {
-        Map<EStatus, Integer> map = new HashMap<>();
+    private Map<String, Integer> countByStatus(List<Order> orderList) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("ALL", 0);
         for (EStatus status : EStatus.values()) {
-            map.put(status, 0);
+            map.put(status.name(), 0);
         }
         for (Order order : orderList) {
-            map.put(order.getStatus(), map.get(order.getStatus()) + 1);
+            map.put("ALL", map.get("ALL") + 1);
+            map.put(order.getStatus().name(), map.get(order.getStatus().name()) + 1);
         }
         return map;
     }
@@ -325,7 +327,7 @@ public class OrderServiceImpl implements OrderService {
         validationUtil.validateAndThrow(pagingRequest);
 
         List<Order> orderList = orderRepository.findAll();
-        Map<EStatus, Integer> countByStatus = countByStatus(orderList);
+        Map<String, Integer> countByStatus = countByStatus(orderList);
         if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);
@@ -365,7 +367,7 @@ public class OrderServiceImpl implements OrderService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Order> orderList = orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
-        Map<EStatus, Integer> countByStatus = countByStatus(orderList);
+        Map<String, Integer> countByStatus = countByStatus(orderList);
         if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
         orderList = filterResult(filter, orderList);

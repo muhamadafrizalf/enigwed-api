@@ -45,4 +45,6 @@ public class Constraint {
     public static final String COMMENT_MAX_500 = "Comment must be at most 500 characters";
     public static final String RATING_NULL = "Rating is required";
     public static final String INVALID_RATING = "Rating can only contains integer number from 0 to 5";
+    public static final String SUBSCRIPTION_LENGTH_NULL = "Subscription length is required";
+    public static final String PAYMENT_IMAGE_NULL = "Payment image is required";
 }

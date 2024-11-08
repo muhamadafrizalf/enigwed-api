@@ -73,15 +73,16 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
                 .toList();
     }
 
-    private Map<EUserStatus, Integer> countByStatus(List<WeddingOrganizer> woList) {
-        Map<EUserStatus, Integer> map = new HashMap<>();
+    private Map<String, Integer> countByStatus(List<WeddingOrganizer> woList) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("ALL", 0);
         for (EUserStatus status : EUserStatus.values()) {
-            map.put(status, 0);
+            map.put(status.name(), 0);
         }
 
         for (WeddingOrganizer wo : woList) {
-            EUserStatus status = getUserStatus(wo);
-            map.put(status, map.get(status) + 1);
+            map.put("ALL", map.get("ALL") + 1);
+            map.put(getUserStatus(wo).name(), map.get(getUserStatus(wo).name()) + 1);
         }
         return map;
     }
@@ -373,6 +374,18 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* ACTIVATE USER */
         UserCredential user = userCredentialService.activateUser(wo.getUserCredential());
+
+        /* SET ACTIVE UNTIL FIRST DAY OF NEXT MOTH */
+        user.setActiveUntil(LocalDateTime.now()
+                .plusMonths(1)
+                .withDayOfMonth(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+        );
+
+        /* SAVE USER CREDENTIAL */
         wo.setUserCredential(user);
 
         /* SAVE WEDDING ORGANIZER */
@@ -387,7 +400,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* LOAD ALL WEDDING ORGANIZERS */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
-        Map<EUserStatus, Integer> countByStatus = countByStatus(woList);
+        Map<String, Integer> countByStatus = countByStatus(woList);
         if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* FILTER RESULT */
@@ -408,7 +421,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         validationUtil.validateAndThrow(pagingRequest);
         /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
         List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
-        Map<EUserStatus, Integer> countByStatus = countByStatus(woList);
+        Map<String, Integer> countByStatus = countByStatus(woList);
         if (woList.isEmpty()) return ApiResponse.successWo(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* FILTER RESULT */

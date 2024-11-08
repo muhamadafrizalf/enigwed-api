@@ -15,5 +15,7 @@ public class PathDb {
     public static final String CUSTOMER = "tbl_customer";
     public static final String NOTIFICATION = "tbl_notification";
     public static final String REVIEW = "tbl_review";
+    public static final String SUBSCRIPTION = "tbl_subscription";
+    public static final String SUBSCRIPTION_PRICE = "tbl_subscription_price";
 }
 

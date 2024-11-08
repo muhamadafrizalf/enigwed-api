@@ -25,8 +25,8 @@ public class ApiResponse <T> {
     private boolean success;
     private String message;
     private PagingResponse paging;
-    private Map<EStatus, Integer> countOrderByStatus;
-    private Map<EUserStatus, Integer> countUserStatus;
+    private Map<String, Integer> countOrderByStatus;
+    private Map<String, Integer> countUserStatus;
     private T data;
     private String error;
 
@@ -57,14 +57,14 @@ public class ApiResponse <T> {
                 .build();
     }
 
-    public static <T> ApiResponse<List<T>> successOrders(List<T> data, PagingRequest pagingRequest, String message, Map<EStatus, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successOrders(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
         response.setCountOrderByStatus(countByStatus);
 
         return response;
     }
 
-    public static <T> ApiResponse<List<T>> successWo(List<T> data, PagingRequest pagingRequest, String message, Map<EUserStatus, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successWo(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
         response.setCountUserStatus(countByStatus);
 

@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,9 @@ public class UserCredential extends AuditEntity implements UserDetails {
     private ERole role;
 
     private boolean active;
+
+    @Column(name = "active_until")
+    private LocalDateTime activeUntil;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
