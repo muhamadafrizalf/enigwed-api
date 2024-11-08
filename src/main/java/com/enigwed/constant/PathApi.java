@@ -62,4 +62,11 @@ public class PathApi {
     public static final String PROTECTED_IMAGE = PROTECTED + "/images";
     public static final String PROTECTED_IMAGE_ID = PROTECTED_IMAGE + "/{id}";
     public static final String PUBLIC_NOTIFICATION = PUBLIC + "/notifications";
+
+    // Subscription
+    public static final String PUBLIC_SUBSCRIPTION = PUBLIC + "/subscriptions";
+    public static final String PROTECTED_SUBSCRIPTION = PROTECTED + "/subscriptions";
+    public static final String PROTECTED_SUBSCRIPTION_PRICE = PROTECTED_SUBSCRIPTION + "/prices";
+    public static final String PROTECTED_SUBSCRIPTION_PRICE_ID = PROTECTED_SUBSCRIPTION_PRICE + "/{id}";
+    public static final String PROTECTED_SUBSCRIPTION_ID = PROTECTED_SUBSCRIPTION + "/{id}";
 }

@@ -1,6 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.ESubscriptionLength;
+import com.enigwed.constant.ESubscriptionPaymentStatus;
 import com.enigwed.constant.PathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -33,5 +36,14 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "payment_image")
     private Image paymentImage;
 
-    private boolean accepted;
+    @Enumerated(EnumType.STRING)
+    private ESubscriptionPaymentStatus status;
+
+    @Column(name = "transaction_date")
+    private LocalDateTime transactionDate;
+
+    @PrePersist
+    protected void onCreate() {
+        transactionDate = LocalDateTime.now();
+    }
 }

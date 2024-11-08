@@ -19,6 +19,7 @@ public interface WeddingOrganizerService {
     // Use in other service
     WeddingOrganizer loadWeddingOrganizerById(String id);
     WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
+    WeddingOrganizer loadWeddingOrganizerByEmail(String email);
 
     // Customer
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);

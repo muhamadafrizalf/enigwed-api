@@ -47,4 +47,5 @@ public class Constraint {
     public static final String INVALID_RATING = "Rating can only contains integer number from 0 to 5";
     public static final String SUBSCRIPTION_LENGTH_NULL = "Subscription length is required";
     public static final String PAYMENT_IMAGE_NULL = "Payment image is required";
+    public static final String SUBSCRIPTION_PRICE_ID_BLANK = "Subscription price id is required";
 }

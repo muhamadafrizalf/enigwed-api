@@ -67,6 +67,17 @@ public class Message {
     public static final String DATA_NOT_FOUND = "Data not found";
     public static final String PAGE_INVALID = "Page must be a positive number";
     public static final String SIZE_INVALID = "Size must be a positive number";
+    public static final String NO_SUBSCRIPTION_PRICE_FOUND = "No subscription price found";
+    public static final String SUBSCRIPTION_PRICES_FOUND = "Subscription prices found";
+    public static final String SUBSCRIPTION_PRICE_FOUND = "Subscription price found";
+    public static final String SUBSCRIPTION_PRICE_CREATED = "Subscription price created";
+    public static final String SUBSCRIPTION_PRICE_UPDATED = "Subscription price updated";
+    public static final String SUBSCRIPTION_PRICE_DELETED = "Subscription price deleted";
+    public static final String SUBSCRIPTION_PAID = "Subscription paid";
+    public static final String SUBSCRIPTION_FOUND = "Subscription found";
+    public static final String NO_SUBSCRIPTION_FOUND = "No subscription found";
+    public static final String SUBSCRIPTIONS_FOUND = "Subscriptions found";
+    public static final String SUBSCRIPTION_PAYMENT_CONFIRMED = "Subscription payment confirmed";
 
     public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
         return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";

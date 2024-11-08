@@ -1,8 +1,8 @@
 package com.enigwed.dto.request;
 
 import com.enigwed.constant.Constraint;
-import com.enigwed.constant.ESubscriptionLength;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,8 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class SubscriptionRequest {
 
-    @NotNull(message = Constraint.SUBSCRIPTION_LENGTH_NULL)
-    private ESubscriptionLength subscriptionLength;
+    @NotBlank(message = Constraint.SUBSCRIPTION_PRICE_ID_BLANK)
+    private String subscriptionPriceId;
 
     @Email(message = Constraint.EMAIL_VALID)
     private String email;

@@ -31,6 +31,10 @@ public class ErrorMessage {
     public static final String WEDDING_ORGANIZER_ID_IS_REQUIRED = "Wedding organizer id is null or empty";
     public static final String WEDDING_PACKAGE_ID_IS_REQUIRED = "Wedding package id is required";
     public static final String PAGE_OUT_OF_BOUND = "Requested page is out of bounds";
+    public static final String SUBSCRIPTION_PRICE_NOT_FOUND = "Subscription price not found";
+    public static final String SUBSCRIPTION_PRICE_ID_IS_REQUIRED = "Subscription price id is required";
+    public static final String SUBSCRIPTION_ID_IS_REQUIRED = "Subscription id is required";
+    public static final String SUBSCRIPTION_NOT_FOUND = "Subscription not found";
 
     public static String PROVINCE_NOT_FOUND(String id) {
         return "Province with id: " + id + " not found";
@@ -47,4 +51,7 @@ public class ErrorMessage {
     public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
     public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
 
+    public static String SUBSCRIPTION_PRICE_ALREADY_EXIST(String length) {
+        return "Subscription price with length: " + length + " already exists";
+    }
 }

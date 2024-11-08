@@ -1,6 +1,7 @@
 package com.enigwed.dto.request;
 
 import com.enigwed.constant.EStatus;
+import com.enigwed.constant.ESubscriptionPaymentStatus;
 import com.enigwed.constant.EUserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,14 +16,15 @@ import java.time.LocalDateTime;
 @Builder
 public class FilterRequest {
     private String weddingOrganizerId;
-    private EUserStatus userStatus;
     private String provinceId;
     private String regencyId;
     private String districtId;
     private Double minPrice;
     private Double maxPrice;
     private String weddingPackageId;
-    private EStatus orderStatus;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private EUserStatus userStatus;
+    private EStatus orderStatus;
+    private ESubscriptionPaymentStatus subscriptionPaymentStatus;
 }

@@ -10,4 +10,5 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     boolean existsByBookCode(String bookCode);
     Optional<Order> findByBookCode(String bookCode);
     List<Order> findByWeddingOrganizerIdOrderByTransactionDateDesc(String weddingOrganizerId);
+    List<Order> findAllByOrderByTransactionDateDesc();
 }

@@ -20,7 +20,7 @@ public interface OrderService {
     ApiResponse<OrderResponse> findOrderByBookCode(String bookCode);
     ApiResponse<OrderResponse> payOrder(MultipartFile image, String orderId);
     ApiResponse<OrderResponse> cancelOrder(String orderId);
-    ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest); // Add review later
+    ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest);
     // Admin
     ApiResponse<OrderResponse> findOrderById(String id);
     ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest);

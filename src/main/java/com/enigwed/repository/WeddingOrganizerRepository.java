@@ -16,6 +16,7 @@ public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganiz
     Optional<WeddingOrganizer> findByIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(String id);
     List<WeddingOrganizer> findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
     Optional<WeddingOrganizer> findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(String userCredentialId);
+    Optional<WeddingOrganizer> findByUserCredentialEmailAndDeletedAtIsNull(String email);
 
     @Query("SELECT wo FROM WeddingOrganizer wo WHERE (" +
             "LOWER(wo.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

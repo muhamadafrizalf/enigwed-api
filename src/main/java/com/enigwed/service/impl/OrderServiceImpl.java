@@ -97,6 +97,7 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+
     private List<Order> filterByStatus(FilterRequest filter, List<Order> orderList) {
         return orderList.stream()
                 .filter(item -> filter.getOrderStatus() == null || item.getStatus().equals(filter.getOrderStatus()))
@@ -326,7 +327,7 @@ public class OrderServiceImpl implements OrderService {
     public ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
 
-        List<Order> orderList = orderRepository.findAll();
+        List<Order> orderList = orderRepository.findAllByOrderByTransactionDateDesc();
         Map<String, Integer> countByStatus = countByStatus(orderList);
         if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 

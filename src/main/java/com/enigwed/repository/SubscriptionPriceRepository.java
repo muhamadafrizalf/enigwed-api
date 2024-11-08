@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface SubscriptionPriceRepository extends JpaRepository<SubscriptionPrice, String> {
     Optional<SubscriptionPrice> findByIdAndDeletedAtIsNull(String id);
+    Optional<SubscriptionPrice> findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength length);
     List<SubscriptionPrice> findByDeletedAtIsNull();
-    boolean existsBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength subscriptionLength);
 }
