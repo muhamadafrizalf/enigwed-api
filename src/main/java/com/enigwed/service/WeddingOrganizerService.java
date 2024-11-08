@@ -33,6 +33,7 @@ public interface WeddingOrganizerService {
     ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id);
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);
 
+
     // ADMIN
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
     ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id);

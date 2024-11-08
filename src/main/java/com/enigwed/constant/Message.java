@@ -79,6 +79,12 @@ public class Message {
     public static final String SUBSCRIPTIONS_FOUND = "Subscriptions found";
     public static final String SUBSCRIPTION_PAYMENT_CONFIRMED = "Subscription payment confirmed";
     public static final String STATISTIC_FETCHED = "Statistic fetched";
+    public static final String BANK_ACCOUNT_FOUND = "Bank account found";
+    public static final String BANK_ACCOUNTS_FOUND = "Bank accounts found";
+    public static final String BANK_ACCOUNT_CREATED = "Bank account created";
+    public static final String BANK_ACCOUNT_UPDATED = "Bank account updated";
+    public static final String BANK_ACCOUNT_DELETED = "Bank account deleted";
+    public static final String NO_BANK_ACCOUNT_FOUND = "No bank account found";
 
     public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
         return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";

@@ -5,6 +5,7 @@ import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;

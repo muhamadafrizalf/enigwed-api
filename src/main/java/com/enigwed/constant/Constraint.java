@@ -48,4 +48,9 @@ public class Constraint {
     public static final String SUBSCRIPTION_LENGTH_NULL = "Subscription length is required";
     public static final String PAYMENT_IMAGE_NULL = "Payment image is required";
     public static final String SUBSCRIPTION_PRICE_ID_BLANK = "Subscription price id is required";
+    public static final String WEDDING_ORGANIZER_ID_BLANK = "Wedding organizer id is required";
+    public static final String ACCOUNT_NUMBER_BLANK = "Account number is required";
+    public static final String BANK_NAME_BLANK = "Bank name is required";
+    public static final String INVALID_ACCOUNT_NUMBER = "Account number must contain only numbers";
+    public static final String INVALID_BANK_CODE = "Bank code must contain only numbers";
 }

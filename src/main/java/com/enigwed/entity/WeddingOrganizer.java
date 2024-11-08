@@ -57,6 +57,9 @@ public class WeddingOrganizer extends AuditEntity{
     @OneToMany(mappedBy = "weddingOrganizer")
     List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "weddingOrganizer", cascade = CascadeType.MERGE)
+    List<BankAccount> bankAccounts = new ArrayList<>();
+
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_credential_id")
     private UserCredential userCredential;
