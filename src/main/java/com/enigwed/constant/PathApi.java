@@ -69,4 +69,5 @@ public class PathApi {
     public static final String PROTECTED_SUBSCRIPTION_PRICE = PROTECTED_SUBSCRIPTION + "/prices";
     public static final String PROTECTED_SUBSCRIPTION_PRICE_ID = PROTECTED_SUBSCRIPTION_PRICE + "/{id}";
     public static final String PROTECTED_SUBSCRIPTION_ID = PROTECTED_SUBSCRIPTION + "/{id}";
+    public static final String PROTECTED_STATISTIC = PROTECTED + "/statistics";
 }

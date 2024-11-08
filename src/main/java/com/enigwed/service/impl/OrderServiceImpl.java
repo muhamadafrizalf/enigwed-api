@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,6 +140,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order loadOrderById(String id) {
         return findByIdOrThrow(id);
+    }
+
+    @Override
+    public List<Order> loadAllOrders(String weddingOrganizerId, LocalDateTime from, LocalDateTime to) {
+        return orderRepository.findByWeddingOrganizerIdAndStatusAndTransactionDateBetween(weddingOrganizerId, EStatus.FINISHED, from, to);
     }
 
     @Transactional(rollbackFor = Exception.class)

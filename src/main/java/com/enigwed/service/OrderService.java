@@ -10,11 +10,13 @@ import com.enigwed.dto.response.OrderResponse;
 import com.enigwed.entity.Order;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OrderService {
     // Use In Other Service
     Order loadOrderById(String id);
+    List<Order> loadAllOrders(String weddingOrganizerId, LocalDateTime from, LocalDateTime to);
     // Customer
     ApiResponse<OrderResponse> createOrder(OrderRequest orderRequest);
     ApiResponse<OrderResponse> findOrderByBookCode(String bookCode);

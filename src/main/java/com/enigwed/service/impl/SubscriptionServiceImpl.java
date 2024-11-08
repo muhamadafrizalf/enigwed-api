@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -144,6 +145,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return;
         }
         throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+    }
+
+    @Override
+    public List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to) {
+        return subscriptionRepository.findByStatusAndTransactionDateBetween(ESubscriptionPaymentStatus.CONFIRMED, from, to);
     }
 
     @Override

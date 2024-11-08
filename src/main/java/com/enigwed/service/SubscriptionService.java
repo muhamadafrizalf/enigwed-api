@@ -7,11 +7,15 @@ import com.enigwed.dto.request.SubscriptionPriceRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
+import com.enigwed.entity.Subscription;
 import com.enigwed.entity.SubscriptionPrice;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SubscriptionService {
+    List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to);
+
     ApiResponse<List<SubscriptionPrice>> getSubscriptionPrices();
     ApiResponse<SubscriptionPrice> getSubscriptionPriceById(String subscriptionPriceId);
     ApiResponse<SubscriptionPrice> addSubscriptionPrice(SubscriptionPriceRequest subscriptionPriceRequest);

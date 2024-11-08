@@ -78,6 +78,7 @@ public class Message {
     public static final String NO_SUBSCRIPTION_FOUND = "No subscription found";
     public static final String SUBSCRIPTIONS_FOUND = "Subscriptions found";
     public static final String SUBSCRIPTION_PAYMENT_CONFIRMED = "Subscription payment confirmed";
+    public static final String STATISTIC_FETCHED = "Statistic fetched";
 
     public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
         return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";

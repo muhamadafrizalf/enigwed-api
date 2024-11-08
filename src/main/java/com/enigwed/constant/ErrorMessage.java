@@ -35,6 +35,7 @@ public class ErrorMessage {
     public static final String SUBSCRIPTION_PRICE_ID_IS_REQUIRED = "Subscription price id is required";
     public static final String SUBSCRIPTION_ID_IS_REQUIRED = "Subscription id is required";
     public static final String SUBSCRIPTION_NOT_FOUND = "Subscription not found";
+    public static final String INVALID_DATE = "Start date must be before end date";
 
     public static String PROVINCE_NOT_FOUND(String id) {
         return "Province with id: " + id + " not found";
