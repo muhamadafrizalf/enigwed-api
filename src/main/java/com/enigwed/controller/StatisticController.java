@@ -37,8 +37,8 @@ public class StatisticController {
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate
     ) {
-        if (startDate != null) startDate = LocalDateTime.now().minusMonths(6);
-        if (endDate != null) endDate = LocalDateTime.now();
+        if (startDate == null) startDate = LocalDateTime.now().minusMonths(6);
+        if (endDate == null) endDate = LocalDateTime.now();
 
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response = statisticService.getStatisticsIncome(userInfo, startDate, endDate);;
