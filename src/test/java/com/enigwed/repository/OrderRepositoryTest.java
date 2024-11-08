@@ -73,33 +73,33 @@ class OrderRepositoryTest {
     }
 
     @Test
-    void findByWeddingOrganizerId_OrderWithWeddingOrganizerIdExist_ReturnListOfOrder() {
+    void findByWeddingOrganizerId_OrderWithWeddingOrganizerIdOrderByTransactionDateDescExist_ReturnListOfOrder() {
         // Arrange
         WeddingOrganizer weddingOrganizer = WeddingOrganizer.builder().id("123").build();
         Order order = Order.builder().weddingOrganizer(weddingOrganizer).build();
         List<Order> expect = List.of(order);
 
-        Mockito.when(orderRepository.findByWeddingOrganizerId("123")).thenReturn(expect);
+        Mockito.when(orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc("123")).thenReturn(expect);
 
         // Act
-        List<Order> actual = orderRepository.findByWeddingOrganizerId("123");
+        List<Order> actual = orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc("123");
 
         // Assert
         assertFalse(actual.isEmpty());
         assertTrue(actual.contains(order));
-        Mockito.verify(orderRepository, Mockito.times(1)).findByWeddingOrganizerId("123");
+        Mockito.verify(orderRepository, Mockito.times(1)).findByWeddingOrganizerIdOrderByTransactionDateDesc("123");
     }
 
     @Test
-    void findByWeddingOrganizerId_OrderWithWeddingOrganizerIdDoesNotExist_ReturnEmptyList() {
+    void findByWeddingOrganizerId_OrderWithWeddingOrganizerIdOrderByTransactionDateDescDoesNotExist_ReturnEmptyList() {
         // Arrange
-        Mockito.when(orderRepository.findByWeddingOrganizerId("123")).thenReturn(List.of());
+        Mockito.when(orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc("123")).thenReturn(List.of());
 
         // Act
-        List<Order> actual = orderRepository.findByWeddingOrganizerId("123");
+        List<Order> actual = orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc("123");
 
         // Assert
         assertTrue(actual.isEmpty());
-        Mockito.verify(orderRepository, Mockito.times(1)).findByWeddingOrganizerId("123");
+        Mockito.verify(orderRepository, Mockito.times(1)).findByWeddingOrganizerIdOrderByTransactionDateDesc("123");
     }
 }

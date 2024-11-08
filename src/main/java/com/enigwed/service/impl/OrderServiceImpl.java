@@ -364,7 +364,7 @@ public class OrderServiceImpl implements OrderService {
 
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
-        List<Order> orderList = orderRepository.findByWeddingOrganizerId(wo.getId());
+        List<Order> orderList = orderRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
         Map<EStatus, Integer> countByStatus = countByStatus(orderList);
         if (orderList.isEmpty()) return ApiResponse.successOrders(new ArrayList<>(), pagingRequest, Message.NO_ORDER_FOUND, countByStatus);
 
