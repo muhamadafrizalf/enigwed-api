@@ -1,11 +1,13 @@
 package com.enigwed.service.impl;
 
 import com.enigwed.constant.ERole;
+import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.StatisticResponse;
+import com.enigwed.dto.response.WeddingOrganizerResponse;
 import com.enigwed.entity.Order;
 import com.enigwed.entity.Subscription;
 import com.enigwed.entity.WeddingOrganizer;
@@ -70,6 +72,30 @@ public class StatisticServiceImpl implements StatisticService {
         return map;
     }
 
+    private EUserStatus getUserStatus(WeddingOrganizer wo) {
+        if (wo.getUserCredential().isActive()) {
+            return EUserStatus.ACTIVE;
+        } else if (wo.getDeletedAt() == null) {
+            return EUserStatus.INACTIVE;
+        } else {
+            return EUserStatus.DELETED;
+        }
+    }
+
+    private Map<String, Integer> countByStatus(List<WeddingOrganizer> woList) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("ALL", 0);
+        for (EUserStatus status : EUserStatus.values()) {
+            map.put(status.name(), 0);
+        }
+
+        for (WeddingOrganizer wo : woList) {
+            map.put("ALL", map.get("ALL") + 1);
+            map.put(getUserStatus(wo).name(), map.get(getUserStatus(wo).name()) + 1);
+        }
+        return map;
+    }
+
     @Override
     public ApiResponse<StatisticResponse> getStatisticsIncome(JwtClaim userInfo, LocalDateTime from, LocalDateTime to) {
         if (from.isAfter(to)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_DATE);
@@ -82,7 +108,9 @@ public class StatisticServiceImpl implements StatisticService {
         } else {
             List<Subscription> subscriptionList = subscriptionService.getSubscriptions(from, to);
             Map<String, Double> statistic = getStatisticSubscription(subscriptionList, from, to);
-            StatisticResponse response = StatisticResponse.admin(statistic);
+            List<WeddingOrganizer> woList = weddingOrganizerService.findAllWeddingOrganizers();
+            Map<String, Integer> countByStatus = countByStatus(woList);
+            StatisticResponse response = StatisticResponse.admin(woList, countByStatus, statistic);
             return ApiResponse.success(response, Message.STATISTIC_FETCHED);
         }
     }

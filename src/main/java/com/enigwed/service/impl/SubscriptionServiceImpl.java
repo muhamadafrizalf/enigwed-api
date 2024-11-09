@@ -12,10 +12,7 @@ import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.SubscriptionPriceRepository;
 import com.enigwed.repository.SubscriptionRepository;
-import com.enigwed.service.ImageService;
-import com.enigwed.service.NotificationService;
-import com.enigwed.service.SubscriptionService;
-import com.enigwed.service.WeddingOrganizerService;
+import com.enigwed.service.*;
 import com.enigwed.util.ValidationUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +37,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
     private final NotificationService notificationService;
+    private final UserCredentialService userCredentialService;
     private final ValidationUtil validationUtil;
 
     @Value("${com.enigwed.subscription-price-one-month}")
@@ -126,23 +124,41 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .toList();
     }
 
-//    private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
-//        Notification notification = Notification.builder()
-//                .channel(ENotificationChannel.SYSTEM)
-//                .type(type)
-//                .receiver(EReceiver.WEDDING_ORGANIZER)
-//                .receiverId(order.getWeddingOrganizer().getUserCredential().getId())
-//                .dataType(EDataType.ORDER)
-//                .dataId(order.getId())
-//                .message(message)
-//                .build();
-//        notificationService.createNotification(notification);
-//        /*
-//
-//            Create notification for channel email
-//
-//        */
-//    }
+    private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
+        Notification notification = Notification.builder()
+                .channel(ENotificationChannel.SYSTEM)
+                .type(type)
+                .receiver(EReceiver.WEDDING_ORGANIZER)
+                .receiverId(subscription.getWeddingOrganizer().getUserCredential().getId())
+                .dataType(EDataType.SUBSCRIPTION)
+                .dataId(subscription.getId())
+                .message(message)
+                .build();
+        notificationService.createNotification(notification);
+        /*
+
+            Create notification for channel email
+
+        */
+    }
+
+    private void sendNotificationAdmin(ENotificationType type, Subscription subscription, String message) {
+        Notification notification = Notification.builder()
+                .channel(ENotificationChannel.SYSTEM)
+                .type(type)
+                .receiver(EReceiver.ADMIN)
+                .receiverId(userCredentialService.loadAdminId())
+                .dataType(EDataType.SUBSCRIPTION)
+                .dataId(subscription.getId())
+                .message(message)
+                .build();
+        notificationService.createNotification(notification);
+        /*
+
+            Create notification for channel email
+
+        */
+    }
 
     private List<Subscription> filterByStatus(FilterRequest filter, List<Subscription> list) {
         return list.stream()
@@ -253,6 +269,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscription = subscriptionRepository.save(subscription);
 
+        /* CREATE NOTIFICATION */
+        sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, Message.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
+
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
         return ApiResponse.success(response, Message.SUBSCRIPTION_PAID);
     }
@@ -308,7 +327,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription = subscriptionRepository.saveAndFlush(subscription);
 
         /* SEND NOTIFICATION */
-
+        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, Message.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPacket().getName()));
 
         weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
 

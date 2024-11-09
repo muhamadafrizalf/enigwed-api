@@ -5,7 +5,6 @@ import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
-import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
@@ -151,6 +150,11 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         user.setActiveUntil(user.getActiveUntil().plusMonths(subscriptionPacket.getSubscriptionLength().getMonths()));
         weddingOrganizer.setUserCredential(user);
         weddingOrganizerRepository.save(weddingOrganizer);
+    }
+
+    @Override
+    public List<WeddingOrganizer> findAllWeddingOrganizers() {
+        return  weddingOrganizerRepository.findAll();
     }
 
     @Transactional(readOnly = true)

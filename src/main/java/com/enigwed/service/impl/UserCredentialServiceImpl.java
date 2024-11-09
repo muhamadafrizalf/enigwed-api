@@ -26,6 +26,8 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     private final UserCredentialRepository userCredentialRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+
     @Value("${com.enigwed.email-admin}")
     private String emailAdmin;
 

@@ -104,4 +104,12 @@ public class Message {
     public static String ORDER_PAID(String name) {
         return "Order from " + name + " has been paid, click to check order detail.";
     }
+
+    public static String NEW_SUBSCRIPTION_RECEIVED(String name) {
+        return "New subscription from " + name + " has been received";
+    }
+
+    public static String SUBSCRIPTION_CONFIRMED(String name) {
+        return "Subscription with subscription packet " + name + " has been confirmed";
+    }
 }

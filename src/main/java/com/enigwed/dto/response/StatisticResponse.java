@@ -5,14 +5,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatisticResponse {
-    WeddingOrganizerResponse weddingOrganizer;
     private Map<String, Double> income;
+    private WeddingOrganizerResponse weddingOrganizer;
+    private Map<String, Integer> countByStatus;
+    private List<WeddingOrganizerResponse> weddingOrganizerList;
 
     public static StatisticResponse wo(WeddingOrganizer weddingOrganizer, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
@@ -21,8 +24,10 @@ public class StatisticResponse {
         return response;
     }
 
-    public static StatisticResponse admin(Map<String, Double> income) {
+    public static StatisticResponse admin(List<WeddingOrganizer> woList, Map<String, Integer> countByStatus, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
+        response.setWeddingOrganizerList(woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList());
+        response.setCountByStatus(countByStatus);
         response.setIncome(income);
         return response;
     }

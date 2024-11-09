@@ -1,6 +1,5 @@
 package com.enigwed.service;
 
-import com.enigwed.constant.ESubscriptionLength;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
@@ -23,6 +22,7 @@ public interface WeddingOrganizerService {
     WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
     WeddingOrganizer loadWeddingOrganizerByEmail(String email);
     void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPacket subscriptionPacket);
+    List<WeddingOrganizer> findAllWeddingOrganizers();
 
     // Customer
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);
@@ -35,7 +35,6 @@ public interface WeddingOrganizerService {
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizerImage(JwtClaim userInfo, String id, MultipartFile avatar);
     ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id);
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);
-
 
     // ADMIN
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
