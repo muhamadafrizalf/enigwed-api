@@ -7,7 +7,6 @@ public class PathApi {
     public static final String BASE_URL = "/api";
 
 
-
     // Accessibility
     public static final String PUBLIC = BASE_URL + "/public";
     public static final String PROTECTED = BASE_URL + "/protected";
@@ -74,4 +73,5 @@ public class PathApi {
     public static final String PROTECTED_BANK_ACCOUNT = PROTECTED + "/bank-accounts";
     public static final String PROTECTED_BANK_ACCOUNT_ID = PROTECTED_BANK_ACCOUNT + "/{id}";
     public static final String PROTECTED_SUBSCRIPTION_ACTIVE = PROTECTED_SUBSCRIPTION + "/active";
+    public static final String PUBLIC_BANK_ACCOUNT = PUBLIC + "/bank-accounts";
 }

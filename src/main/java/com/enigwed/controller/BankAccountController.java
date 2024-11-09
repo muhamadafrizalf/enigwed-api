@@ -4,6 +4,7 @@ import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.BankAccountResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.BankAccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,15 @@ import org.springframework.web.bind.annotation.*;
 public class BankAccountController {
     private final BankAccountService bankAccountService;
     private final JwtUtil jwtUtil;
+
+    @Operation(summary = "For customer to get list of bank account by wedding_organizer_id (MOBILE)")
+    @GetMapping(PathApi.PUBLIC_BANK_ACCOUNT)
+    public ResponseEntity<?> getBankAccounts(
+            @RequestParam String weddingOrganizerId
+    ) {
+        ApiResponse<?> response = bankAccountService.getBankAccountsByWeddingOrganizerId(weddingOrganizerId);
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "For wedding organizer to get bank account information by bank_account_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")

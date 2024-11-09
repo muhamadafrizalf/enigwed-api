@@ -45,6 +45,15 @@ public class BankAccountImpl implements BankAccountService {
     }
 
     @Override
+    public ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId) {
+        List<BankAccount> bankAccountList = bankAccountRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
+        if (bankAccountList == null || bankAccountList.isEmpty())
+            return ApiResponse.success(new ArrayList<>(), Message.NO_BANK_ACCOUNT_FOUND);
+        List<BankAccountResponse> responses = bankAccountList.stream().map(BankAccountResponse::from).toList();
+        return ApiResponse.success(responses, Message.BANK_ACCOUNTS_FOUND);
+    }
+
+    @Override
     public ApiResponse<BankAccountResponse> findBankAccountById(String id) {
         BankAccount bankAccount =  findByIdOrThrow(id);
         BankAccountResponse response = BankAccountResponse.from(bankAccount);
