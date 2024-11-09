@@ -33,6 +33,7 @@ public class WeddingOrganizerResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private EUserStatus status;
+    private LocalDateTime activeUntil;
     private Double rating;
     private Integer weddingPackageCount;
 
@@ -56,6 +57,7 @@ public class WeddingOrganizerResponse {
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setDeletedAt(weddingOrganizer.getDeletedAt());
+        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         response.setWeddingPackageCount(
                 (int) weddingOrganizer.getWeddingPackages().stream()
                         .filter(weddingPackage -> weddingPackage.getDeletedAt() != null)
@@ -124,6 +126,12 @@ public class WeddingOrganizerResponse {
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
             response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
         }
+        return response;
+    }
+
+    public static WeddingOrganizerResponse statistic(WeddingOrganizer weddingOrganizer) {
+        WeddingOrganizerResponse response = simple(weddingOrganizer);
+        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         return response;
     }
 }
