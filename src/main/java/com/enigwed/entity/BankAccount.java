@@ -17,14 +17,17 @@ import lombok.experimental.SuperBuilder;
 @Table(name = PathDb.BANK_ACCOUNT)
 public class BankAccount extends AuditEntity {
 
-    @Column(name = "account_number")
-    private String accountNumber;
-
     @Column(name = "bank_code")
     private String bankCode;
 
     @Column(name = "bank_name")
     private String bankName;
+
+    @Column(name = "account_number")
+    private String accountNumber;
+
+    @Column(name = "account_name")
+    private String accountName;
 
     @ManyToOne
     @JoinColumn(name = "wedding_organizer_id")

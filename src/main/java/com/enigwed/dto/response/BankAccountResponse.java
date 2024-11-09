@@ -24,6 +24,8 @@ public class BankAccountResponse {
 
     private String accountNumber;
 
+    private String accountName;
+
     public static BankAccountResponse from(BankAccount bankAccount) {
         BankAccountResponse response = new BankAccountResponse();
         response.setId(bankAccount.getId());
@@ -31,6 +33,7 @@ public class BankAccountResponse {
         response.setBankName(bankAccount.getBankName());
         response.setBankCode(bankAccount.getBankCode());
         response.setAccountNumber(bankAccount.getAccountNumber());
+        response.setAccountName(bankAccount.getAccountName());
         return response;
     }
 }

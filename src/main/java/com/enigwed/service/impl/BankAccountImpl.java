@@ -72,6 +72,8 @@ public class BankAccountImpl implements BankAccountService {
                 .bankCode(bankAccountRequest.getBankCode())
                 .bankName(bankAccountRequest.getBankName())
                 .accountNumber(bankAccountRequest.getAccountNumber())
+                .accountName(bankAccountRequest.getAccountName())
+                .accountName(bankAccountRequest.getAccountName())
                 .build();
 
         bankAccount = bankAccountRepository.save(bankAccount);
