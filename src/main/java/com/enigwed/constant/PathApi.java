@@ -73,4 +73,5 @@ public class PathApi {
 
     public static final String PROTECTED_BANK_ACCOUNT = PROTECTED + "/bank-accounts";
     public static final String PROTECTED_BANK_ACCOUNT_ID = PROTECTED_BANK_ACCOUNT + "/{id}";
+    public static final String PROTECTED_SUBSCRIPTION_ACTIVE = PROTECTED_SUBSCRIPTION + "/active";
 }

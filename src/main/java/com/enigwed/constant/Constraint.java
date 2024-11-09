@@ -53,4 +53,5 @@ public class Constraint {
     public static final String BANK_NAME_BLANK = "Bank name is required";
     public static final String INVALID_ACCOUNT_NUMBER = "Account number must contain only numbers";
     public static final String INVALID_BANK_CODE = "Bank code must contain only numbers";
+    public static final String SUBSCRIPTION_PACKET_NAME_BLANK = "Subscription packet name is required";
 }

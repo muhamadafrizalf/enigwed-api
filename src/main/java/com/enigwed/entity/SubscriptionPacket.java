@@ -16,11 +16,15 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @Table(name = PathDb.SUBSCRIPTION_PRICE)
-public class SubscriptionPrice extends AuditEntity{
+public class SubscriptionPacket extends AuditEntity{
+
+    private String name;
 
     @Column(name = "subscription_length")
     @Enumerated(EnumType.STRING)
     private ESubscriptionLength subscriptionLength;
+
+    private String description = subscriptionLength.getDescription();
 
     private double price;
 }

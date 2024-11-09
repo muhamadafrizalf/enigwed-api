@@ -1,11 +1,13 @@
 package com.enigwed.service;
 
+import com.enigwed.constant.ESubscriptionLength;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
+import com.enigwed.entity.SubscriptionPacket;
 import com.enigwed.entity.WeddingOrganizer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +22,7 @@ public interface WeddingOrganizerService {
     WeddingOrganizer loadWeddingOrganizerById(String id);
     WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
     WeddingOrganizer loadWeddingOrganizerByEmail(String email);
+    void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPacket subscriptionPacket);
 
     // Customer
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);

@@ -6,7 +6,7 @@ import com.enigwed.constant.PathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.dto.request.SubscriptionPriceRequest;
+import com.enigwed.dto.request.SubscriptionPacketRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -45,17 +45,17 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> addSubscriptionPrice(
-            @RequestBody SubscriptionPriceRequest subscriptionPriceRequest
+            @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.addSubscriptionPrice(subscriptionPriceRequest));
+        return ResponseEntity.ok(subscriptionService.addSubscriptionPrice(subscriptionPacketRequest));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> updateSubscriptionPrice(
-            @RequestBody SubscriptionPriceRequest subscriptionPriceRequest
+            @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.updateSubscriptionPrice(subscriptionPriceRequest));
+        return ResponseEntity.ok(subscriptionService.updateSubscriptionPrice(subscriptionPacketRequest));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -101,6 +101,20 @@ public class SubscriptionController {
         } else {
             response = subscriptionService.getAllSubscriptions(pagingRequest, filterRequest);
         }
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('WO')")
+    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION_ACTIVE)
+    public ResponseEntity<?> getActiveSubscription(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size
+    ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = subscriptionService.getActiveSubscriptions(userInfo, pagingRequest);
         return ResponseEntity.ok(response);
     }
 

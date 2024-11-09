@@ -136,11 +136,21 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
                 .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public WeddingOrganizer loadWeddingOrganizerByEmail(String email) {
         if (email == null || email.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.EMAIL_IS_REQUIRED);
         return weddingOrganizerRepository.findByUserCredentialEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPacket subscriptionPacket) {
+        UserCredential user = weddingOrganizer.getUserCredential();
+        user.setActiveUntil(user.getActiveUntil().plusMonths(subscriptionPacket.getSubscriptionLength().getMonths()));
+        weddingOrganizer.setUserCredential(user);
+        weddingOrganizerRepository.save(weddingOrganizer);
     }
 
     @Transactional(readOnly = true)

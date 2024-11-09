@@ -28,9 +28,9 @@ public class Subscription extends BaseEntity {
     @Column(name = "total_paid")
     private double totalPaid;
 
-    @Column(name = "subscription_length")
-    @Enumerated(EnumType.STRING)
-    private ESubscriptionLength subscriptionLength;
+    @ManyToOne
+    @JoinColumn(name = "subscription_packet_id")
+    private SubscriptionPacket subscriptionPacket;
 
     @ManyToOne
     @JoinColumn(name = "payment_image")
@@ -41,6 +41,12 @@ public class Subscription extends BaseEntity {
 
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
+
+    @Column(name = "active_from")
+    private LocalDateTime activeFrom;
+
+    @Column(name = "active_until")
+    private LocalDateTime activeUntil;
 
     @PrePersist
     protected void onCreate() {

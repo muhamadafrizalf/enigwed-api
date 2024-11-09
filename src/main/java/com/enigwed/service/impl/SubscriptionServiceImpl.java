@@ -4,12 +4,12 @@ import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.dto.request.SubscriptionPriceRequest;
+import com.enigwed.dto.request.SubscriptionPacketRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
 import com.enigwed.entity.Subscription;
-import com.enigwed.entity.SubscriptionPrice;
+import com.enigwed.entity.SubscriptionPacket;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.SubscriptionPriceRepository;
@@ -56,7 +56,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @PostConstruct
     public void init() {
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.A_MONTH).isEmpty()) {
-            SubscriptionPrice oneMonth = SubscriptionPrice.builder()
+            SubscriptionPacket oneMonth = SubscriptionPacket.builder()
+                    .name("Starter")
                     .subscriptionLength(ESubscriptionLength.A_MONTH)
                     .price(oneMonthPrice)
                     .build();
@@ -64,7 +65,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.TWO_MONTHS).isEmpty()) {
-            SubscriptionPrice twoMonths = SubscriptionPrice.builder()
+            SubscriptionPacket twoMonths = SubscriptionPacket.builder()
+                    .name("Basic")
                     .subscriptionLength(ESubscriptionLength.TWO_MONTHS)
                     .price(twoMonthsPrice)
                     .build();
@@ -72,7 +74,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.THREE_MONTHS).isEmpty()) {
-            SubscriptionPrice threeMonths = SubscriptionPrice.builder()
+            SubscriptionPacket threeMonths = SubscriptionPacket.builder()
+                    .name("Bronze")
                     .subscriptionLength(ESubscriptionLength.THREE_MONTHS)
                     .price(threeMonthsPrice)
                     .build();
@@ -80,7 +83,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FOUR_MONTHS).isEmpty()) {
-            SubscriptionPrice fourMonths = SubscriptionPrice.builder()
+            SubscriptionPacket fourMonths = SubscriptionPacket.builder()
+                    .name("Silver")
                     .subscriptionLength(ESubscriptionLength.FOUR_MONTHS)
                     .price(fourMonthsPrice)
                     .build();
@@ -88,7 +92,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FIVE_MONTHS).isEmpty()) {
-            SubscriptionPrice fiveMonths = SubscriptionPrice.builder()
+            SubscriptionPacket fiveMonths = SubscriptionPacket.builder()
+                    .name("Gold")
                     .subscriptionLength(ESubscriptionLength.FIVE_MONTHS)
                     .price(fiveMonthsPrice)
                     .build();
@@ -96,7 +101,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.SIX_MONTHS).isEmpty()) {
-            SubscriptionPrice sixMonths = SubscriptionPrice.builder()
+            SubscriptionPacket sixMonths = SubscriptionPacket.builder()
+                    .name("Platinum")
                     .subscriptionLength(ESubscriptionLength.SIX_MONTHS)
                     .price(sixMonthsPrice)
                     .build();
@@ -104,7 +110,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    private SubscriptionPrice findSubscriptionPriceByIdOrThrow(String id) {
+    private SubscriptionPacket findSubscriptionPriceByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ID_IS_REQUIRED);
         return subscriptionPriceRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
     }
@@ -153,28 +159,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionPrice>> getSubscriptionPrices() {
-        List<SubscriptionPrice> response = subscriptionPriceRepository.findByDeletedAtIsNull();
+    public ApiResponse<List<SubscriptionPacket>> getSubscriptionPrices() {
+        List<SubscriptionPacket> response = subscriptionPriceRepository.findByDeletedAtIsNull();
         if (response == null || response.isEmpty())
             return ApiResponse.success(new ArrayList<>(), Message.NO_SUBSCRIPTION_PRICE_FOUND);
         return ApiResponse.success(response, Message.SUBSCRIPTION_PRICES_FOUND);
     }
 
     @Override
-    public ApiResponse<SubscriptionPrice> getSubscriptionPriceById(String subscriptionPriceId) {
-        SubscriptionPrice subscriptionPrice = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
+    public ApiResponse<SubscriptionPacket> getSubscriptionPriceById(String subscriptionPriceId) {
+        SubscriptionPacket subscriptionPrice = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
         return ApiResponse.success(subscriptionPrice, Message.SUBSCRIPTION_PRICE_FOUND);
     }
 
     @Override
-    public ApiResponse<SubscriptionPrice> addSubscriptionPrice(SubscriptionPriceRequest subscriptionPriceRequest) {
-        validationUtil.validateAndThrow(subscriptionPriceRequest);
-        if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPriceRequest.getSubscriptionLength()).isPresent())
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPriceRequest.getSubscriptionLength().name()));
+    public ApiResponse<SubscriptionPacket> addSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest) {
+        validationUtil.validateAndThrow(subscriptionPacketRequest);
+        if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).isPresent())
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
 
-        SubscriptionPrice subscriptionPrice = SubscriptionPrice.builder()
-                .subscriptionLength(subscriptionPriceRequest.getSubscriptionLength())
-                .price(subscriptionPriceRequest.getPrice())
+        SubscriptionPacket subscriptionPrice = SubscriptionPacket.builder()
+                .subscriptionLength(subscriptionPacketRequest.getSubscriptionLength())
+                .price(subscriptionPacketRequest.getPrice())
                 .build();
 
         subscriptionPrice = subscriptionPriceRepository.save(subscriptionPrice);
@@ -182,19 +188,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<SubscriptionPrice> updateSubscriptionPrice(SubscriptionPriceRequest subscriptionPriceRequest) {
-        validationUtil.validateAndThrow(subscriptionPriceRequest);
-        SubscriptionPrice subscriptionPrice = findSubscriptionPriceByIdOrThrow(subscriptionPriceRequest.getId());
-        SubscriptionPrice possibleConflict = subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPriceRequest.getSubscriptionLength()).orElse(null);
-        if (possibleConflict != null && !subscriptionPrice.getId().equals(possibleConflict.getId())) {
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPriceRequest.getSubscriptionLength().name()));
+    public ApiResponse<SubscriptionPacket> updateSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest) {
+        validationUtil.validateAndThrow(subscriptionPacketRequest);
+        SubscriptionPacket subscriptionPacket = findSubscriptionPriceByIdOrThrow(subscriptionPacketRequest.getId());
+        SubscriptionPacket possibleConflict = subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).orElse(null);
+        if (possibleConflict != null && !subscriptionPacket.getId().equals(possibleConflict.getId())) {
+            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
         }
 
-        subscriptionPrice.setSubscriptionLength(subscriptionPriceRequest.getSubscriptionLength());
-        subscriptionPrice.setPrice(subscriptionPriceRequest.getPrice());
+        subscriptionPacket.setSubscriptionLength(subscriptionPacketRequest.getSubscriptionLength());
+        subscriptionPacket.setPrice(subscriptionPacketRequest.getPrice());
 
-        subscriptionPrice = subscriptionPriceRepository.save(subscriptionPrice);
-        return ApiResponse.success(subscriptionPrice, Message.SUBSCRIPTION_PRICE_UPDATED);
+        subscriptionPacket = subscriptionPriceRepository.save(subscriptionPacket);
+        return ApiResponse.success(subscriptionPacket, Message.SUBSCRIPTION_PRICE_UPDATED);
     }
 
     @Override
@@ -213,12 +219,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } else {
             wo = weddingOrganizerService.loadWeddingOrganizerByEmail(subscriptionRequest.getEmail());
         }
-        SubscriptionPrice price = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
+        SubscriptionPacket packet = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
 
         Subscription subscription = Subscription.builder()
                 .weddingOrganizer(wo)
-                .subscriptionLength(price.getSubscriptionLength())
-                .totalPaid(price.getPrice())
+                .subscriptionPacket(packet)
+                .totalPaid(packet.getPrice())
                 .status(ESubscriptionPaymentStatus.PAID)
                 .build();
 
@@ -249,13 +255,33 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public ApiResponse<List<SubscriptionResponse>> getActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
+        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+
+        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
+        subscriptionList = subscriptionList.stream()
+                .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))
+                .toList();
+
+        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+        return ApiResponse.success(responses, pagingRequest, Message.SUBSCRIPTIONS_FOUND);
+    }
+
+    @Override
     public ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId) {
         if (subscriptionId == null || subscriptionId.isEmpty())
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
         Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_NOT_FOUND));
 
         subscription.setStatus(ESubscriptionPaymentStatus.CONFIRMED);
-        subscription = subscriptionRepository.save(subscription);
+        LocalDateTime activeFrom = subscription.getWeddingOrganizer().getUserCredential().getActiveUntil();
+        LocalDateTime activeUntil = activeFrom.plusMonths(subscription.getSubscriptionPacket().getSubscriptionLength().getMonths());
+
+        subscription.setActiveFrom(activeFrom);
+        subscription.setActiveUntil(activeUntil);
+        subscription = subscriptionRepository.saveAndFlush(subscription);
+
+        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
         return ApiResponse.success(response, Message.SUBSCRIPTION_PAYMENT_CONFIRMED);
