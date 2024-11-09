@@ -8,14 +8,12 @@ import com.enigwed.dto.request.SubscriptionPacketRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
-import com.enigwed.entity.Image;
-import com.enigwed.entity.Subscription;
-import com.enigwed.entity.SubscriptionPacket;
-import com.enigwed.entity.WeddingOrganizer;
+import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.SubscriptionPriceRepository;
 import com.enigwed.repository.SubscriptionRepository;
 import com.enigwed.service.ImageService;
+import com.enigwed.service.NotificationService;
 import com.enigwed.service.SubscriptionService;
 import com.enigwed.service.WeddingOrganizerService;
 import com.enigwed.util.ValidationUtil;
@@ -41,6 +39,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionPriceRepository subscriptionPriceRepository;
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
+    private final NotificationService notificationService;
     private final ValidationUtil validationUtil;
 
     @Value("${com.enigwed.subscription-price-one-month}")
@@ -126,6 +125,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 )
                 .toList();
     }
+
+//    private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
+//        Notification notification = Notification.builder()
+//                .channel(ENotificationChannel.SYSTEM)
+//                .type(type)
+//                .receiver(EReceiver.WEDDING_ORGANIZER)
+//                .receiverId(order.getWeddingOrganizer().getUserCredential().getId())
+//                .dataType(EDataType.ORDER)
+//                .dataId(order.getId())
+//                .message(message)
+//                .build();
+//        notificationService.createNotification(notification);
+//        /*
+//
+//            Create notification for channel email
+//
+//        */
+//    }
 
     private List<Subscription> filterByStatus(FilterRequest filter, List<Subscription> list) {
         return list.stream()
@@ -289,6 +306,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setActiveFrom(activeFrom);
         subscription.setActiveUntil(activeUntil);
         subscription = subscriptionRepository.saveAndFlush(subscription);
+
+        /* SEND NOTIFICATION */
+
 
         weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
 

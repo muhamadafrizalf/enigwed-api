@@ -14,10 +14,17 @@ public class StatisticResponse {
     WeddingOrganizerResponse weddingOrganizer;
     private Map<String, Double> income;
 
-    public static StatisticResponse from(WeddingOrganizer weddingOrganizer, Map<String, Double> income) {
+    public static StatisticResponse wo(WeddingOrganizer weddingOrganizer, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
         response.setIncome(income);
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingOrganizer));
+        return response;
+    }
+
+    public static StatisticResponse admin(Map<String, Double> income) {
+        StatisticResponse response = new StatisticResponse();
+        g
+        response.setIncome(income);
         return response;
     }
 }

@@ -77,12 +77,12 @@ public class StatisticServiceImpl implements StatisticService {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
             List<Order> orderList = orderService.loadAllOrders(wo.getId(), from, to);
             Map<String, Double> statistic = getStatisticOrder(orderList, from, to);
-            StatisticResponse response = StatisticResponse.from(wo, statistic);
+            StatisticResponse response = StatisticResponse.wo(wo, statistic);
             return ApiResponse.success(response, Message.STATISTIC_FETCHED);
         } else {
             List<Subscription> subscriptionList = subscriptionService.getSubscriptions(from, to);
             Map<String, Double> statistic = getStatisticSubscription(subscriptionList, from, to);
-            StatisticResponse response = StatisticResponse.from(null, statistic);
+            StatisticResponse response = StatisticResponse.admin(statistic);
             return ApiResponse.success(response, Message.STATISTIC_FETCHED);
         }
     }
