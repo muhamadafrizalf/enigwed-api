@@ -24,7 +24,15 @@ public class SubscriptionPacket extends AuditEntity{
     @Enumerated(EnumType.STRING)
     private ESubscriptionLength subscriptionLength;
 
-    private String description = subscriptionLength.getDescription();
+    private String description;
 
     private double price;
+
+    @PrePersist
+    @PreUpdate
+    public void updateDescription() {
+        if (subscriptionLength != null) {
+            this.description = subscriptionLength.getDescription();
+        }
+    }
 }
