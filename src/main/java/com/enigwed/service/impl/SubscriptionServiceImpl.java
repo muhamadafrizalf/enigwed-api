@@ -326,10 +326,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setActiveUntil(activeUntil);
         subscription = subscriptionRepository.saveAndFlush(subscription);
 
+        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
+
         /* SEND NOTIFICATION */
         sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, Message.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPacket().getName()));
-
-        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
         return ApiResponse.success(response, Message.SUBSCRIPTION_PAYMENT_CONFIRMED);

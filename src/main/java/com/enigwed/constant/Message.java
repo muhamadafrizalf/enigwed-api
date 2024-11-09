@@ -110,6 +110,6 @@ public class Message {
     }
 
     public static String SUBSCRIPTION_CONFIRMED(String name) {
-        return "Subscription with subscription packet " + name + " has been confirmed";
+        return "Subscription with subscription package " + name + " has been confirmed";
     }
 }
