@@ -9,6 +9,7 @@ import com.enigwed.security.JwtUtil;
 import com.enigwed.service.OrderService;
 import com.enigwed.service.StatisticService;
 import com.enigwed.service.SubscriptionService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,10 @@ public class StatisticController {
     private final StatisticService statisticService;
     private final JwtUtil jwtUtil;
 
+    @Operation(
+            summary = "For admin and wedding organizer to get statistic [ADMIN, WO] (WEB)",
+            description = "Admin get income statistic from confirmed subscription and list of wedding organizer status. Wedding organizer get income statistic from finished order and information of wedding packages"
+    )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_STATISTIC)
     public ResponseEntity<?> getStatistic(

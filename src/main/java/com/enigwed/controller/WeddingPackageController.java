@@ -27,7 +27,7 @@ public class WeddingPackageController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "To get wedding package by wedding_package_id (MOBILE)"
+            summary = "For customer to get wedding package information by wedding_package_id (MOBILE)"
     )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
@@ -36,7 +36,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To get all wedding packages (MOBILE)",
+            summary = "For customer to get list of wedding packages (Default pagination {page:1, size:8}) (MOBILE)",
             description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
     )
     @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
@@ -70,7 +70,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To get wedding package by wedding_package_id [ADMIN, WO] (WEB)",
+            summary = "For admin and wedding organizer to get wedding package information by wedding_package_id [ADMIN, WO] (WEB)",
             description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -91,7 +91,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To get all wedding packages [ADMIN, WO] (WEB)",
+            summary = "For admin and wedding organizer to get list of wedding packages (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
             description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -138,8 +138,7 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To create wedding package [WO] (WEB)",
-            description = "Only wedding organizer can create wedding package"
+            summary = "For wedding organizer to create wedding package [WO] (WEB)"
     )
     @PreAuthorize("hasRole('WO')")
     @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
@@ -154,8 +153,8 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To update wedding package [WO] (WEB)",
-            description = "Only wedding organizer can update wedding package and wedding organizer can only update their own wedding package"
+            summary = "For wedding organizer to update wedding package [WO] (WEB)",
+            description = "Wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
@@ -170,8 +169,8 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To delete wedding package by wedding_package_id [WO] (WEB)",
-            description = "Only wedding organizer can delete wedding package and wedding organizer can only delete their own wedding package"
+            summary = "For wedding organizer to delete wedding package by wedding_package_id [WO] (WEB)",
+            description = "Wedding organizer can only delete their own wedding package"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
@@ -186,8 +185,8 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To add wedding package image [WO] (WEB)",
-            description = "Only wedding organizer can add wedding package image and wedding organizer can only update their own wedding package"
+            summary = "For wedding organizer to add wedding package image [WO] (WEB)",
+            description = "Wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
@@ -203,8 +202,8 @@ public class WeddingPackageController {
     }
 
     @Operation(
-            summary = "To delete wedding package image by wedding_package_id and image_id [WO] (WEB)",
-            description = "Only WO can delete wedding package images and wedding organizer can only delete their own wedding package images"
+            summary = "For wedding organizer to delete wedding package image by wedding_package_id and image_id [WO] (WEB)",
+            description = "Wedding organizer can only delete their own wedding package images"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)

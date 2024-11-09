@@ -24,7 +24,7 @@ public class ProductController {
     private final ProductService productService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "To get product by product_id (MOBILE)")
+    @Operation(summary = "For customer to get product information by product_id (MOBILE)")
     @GetMapping(PathApi.PUBLIC_PRODUCT_ID)
     public ResponseEntity<?> customerGetBonusPackageById(
             @PathVariable String id
@@ -32,17 +32,14 @@ public class ProductController {
         ApiResponse<?> response = productService.findProductById(id);
         return ResponseEntity.ok(response);
     }
-
-    /* IMPLEMENT PAGING [SOON] */
     @Operation(
-            summary = "To search product own by one wedding organizer (MOBILE)",
-            description = "wedding_organizer_id is mandatory and keyword is optional (USE PAGING[SOON])"
+            summary = "For customer to search product own by one wedding organizer (Default pagination {page:1, size:8}) (MOBILE)",
+            description = "wedding_organizer_id is mandatory and keyword is optional"
     )
     @GetMapping(PathApi.PUBLIC_PRODUCT)
     public ResponseEntity<?> customerGetAllBonusPackages(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-
             @Parameter(description = "To filter by wedding_organizer_id", required = true)
             @RequestParam(required = false) String weddingOrganizerId,
             @Parameter(description = "Keyword can filter result by name, and description", required = false)
@@ -59,7 +56,10 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get own product by product_id [WO] (WEB)")
+    @Operation(
+            summary = "For wedding organizer to get product information by product_id [WO] (WEB)",
+            description = "Wedding organizer can only get their own product"
+    )
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_PRODUCT_ID)
     public ResponseEntity<?> getOwnProductById(
@@ -73,17 +73,16 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To get all products own by wedding organizer [WO] (WEB)",
-            description = "WO can only receive their own products"
+            summary = "For wedding organizer to get all products own by wedding organizer (Default pagination {page:1, size:8}) [WO] (WEB)",
+            description = "Wedding organizer can only retrieve their own products"
     )
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> getOwnBonusPackages(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size,
-
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -91,7 +90,9 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To create new product [WO] (WEB)")
+    @Operation(
+            summary = "For wedding organizer to create new product [WO] (WEB)"
+    )
     @PreAuthorize("hasRole('WO')")
     @PostMapping(PathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> createBonusPackage(
@@ -105,8 +106,8 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To update existing product [WO] (WEB)",
-            description = "WO can only update their own product"
+            summary = "For wedding organizer to update existing product [WO] (WEB)",
+            description = "Wedding organizer can only update their own product"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @PutMapping(PathApi.PROTECTED_PRODUCT)
@@ -121,8 +122,8 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id [WO] (WEB)",
-            description = "WO can only update their own product"
+            summary = "For wedding organizer to delete product by product_id [WO] (WEB)",
+            description = "Wedding organizer can only update their own product"
     )
     @PreAuthorize("hasRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_PRODUCT_ID)
@@ -137,8 +138,8 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id [WO] (WEB)",
-            description = "WO can only add image to their own product"
+            summary = "For wedding organizer to add product image by product_id [WO] (WEB)",
+            description = "Wedding organizer can only add image to their own product"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_PRODUCT_ID_IMAGE, consumes = {"multipart/form-data"})
@@ -154,7 +155,7 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "To delete product by product_id [WO] (WEB)",
+            summary = "For wedding organizer to delete product image by product_id and image_id [WO] (WEB)",
             description = "WO can only delete image from their own product"
     )
     @PreAuthorize("hasRole('WO')")
@@ -172,7 +173,7 @@ public class ProductController {
 
     // FOR DEVELOPMENT
     @Operation(
-            summary = "Get all products in database (For development only, don't use)"
+            summary = "For development to get all products in database (FOR DEVELOPMENT ONLY, DON'T USE)"
     )
     @GetMapping(PathApi.PUBLIC_PRODUCT + "/dev")
     public ResponseEntity<?> dev(

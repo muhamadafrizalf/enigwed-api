@@ -18,7 +18,7 @@ public class ReviewController {
 
     // FOR DEVELOPMENT
     @Operation(
-            summary = "Get all review in database (For development only, don't use)"
+            summary = "For development to get all review in database (FOR DEVELOPMENT ONLY, DON'T USE)"
     )
     @GetMapping("/api/public/reviews")
     public ResponseEntity<?> getAllReviews() {
@@ -27,7 +27,7 @@ public class ReviewController {
 
     // FOR DEVELOPMENT
     @Operation(
-            summary = "Get create new review (For development only, don't use)"
+            summary = "For development to create new review (FOR DEVELOPMENT ONLY, DON'T USE)"
     )
     @PostMapping("/api/public/reviews")
     public ResponseEntity<?> createReview(@RequestBody ReviewRequest reviewRequest) {

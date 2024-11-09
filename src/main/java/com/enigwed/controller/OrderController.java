@@ -32,7 +32,7 @@ public class OrderController {
 
     // Customer
     @Operation(
-            summary = "To create order by customer (MOBILE)",
+            summary = "For customer to create order (MOBILE)",
             description = "Create order, send notification to wedding organizer"
     )
     @PostMapping(PathApi.PUBLIC_ORDER)
@@ -43,7 +43,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get order by book_code (MOBILE)")
+    @Operation(summary = "For customer to get order information by book_code (MOBILE)")
     @GetMapping(PathApi.PUBLIC_ORDER)
     public ResponseEntity<?> getOrderByBookCode(
             @RequestParam String bookCode
@@ -53,8 +53,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To upload order payment image, update order by order_id (MOBILE)",
-            description = "Add payment image, update status to CHECKING_PAYMENT, send notification to WO"
+            summary = "For customer to upload order payment image, update order by order_id (MOBILE)",
+            description = "Add payment image, update status to CHECKING_PAYMENT, send notification to wedding organizer, Only accessible if order status is WAITING_PAYMENT"
     )
     @PutMapping(value = PathApi.PUBLIC_ORDER_ID_PAY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateOrder(
@@ -66,8 +66,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To cancel order, update order by order_id (MOBILE)",
-            description = "Update status to CANCELED, send notification to wedding organizer"
+            summary = "For customer to cancel order, update order by order_id (MOBILE)",
+            description = "Update status to CANCELED, send notification to wedding organizer, Only accessible if order status is not FINISHED"
     )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_CANCEL)
     public ResponseEntity<?> cancelOrder(
@@ -78,8 +78,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To review order, update order by order_id (MOBILE)",
-            description = "Update order reviewed true, post review here [SOON], send notification to wedding organizer"
+            summary = "For customer to review order, update order by order_id (MOBILE)",
+            description = "Update order reviewed true, send notification to wedding organizer, Only accessible if order status is FINISHED"
     )
     @PutMapping(PathApi.PUBLIC_ORDER_ID_REVIEW)
     public ResponseEntity<?> reviewOrder(
@@ -91,8 +91,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "To get order by order_id [ADMIN, WO] (WEB)",
-            description = "Admin can get all order, WO can only get if it's their own order"
+            summary = "For admin and wedding organizer to get order by order_id [ADMIN, WO] (WEB)",
+            description = "Admin can get all order, wedding organizer can only get their own order"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_ORDER_ID)
@@ -108,13 +108,12 @@ public class OrderController {
         } else {
             response = orderService.findOrderById(id);
         }
-
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "To get all orders [ADMIN, WO] (WEB)",
-            description = "ADMIN can get all orders, WO can only get own orders"
+            summary = "For admin and wedding organizer to get list of all orders [ADMIN, WO] (WEB)",
+            description = "Admin can get all orders, wedding organizer can only get own orders"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(PathApi.PROTECTED_ORDER)
@@ -148,8 +147,8 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "For WO to confirm payment by order_id [WO] (WEB)",
-            description = "Update status to PAID, send notification to wedding organizer"
+            summary = "For wedding organizer to confirm payment by order_id [WO] (WEB)",
+            description = "Update status to PAID, send notification to wedding organizer, Only accessible if order status is CHECKING_PAYMENT"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_CONFIRM)
@@ -165,7 +164,7 @@ public class OrderController {
 
     @Operation(
             summary = "For wedding organizer to accept order by order_id [WO] (WEB)",
-            description = "Update status to WAITING_FOR_PAYMENT, send notification to customer [SOON]"
+            description = "Update status to WAITING_FOR_PAYMENT, send notification to customer [SOON], Only accessible if order status is PENDING"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_ACCEPT)
@@ -181,7 +180,7 @@ public class OrderController {
 
     @Operation(
             summary = "For wedding organizer to reject order by order_id [WO] (WEB)",
-            description = "Update status to REJECTED, send notification to customer [SOON]"
+            description = "Update status to REJECTED, send notification to customer [SOON], Only accessible if order status is PENDING"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_REJECT)
@@ -197,7 +196,7 @@ public class OrderController {
 
     @Operation(
             summary = "For wedding organizer to finish order by order_id [WO] (WEB)",
-            description = "Update status to FINISHED, send notification to customer [SOON]"
+            description = "Update status to FINISHED, send notification to customer [SOON], Only accessible if order status is PAID"
     )
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_ORDER_ID_FINISH)

@@ -22,21 +22,27 @@ public class AuthController {
 
     @Operation(summary = "Login to get token and other addition info")
     @PostMapping(PathApi.LOGIN)
-    public ResponseEntity<?> login (@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login (
+            @RequestBody LoginRequest loginRequest
+    ) {
         ApiResponse<?> apiResponse = authService.login(loginRequest);
         return ResponseEntity.ok(apiResponse);
     }
 
-    @Operation(summary = "Register to create new account and new wedding organizer")
+    @Operation(summary = "Register to create new wedding organizer account")
     @PostMapping(PathApi.REGISTER)
-    public ResponseEntity<?> register (@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register (
+            @RequestBody RegisterRequest registerRequest
+    ) {
         ApiResponse<?> apiResponse = authService.register(registerRequest);
         return ResponseEntity.ok(apiResponse);
     }
 
     @Operation(summary = "To get new token by sending active old token")
     @PostMapping(PathApi.REFRESH_TOKEN)
-    public ResponseEntity<?> refreshToken (@RequestBody RefreshToken refreshToken) {
+    public ResponseEntity<?> refreshToken (
+            @RequestBody RefreshToken refreshToken
+    ) {
         ApiResponse<?> response = authService.refresh(refreshToken);
         return ResponseEntity.ok(response);
     }

@@ -6,6 +6,7 @@ import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.BankAccountService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class BankAccountController {
     private final BankAccountService bankAccountService;
     private final JwtUtil jwtUtil;
 
+    @Operation(summary = "For wedding organizer to get bank account information by bank_account_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_BANK_ACCOUNT_ID)
     public ResponseEntity<?> getBankAccountById(
@@ -30,6 +32,7 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "For wedding organizer to get list of bank account owned by wedding organizer [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @GetMapping(PathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> getOwnBankAccounts(
@@ -41,6 +44,7 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "For wedding organizer to edit bank account information [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @PutMapping(PathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> updateBankAccount(
@@ -53,6 +57,7 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "For wedding organizer to create bank account information [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @PostMapping(PathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> createBankAccount(
@@ -65,6 +70,7 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "For wedding organizer to delete bank account information by bank_account_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_BANK_ACCOUNT_ID)
     public ResponseEntity<?> deleteBankAccount(

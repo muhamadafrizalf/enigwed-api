@@ -27,7 +27,9 @@ public class WeddingOrganizerController {
     private final WeddingOrganizerService weddingOrganizerService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "To get wedding organizer by wedding_organizer_id (MOBILE)")
+    @Operation(
+            summary = "For customer to get wedding organizer information by wedding_organizer_id (MOBILE)"
+    )
     @GetMapping(PathApi.PUBLIC_WO_ID)
     public ResponseEntity<?> customerGetWeddingOrganizerById(
             @PathVariable String id
@@ -36,7 +38,10 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "To get all wedding organizers (MOBILE)")
+    @Operation(
+            summary = "For customer to get list of wedding organizers (Default pagination {page:1, size:8}) (MOBILE)",
+            description = "Sorted by [SOON]"
+    )
     @GetMapping(PathApi.PUBLIC_WO)
     public ResponseEntity<?> customerGetAllWeddingOrganizers(
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -73,7 +78,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To get wedding organizers [ADMIN, WO] (WEB)",
+            summary = "For admin and wedding organizer to get list of wedding organizers (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
             description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
@@ -111,8 +116,8 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To update wedding organizer by wedding_organizer_id (authorization WO)",
-            description = "Only WO can update wedding organizer and each wedding organizer can only update their own account"
+            summary = "For wedding organizer to update wedding organizer information [WO] (WEB)",
+            description = "Wedding organizer can only update their own account"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @PutMapping(PathApi.PROTECTED_WO)
@@ -127,8 +132,8 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To delete wedding organizer by wedding_organizer_id [ADMIN, WO] (WEB)",
-            description = "Admin can delete all wedding organizer and each wedding organizer can only delete their own account"
+            summary = "For admin and wedding organizer to delete wedding organizer by wedding_organizer_id [ADMIN, WO] (WEB)",
+            description = "Admin can delete all wedding organizer, wedding organizer can only delete their own account"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @DeleteMapping(PathApi.PROTECTED_WO_ID)
@@ -143,8 +148,8 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To update wedding organizer image by wedding_organizer_id [WO] (WEB)",
-            description = "Only WO can update wedding organizer image and each wedding organizer can only access their own account"
+            summary = "For wedding organizer to update wedding organizer image by wedding_organizer_id [WO] (WEB)",
+            description = "Wedding organizer can only update their own account"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @PutMapping(value = PathApi.PROTECTED_WO_ID_IMAGE, consumes = {"multipart/form-data"})
@@ -160,8 +165,8 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To delete wedding organizer image by wedding_organizer_id [WO] (WEB)",
-            description = "Only WO can delete wedding organizer image and each wedding organizer can only access their own account"
+            summary = "For wedding organizer to delete wedding organizer image by wedding_organizer_id and image_id [WO] (WEB)",
+            description = "Wedding organizer can only update their own account"
     )
     @PreAuthorize("hasAnyRole('WO')")
     @DeleteMapping(PathApi.PROTECTED_WO_ID_IMAGE)
@@ -176,8 +181,8 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "To activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
-            description = "Only ADMIN can activate wedding organizer account"
+            summary = "For admin activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
+            description = "Set active to TRUE and active until to first day next month"
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(PathApi.PROTECTED_WO_ID_ACTIVATE)
