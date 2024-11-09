@@ -1,6 +1,5 @@
 package com.enigwed.dto.request;
 
-import com.enigwed.constant.SConstraint;
 import com.enigwed.constant.ESubscriptionLength;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
