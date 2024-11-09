@@ -268,6 +268,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
         subscriptionList = subscriptionList.stream()
+                .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
                 .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))
                 .toList();
 
