@@ -28,13 +28,10 @@ public class ReviewServiceImpl implements ReviewService {
                 .weddingOrganizer(order.getWeddingOrganizer())
                 .weddingPackage(order.getWeddingPackage())
                 .rating(reviewRequest.getRating())
+                .customerName(reviewRequest.getCustomerName() != null ? reviewRequest.getCustomerName() : "Anonymous")
+                .comment(reviewRequest.getComment() != null ? reviewRequest.getComment() : "")
+                .visiblePublic(reviewRequest.getVisiblePublic() != null ? reviewRequest.getVisiblePublic() : true)
                 .build();
-        if (reviewRequest.getComment()!=null) {
-            review.setComment(reviewRequest.getComment());
-        }
-        if (reviewRequest.getCustomerName() !=null && !reviewRequest.getCustomerName().isEmpty()) {
-            review.setCustomerName(reviewRequest.getCustomerName());
-        }
         review = reviewRepository.save(review);
         return ReviewResponse.simple(review);
     }

@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.response.ApiResponse;
@@ -32,8 +32,8 @@ public class BankAccountImpl implements BankAccountService {
     private final ValidationUtil validationUtil;
 
     private BankAccount findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.BANK_ACCOUNT_ID_IS_REQUIRED);
-        return bankAccountRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.BANK_ACCOUNT_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.BANK_ACCOUNT_ID_IS_REQUIRED);
+        return bankAccountRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.BANK_ACCOUNT_NOT_FOUND));
     }
 
     private void validateUserAccess(JwtClaim userInfo, BankAccount bankAccount) throws AccessDeniedException {
@@ -41,23 +41,23 @@ public class BankAccountImpl implements BankAccountService {
         if (userInfo.getUserId().equals(userCredentialId)) {
             return;
         }
-        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     @Override
     public ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId) {
         List<BankAccount> bankAccountList = bankAccountRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
         if (bankAccountList == null || bankAccountList.isEmpty())
-            return ApiResponse.success(new ArrayList<>(), Message.NO_BANK_ACCOUNT_FOUND);
+            return ApiResponse.success(new ArrayList<>(), SMessage.NO_BANK_ACCOUNT_FOUND);
         List<BankAccountResponse> responses = bankAccountList.stream().map(BankAccountResponse::from).toList();
-        return ApiResponse.success(responses, Message.BANK_ACCOUNTS_FOUND);
+        return ApiResponse.success(responses, SMessage.BANK_ACCOUNTS_FOUND);
     }
 
     @Override
     public ApiResponse<BankAccountResponse> findBankAccountById(String id) {
         BankAccount bankAccount =  findByIdOrThrow(id);
         BankAccountResponse response = BankAccountResponse.from(bankAccount);
-        return ApiResponse.success(response, Message.BANK_ACCOUNT_FOUND);
+        return ApiResponse.success(response, SMessage.BANK_ACCOUNT_FOUND);
     }
 
     @Override
@@ -65,9 +65,9 @@ public class BankAccountImpl implements BankAccountService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
         List<BankAccount> bankAccountList = bankAccountRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
         if (bankAccountList == null || bankAccountList.isEmpty())
-            return ApiResponse.success(new ArrayList<>(), Message.NO_BANK_ACCOUNT_FOUND);
+            return ApiResponse.success(new ArrayList<>(), SMessage.NO_BANK_ACCOUNT_FOUND);
         List<BankAccountResponse> responses = bankAccountList.stream().map(BankAccountResponse::from).toList();
-        return ApiResponse.success(responses, Message.BANK_ACCOUNTS_FOUND);
+        return ApiResponse.success(responses, SMessage.BANK_ACCOUNTS_FOUND);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class BankAccountImpl implements BankAccountService {
         bankAccount = bankAccountRepository.save(bankAccount);
 
         BankAccountResponse response = BankAccountResponse.from(bankAccount);
-        return ApiResponse.success(response, Message.BANK_ACCOUNT_CREATED);
+        return ApiResponse.success(response, SMessage.BANK_ACCOUNT_CREATED);
     }
 
     @Override
@@ -107,9 +107,9 @@ public class BankAccountImpl implements BankAccountService {
             bankAccount = bankAccountRepository.save(bankAccount);
 
             BankAccountResponse response = BankAccountResponse.from(bankAccount);
-            return ApiResponse.success(response, Message.BANK_ACCOUNT_UPDATED);
+            return ApiResponse.success(response, SMessage.BANK_ACCOUNT_UPDATED);
         } catch (AccessDeniedException e) {
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         }
     }
 
@@ -124,9 +124,9 @@ public class BankAccountImpl implements BankAccountService {
 
             bankAccountRepository.save(bankAccount);
 
-            return ApiResponse.success(Message.BANK_ACCOUNT_DELETED);
+            return ApiResponse.success(SMessage.BANK_ACCOUNT_DELETED);
         } catch (AccessDeniedException e) {
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         }
     }
 

@@ -1,6 +1,6 @@
 package com.enigwed.constant;
 
-public class PathApi {
+public class SPathApi {
     // Base url
 //    public static final String VERSION = "/v1";
 //    public static final String BASE_URL = "/api" + VERSION;

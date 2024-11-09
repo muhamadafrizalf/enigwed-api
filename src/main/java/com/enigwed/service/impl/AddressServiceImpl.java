@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.request.DistrictRequest;
 import com.enigwed.dto.request.ProvinceRequest;
 import com.enigwed.dto.request.RegencyRequest;
@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
     public Regency saveOrLoadRegency(RegencyRequest regencyRequest) {
         validationUtil.validateAndThrow(regencyRequest);
         Province province = provinceRepository.findById(regencyRequest.getProvince_id())
-                .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DATA_NOT_FOUND, ErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
         Regency regency = Regency.builder()
                 .id(regencyRequest.getId())
                 .name(regencyRequest.getName())
@@ -57,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
     public District saveOrLoadDistrict(DistrictRequest districtRequest) {
         validationUtil.validateAndThrow(districtRequest);
         Regency regency = regencyRepository.findById(districtRequest.getRegency_id())
-                .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DATA_NOT_FOUND, ErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
         District district = District.builder()
                 .id(districtRequest.getId())
                 .name(districtRequest.getName())

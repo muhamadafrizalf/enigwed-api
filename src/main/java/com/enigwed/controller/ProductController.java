@@ -1,6 +1,6 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ProductRequest;
@@ -25,7 +25,7 @@ public class ProductController {
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "For customer to get product information by product_id (MOBILE)")
-    @GetMapping(PathApi.PUBLIC_PRODUCT_ID)
+    @GetMapping(SPathApi.PUBLIC_PRODUCT_ID)
     public ResponseEntity<?> customerGetBonusPackageById(
             @PathVariable String id
     ) {
@@ -36,7 +36,7 @@ public class ProductController {
             summary = "For customer to search product own by one wedding organizer (Default pagination {page:1, size:8}) (MOBILE)",
             description = "wedding_organizer_id is mandatory and keyword is optional"
     )
-    @GetMapping(PathApi.PUBLIC_PRODUCT)
+    @GetMapping(SPathApi.PUBLIC_PRODUCT)
     public ResponseEntity<?> customerGetAllBonusPackages(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
@@ -61,7 +61,7 @@ public class ProductController {
             description = "Wedding organizer can only get their own product"
     )
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_PRODUCT_ID)
+    @GetMapping(SPathApi.PROTECTED_PRODUCT_ID)
     public ResponseEntity<?> getOwnProductById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -77,7 +77,7 @@ public class ProductController {
             description = "Wedding organizer can only retrieve their own products"
     )
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_PRODUCT)
+    @GetMapping(SPathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> getOwnBonusPackages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -94,7 +94,7 @@ public class ProductController {
             summary = "For wedding organizer to create new product [WO] (WEB)"
     )
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_PRODUCT)
+    @PostMapping(SPathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> createBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -110,7 +110,7 @@ public class ProductController {
             description = "Wedding organizer can only update their own product"
     )
     @PreAuthorize("hasAnyRole('WO')")
-    @PutMapping(PathApi.PROTECTED_PRODUCT)
+    @PutMapping(SPathApi.PROTECTED_PRODUCT)
     public ResponseEntity<?> updateBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -126,7 +126,7 @@ public class ProductController {
             description = "Wedding organizer can only update their own product"
     )
     @PreAuthorize("hasRole('WO')")
-    @DeleteMapping(PathApi.PROTECTED_PRODUCT_ID)
+    @DeleteMapping(SPathApi.PROTECTED_PRODUCT_ID)
     public ResponseEntity<?> deleteBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -142,7 +142,7 @@ public class ProductController {
             description = "Wedding organizer can only add image to their own product"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(value = PathApi.PROTECTED_PRODUCT_ID_IMAGE, consumes = {"multipart/form-data"})
+    @PutMapping(value = SPathApi.PROTECTED_PRODUCT_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -159,7 +159,7 @@ public class ProductController {
             description = "WO can only delete image from their own product"
     )
     @PreAuthorize("hasRole('WO')")
-    @DeleteMapping(PathApi.PROTECTED_PRODUCT_ID_IMAGE_ID)
+    @DeleteMapping(SPathApi.PROTECTED_PRODUCT_ID_IMAGE_ID)
     public ResponseEntity<?> deleteBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -175,7 +175,7 @@ public class ProductController {
     @Operation(
             summary = "For development to get all products in database (FOR DEVELOPMENT ONLY, DON'T USE)"
     )
-    @GetMapping(PathApi.PUBLIC_PRODUCT + "/dev")
+    @GetMapping(SPathApi.PUBLIC_PRODUCT + "/dev")
     public ResponseEntity<?> dev(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size

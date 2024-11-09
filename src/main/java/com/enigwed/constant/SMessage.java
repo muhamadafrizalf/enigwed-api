@@ -1,6 +1,6 @@
 package com.enigwed.constant;
 
-public class Message {
+public class SMessage {
     // Api Response Message
     public static final String CREATE_FAILED = "Create failed";
     public static final String FETCHING_FAILED = "Fetching failed";

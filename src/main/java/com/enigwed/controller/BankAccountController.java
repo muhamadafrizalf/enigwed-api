@@ -1,10 +1,9 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.BankAccountRequest;
 import com.enigwed.dto.response.ApiResponse;
-import com.enigwed.dto.response.BankAccountResponse;
 import com.enigwed.security.JwtUtil;
 import com.enigwed.service.BankAccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +23,7 @@ public class BankAccountController {
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "For customer to get list of bank account by wedding_organizer_id (MOBILE)")
-    @GetMapping(PathApi.PUBLIC_BANK_ACCOUNT)
+    @GetMapping(SPathApi.PUBLIC_BANK_ACCOUNT)
     public ResponseEntity<?> getBankAccounts(
             @RequestParam String weddingOrganizerId
     ) {
@@ -34,7 +33,7 @@ public class BankAccountController {
 
     @Operation(summary = "For wedding organizer to get bank account information by bank_account_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_BANK_ACCOUNT_ID)
+    @GetMapping(SPathApi.PROTECTED_BANK_ACCOUNT_ID)
     public ResponseEntity<?> getBankAccountById(
             @PathVariable String id
     ) {
@@ -44,7 +43,7 @@ public class BankAccountController {
 
     @Operation(summary = "For wedding organizer to get list of bank account owned by wedding organizer [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_BANK_ACCOUNT)
+    @GetMapping(SPathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> getOwnBankAccounts(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
@@ -56,7 +55,7 @@ public class BankAccountController {
 
     @Operation(summary = "For wedding organizer to edit bank account information [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_BANK_ACCOUNT)
+    @PutMapping(SPathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> updateBankAccount(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -69,7 +68,7 @@ public class BankAccountController {
 
     @Operation(summary = "For wedding organizer to create bank account information [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_BANK_ACCOUNT)
+    @PostMapping(SPathApi.PROTECTED_BANK_ACCOUNT)
     public ResponseEntity<?> createBankAccount(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -82,7 +81,7 @@ public class BankAccountController {
 
     @Operation(summary = "For wedding organizer to delete bank account information by bank_account_id [WO] (WEB)")
     @PreAuthorize("hasRole('WO')")
-    @DeleteMapping(PathApi.PROTECTED_BANK_ACCOUNT_ID)
+    @DeleteMapping(SPathApi.PROTECTED_BANK_ACCOUNT_ID)
     public ResponseEntity<?> deleteBankAccount(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

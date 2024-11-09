@@ -1,6 +1,6 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
@@ -23,7 +23,7 @@ public class ErrorController {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<?> handle(AuthenticationException e) {
-        ApiResponse<?> response = ApiResponse.failed(Message.ERROR, e.getMessage());
+        ApiResponse<?> response = ApiResponse.failed(SMessage.ERROR, e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
@@ -37,7 +37,7 @@ public class ErrorController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handle(Exception e) {
         log.error("UNHANDLED ERROR: {}",e.getMessage(), e);
-        ApiResponse<?> response = ApiResponse.failed(Message.ERROR, e.getMessage());
+        ApiResponse<?> response = ApiResponse.failed(SMessage.ERROR, e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

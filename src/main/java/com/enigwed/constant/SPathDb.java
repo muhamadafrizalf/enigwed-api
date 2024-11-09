@@ -1,6 +1,6 @@
 package com.enigwed.constant;
 
-public class PathDb {
+public class SPathDb {
     public static final String USER_CREDENTIAL = "tbl_user_credential";
     public static final String IMAGE = "tbl_image";
     public static final String PROVINCE = "tbl_province";

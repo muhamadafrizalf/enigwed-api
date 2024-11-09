@@ -1,6 +1,6 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.BANK_ACCOUNT)
+@Table(name = SPathDb.BANK_ACCOUNT)
 public class BankAccount extends AuditEntity {
 
     @Column(name = "bank_code")

@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.enigwed.constant.Constraint.PROVINCE_ID_BLANK;
-import static com.enigwed.constant.Constraint.PROVINCE_NAME_BLANK;
+import static com.enigwed.constant.SConstraint.PROVINCE_ID_BLANK;
+import static com.enigwed.constant.SConstraint.PROVINCE_NAME_BLANK;
 
 @Data
 @AllArgsConstructor

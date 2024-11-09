@@ -1,7 +1,5 @@
 package com.enigwed.dto.response;
 
-import com.enigwed.constant.EStatus;
-import com.enigwed.constant.EUserStatus;
 import com.enigwed.dto.request.PagingRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -22,23 +20,44 @@ import java.util.Map;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse <T> {
-    private boolean success;
+    private Boolean success;
     private String message;
+    private String error;
     private PagingResponse paging;
     private Map<String, Integer> countOrderByStatus;
     private Map<String, Integer> countUserStatus;
     private Map<String, Integer> countSubscriptionPaymentStatus;
     private T data;
-    private String error;
+
+    public static ApiResponse<?> failed(String message, String errorMessage) {
+        return ApiResponse.builder()
+                .success(false)
+                .message(message)
+                .error(errorMessage)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> success(T data, String message) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    public static ApiResponse<?> success(String message) {
+        return ApiResponse.builder()
+                .success(true)
+                .message(message)
+                .build();
+    }
 
     public static <T> ApiResponse<List<T>> success(List<T> data, PagingRequest pagingRequest, String message) {
         int page = pagingRequest.getPage() - 1;
         int size = pagingRequest.getSize();
         int maxPages = Math.max((int) Math.ceil((double) data.size() / size) - 1, 0);
         int start = Math.min(page * size, maxPages * size);
-//        if (page * size > data.size()) {
-//            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.PAGE_OUT_OF_BOUND);
-//        }
+
         if (page > maxPages) {
             page = maxPages;
         }
@@ -58,47 +77,21 @@ public class ApiResponse <T> {
                 .build();
     }
 
-    public static <T> ApiResponse<List<T>> successOrders(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successOrderList(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
         response.setCountOrderByStatus(countByStatus);
-
         return response;
     }
 
-    public static <T> ApiResponse<List<T>> successWo(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successWeddingOrganizerList(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
         response.setCountUserStatus(countByStatus);
-
         return response;
     }
 
-    public static <T> ApiResponse<List<T>> successSubscription(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
+    public static <T> ApiResponse<List<T>> successSubscriptionList(List<T> data, PagingRequest pagingRequest, String message, Map<String, Integer> countByStatus) {
         ApiResponse<List<T>> response = success(data, pagingRequest, message);
         response.setCountSubscriptionPaymentStatus(countByStatus);
-
         return response;
-    }
-
-    public static <T> ApiResponse<T> success(T data, String message) {
-        return ApiResponse.<T>builder()
-                .success(true)
-                .message(message)
-                .data(data)
-                .build();
-    }
-
-    public static ApiResponse<?> success(String message) {
-        return ApiResponse.builder()
-                .success(true)
-                .message(message)
-                .build();
-    }
-
-    public static ApiResponse<?> failed(String message, String errorMessage) {
-        return ApiResponse.builder()
-                .success(false)
-                .message(message)
-                .error(errorMessage)
-                .build();
     }
 }

@@ -1,7 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.EStatus;
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.ORDER)
+@Table(name = SPathDb.ORDER)
 public class Order extends BaseEntity{
 
     @Column(name = "book_code", unique = true, nullable = false)

@@ -1,6 +1,5 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
 import com.enigwed.dto.request.ReviewRequest;
 import com.enigwed.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;

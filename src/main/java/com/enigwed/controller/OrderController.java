@@ -2,7 +2,7 @@ package com.enigwed.controller;
 
 import com.enigwed.constant.ERole;
 import com.enigwed.constant.EStatus;
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.OrderRequest;
@@ -35,7 +35,7 @@ public class OrderController {
             summary = "For customer to create order (MOBILE)",
             description = "Create order, send notification to wedding organizer"
     )
-    @PostMapping(PathApi.PUBLIC_ORDER)
+    @PostMapping(SPathApi.PUBLIC_ORDER)
     public ResponseEntity<?> createOrder(
             @RequestBody OrderRequest orderRequest
     ) {
@@ -44,7 +44,7 @@ public class OrderController {
     }
 
     @Operation(summary = "For customer to get order information by book_code (MOBILE)")
-    @GetMapping(PathApi.PUBLIC_ORDER)
+    @GetMapping(SPathApi.PUBLIC_ORDER)
     public ResponseEntity<?> getOrderByBookCode(
             @RequestParam String bookCode
     ) {
@@ -56,7 +56,7 @@ public class OrderController {
             summary = "For customer to upload order payment image, update order by order_id (MOBILE)",
             description = "Add payment image, update status to CHECKING_PAYMENT, send notification to wedding organizer, Only accessible if order status is WAITING_PAYMENT"
     )
-    @PutMapping(value = PathApi.PUBLIC_ORDER_ID_PAY, consumes = {"multipart/form-data"})
+    @PutMapping(value = SPathApi.PUBLIC_ORDER_ID_PAY, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateOrder(
             @PathVariable String id,
             @RequestPart(name = "image", required = false) MultipartFile image
@@ -69,7 +69,7 @@ public class OrderController {
             summary = "For customer to cancel order, update order by order_id (MOBILE)",
             description = "Update status to CANCELED, send notification to wedding organizer, Only accessible if order status is not FINISHED"
     )
-    @PutMapping(PathApi.PUBLIC_ORDER_ID_CANCEL)
+    @PutMapping(SPathApi.PUBLIC_ORDER_ID_CANCEL)
     public ResponseEntity<?> cancelOrder(
             @PathVariable String id
     ) {
@@ -81,7 +81,7 @@ public class OrderController {
             summary = "For customer to review order, update order by order_id (MOBILE)",
             description = "Update order reviewed true, send notification to wedding organizer, Only accessible if order status is FINISHED"
     )
-    @PutMapping(PathApi.PUBLIC_ORDER_ID_REVIEW)
+    @PutMapping(SPathApi.PUBLIC_ORDER_ID_REVIEW)
     public ResponseEntity<?> reviewOrder(
             @PathVariable String id,
             @RequestBody ReviewRequest reviewRequest
@@ -95,7 +95,7 @@ public class OrderController {
             description = "Admin can get all order, wedding organizer can only get their own order"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_ORDER_ID)
+    @GetMapping(SPathApi.PROTECTED_ORDER_ID)
     public ResponseEntity<?> getOrderById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -116,7 +116,7 @@ public class OrderController {
             description = "Admin can get all orders, wedding organizer can only get own orders"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_ORDER)
+    @GetMapping(SPathApi.PROTECTED_ORDER)
     public ResponseEntity<?> getAllOrders(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -151,7 +151,7 @@ public class OrderController {
             description = "Update status to PAID, send notification to wedding organizer, Only accessible if order status is CHECKING_PAYMENT"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_ORDER_ID_CONFIRM)
+    @PutMapping(SPathApi.PROTECTED_ORDER_ID_CONFIRM)
     public ResponseEntity<?> confirmPayment(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -167,7 +167,7 @@ public class OrderController {
             description = "Update status to WAITING_FOR_PAYMENT, send notification to customer [SOON], Only accessible if order status is PENDING"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_ORDER_ID_ACCEPT)
+    @PutMapping(SPathApi.PROTECTED_ORDER_ID_ACCEPT)
     public ResponseEntity<?> acceptOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -183,7 +183,7 @@ public class OrderController {
             description = "Update status to REJECTED, send notification to customer [SOON], Only accessible if order status is PENDING"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_ORDER_ID_REJECT)
+    @PutMapping(SPathApi.PROTECTED_ORDER_ID_REJECT)
     public ResponseEntity<?> rejectOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -199,7 +199,7 @@ public class OrderController {
             description = "Update status to FINISHED, send notification to customer [SOON], Only accessible if order status is PAID"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_ORDER_ID_FINISH)
+    @PutMapping(SPathApi.PROTECTED_ORDER_ID_FINISH)
     public ResponseEntity<?> finishOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

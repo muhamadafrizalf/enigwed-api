@@ -1,6 +1,6 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.service.ImageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,13 +17,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
     private final ImageService imageService;
 
-    @GetMapping(PathApi.PUBLIC_IMAGE_RESOURCE_ID)
+    @GetMapping(SPathApi.PUBLIC_IMAGE_RESOURCE_ID)
     public ResponseEntity<?> getRawImageById(@PathVariable String id) {
         Resource image = imageService.loadImageResourceById(id);
         return ResponseEntity.ok(image);
     }
 
-    @GetMapping(PathApi.PUBLIC_IMAGE_ID)
+    @GetMapping(SPathApi.PUBLIC_IMAGE_ID)
     public ResponseEntity<?> getImageById(@PathVariable String id) {
         ApiResponse<?> response = imageService.findByIdResponse(id);
 
@@ -31,7 +31,7 @@ public class ImageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(value = PathApi.PROTECTED_IMAGE_ID, consumes = {"multipart/form-data"})
+    @PutMapping(value = SPathApi.PROTECTED_IMAGE_ID, consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateImageById(@PathVariable String id, @RequestBody MultipartFile image) {
         ApiResponse<?> response = imageService.updateResponse(id, image);
         return ResponseEntity.ok(response);

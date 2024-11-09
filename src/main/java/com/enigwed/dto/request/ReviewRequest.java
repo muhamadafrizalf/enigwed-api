@@ -1,11 +1,10 @@
 package com.enigwed.dto.request;
 
-import com.enigwed.constant.Constraint;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.enigwed.constant.SConstraint;
+import jakarta.validation.constraints.*;
 import lombok.*;
+
+import static com.enigwed.constant.SConstraint.*;
 
 @Data
 @AllArgsConstructor
@@ -13,15 +12,18 @@ import lombok.*;
 @Builder
 public class ReviewRequest {
 
+    @NotBlank(message = ORDER_ID_BLANK)
     private String orderId;
+
+    @Min(value = 0, message = RATING_INVALID)
+    @Max(value = 5, message = RATING_INVALID)
+    @NotNull(message = RATING_NULL)
+    private Integer rating;
 
     private String customerName;
 
-    @NotNull(message = Constraint.RATING_NULL)
-    @Min(value = 0, message = Constraint.INVALID_RATING)
-    @Max(value = 5, message = Constraint.INVALID_RATING)
-    private Integer rating;
-
-    @Size(max = 500, message = Constraint.COMMENT_MAX_500)
+    @Size(max = 500, message = COMMENT_MAX_500)
     private String comment;
+
+    private Boolean visiblePublic;
 }

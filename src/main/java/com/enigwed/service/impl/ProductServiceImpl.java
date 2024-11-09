@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.ProductRequest;
@@ -39,8 +39,8 @@ public class ProductServiceImpl implements ProductService {
     private final ValidationUtil validationUtil;
 
     private Product findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.BONUS_PACKAGE_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
+        return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.BONUS_PACKAGE_NOT_FOUND));
     }
 
     private void validateUserAccess(JwtClaim userInfo, Product product) throws AccessDeniedException {
@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
         if (userInfo.getUserId().equals(userCredentialId)) {
             return;
         }
-        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
             // ErrorResponse
             Product product = findByIdOrThrow(id);
             ProductResponse response = ProductResponse.information(product);
-            return ApiResponse.success(response, Message.PRODUCT_FOUND);
+            return ApiResponse.success(response, SMessage.PRODUCT_FOUND);
         } catch (ErrorResponse e) {
             log.error("Error during loading product: {}", e.getMessage());
             throw e;
@@ -81,9 +81,9 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
     }
 
     @Transactional(readOnly = true)
@@ -91,9 +91,9 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(),pagingRequest, Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(),pagingRequest, SMessage.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
     }
 
     @Override
@@ -104,10 +104,10 @@ public class ProductServiceImpl implements ProductService {
             validateUserAccess(userInfo, product);
 
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, Message.PRODUCT_FOUND);
+            return ApiResponse.success(response, SMessage.PRODUCT_FOUND);
         } catch (AccessDeniedException e) {
             log.error("Access denied during loading own product: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during loading own product: {}", e.getError());
             throw e;
@@ -120,9 +120,9 @@ public class ProductServiceImpl implements ProductService {
         validationUtil.validateAndThrow(pagingRequest);
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
         List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -145,11 +145,11 @@ public class ProductServiceImpl implements ProductService {
             product = productRepository.save(product);
 
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, Message.PRODUCT_CREATED);
+            return ApiResponse.success(response, SMessage.PRODUCT_CREATED);
 
         } catch (ValidationException e) {
             log.error("Validation error creating bonus: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         }  catch (ErrorResponse e) {
             log.error("Error during creating product: {}", e.getMessage());
             throw e;
@@ -177,14 +177,14 @@ public class ProductServiceImpl implements ProductService {
             product = productRepository.save(product);
 
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, Message.PRODUCT_UPDATED);
+            return ApiResponse.success(response, SMessage.PRODUCT_UPDATED);
 
         } catch (AccessDeniedException e) {
           log.error("Access denied during updating product: {}", e.getMessage());
-          throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+          throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ValidationException e) {
             log.error("Validation error during updating product: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error during updating product: {}", e.getError());
             throw e;
@@ -205,11 +205,11 @@ public class ProductServiceImpl implements ProductService {
 
             productRepository.save(product);
 
-            return ApiResponse.success(Message.PRODUCT_DELETED);
+            return ApiResponse.success(SMessage.PRODUCT_DELETED);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during deletion product: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deleting product: {}", e.getError());
             throw e;
@@ -236,11 +236,11 @@ public class ProductServiceImpl implements ProductService {
             product = productRepository.save(product);
 
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, Message.PRODUCT_UPDATED);
+            return ApiResponse.success(response, SMessage.PRODUCT_UPDATED);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during adding product image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during adding product image: {}", e.getError());
             throw e;
@@ -263,10 +263,10 @@ public class ProductServiceImpl implements ProductService {
             }
             product = productRepository.save(product);
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, Message.PRODUCT_UPDATED);
+            return ApiResponse.success(response, SMessage.PRODUCT_UPDATED);
         } catch (AccessDeniedException e) {
             log.error("Access denied during deleting product image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deleting product image: {}", e.getError());
             throw e;
@@ -280,12 +280,12 @@ public class ProductServiceImpl implements ProductService {
             // ValidationException
             validationUtil.validateAndThrow(pagingRequest);
             List<Product> productList = productRepository.findByDeletedAtIsNull();
-            if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
+            if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
             List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-            return ApiResponse.success(responses, pagingRequest, Message.PRODUCTS_FOUND);
+            return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
         } catch (ValidationException e) {
             log.error("Validation error while loading products: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         }  catch (ErrorResponse e) {
             log.error("Error error while loading products: {}", e.getMessage());
             throw e;
@@ -297,8 +297,8 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<Product> productList = productRepository.searchBonusPackage(keyword);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_PRODUCT_FOUND);
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
         List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-        return ApiResponse.success(responses, Message.PRODUCTS_FOUND);
+        return ApiResponse.success(responses, SMessage.PRODUCTS_FOUND);
     }
 }

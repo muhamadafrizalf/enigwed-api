@@ -1,6 +1,6 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.BONUS_DETAIL)
+@Table(name = SPathDb.BONUS_DETAIL)
 public class BonusDetail extends BaseEntity{
 
     @ManyToOne

@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.enigwed.constant.Constraint.*;
-import static com.enigwed.constant.Constraint.PASSWORD_MIN;
+import static com.enigwed.constant.SConstraint.*;
+import static com.enigwed.constant.SConstraint.PASSWORD_MIN_6;
 
 @Data
 @AllArgsConstructor
@@ -17,11 +17,11 @@ import static com.enigwed.constant.Constraint.PASSWORD_MIN;
 @Builder
 public class LoginRequest {
 
-    @Email(message = EMAIL_VALID)
+    @Email(message = EMAIL_INVALID)
     @NotBlank(message = EMAIL_BLANK)
     private String email;
 
+    @Size(min = 6, message = PASSWORD_MIN_6)
     @NotBlank(message = PASSWORD_BLANK)
-    @Size(min = 6, message = PASSWORD_MIN)
     private String password;
 }

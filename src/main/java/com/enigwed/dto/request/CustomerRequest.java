@@ -1,6 +1,5 @@
 package com.enigwed.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,8 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.enigwed.constant.Constraint.*;
-import static com.enigwed.constant.Constraint.EMAIL_BLANK;
+import static com.enigwed.constant.SConstraint.*;
+import static com.enigwed.constant.SConstraint.EMAIL_BLANK;
 
 @Data
 @AllArgsConstructor
@@ -18,16 +17,17 @@ import static com.enigwed.constant.Constraint.EMAIL_BLANK;
 @Builder
 public class CustomerRequest {
 
-    @NotBlank(message = NAME_BLANK)
+    @NotBlank(message = CUSTOMER_NAME_BLANK)
     private String name;
 
     @NotBlank(message = PHONE_BLANK)
     private String email;
 
-    @Email(message = EMAIL_VALID)
+    @Email(message = EMAIL_INVALID)
     @NotBlank(message = EMAIL_BLANK)
     private String phone;
 
-    @Size(max = 1000, message = ADDRESS_MAX)
+    @Size(max = 1000, message = ADDRESS_MAX_1000)
+    @NotBlank(message = ADDRESS_BLANK)
     private String address;
 }

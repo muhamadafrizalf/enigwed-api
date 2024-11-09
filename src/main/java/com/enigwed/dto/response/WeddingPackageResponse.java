@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,7 +32,6 @@ public class WeddingPackageResponse {
     private WeddingOrganizerResponse weddingOrganizer;
     private List<ImageResponse> images;
     List<BonusDetailResponse> bonusDetails;
-
 
     public static WeddingPackageResponse all(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = new WeddingPackageResponse();
@@ -67,7 +65,7 @@ public class WeddingPackageResponse {
         return response;
     }
 
-    public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
+    public static WeddingPackageResponse publicInformation(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = new WeddingPackageResponse();
         response.setId(weddingPackage.getId());
         response.setName(weddingPackage.getName());
@@ -82,7 +80,7 @@ public class WeddingPackageResponse {
         }
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
             response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-            response.setReviews(weddingPackage.getReviews().stream().map(ReviewResponse::simple).toList());
+            response.setReviews(weddingPackage.getReviews().stream().filter(Review::isVisiblePublic).map(ReviewResponse::simple).toList());
         }
         return response;
     }

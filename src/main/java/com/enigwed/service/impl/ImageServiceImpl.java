@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.ImageResponse;
 import com.enigwed.entity.Image;
@@ -44,19 +44,19 @@ public class ImageServiceImpl implements ImageService {
             try {
                 Files.createDirectory(directoryPath);
             } catch (IOException e) {
-                throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.ERROR_CREATING_IMAGE_DIRECTORY, e.getMessage());
+                throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.ERROR_CREATING_IMAGE_DIRECTORY, e.getMessage());
             }
         }
     }
 
     private Image findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
-        return imageRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
+        return imageRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SMessage.IMAGE_NOT_FOUND));
     }
 
     private SaveImage saveImageToDirectory(MultipartFile file) throws IOException {
         if (!List.of("image/jpeg", "image/png", "image/jpg", "image/svg+xml").contains(file.getContentType())) {
-            throw new ConstraintViolationException(Message.INVALID_IMAGE_TYPE, null);
+            throw new ConstraintViolationException(SMessage.INVALID_IMAGE_TYPE, null);
         }
         String originalFilename = file.getOriginalFilename();
         String extension = (originalFilename != null && originalFilename.lastIndexOf('.') > 0)
@@ -102,10 +102,10 @@ public class ImageServiceImpl implements ImageService {
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
             log.error("Constraint violation error during creation image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.ERROR_CREATING_IMAGE, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.ERROR_CREATING_IMAGE, e.getMessage());
         } catch (IOException e) {
             log.error("IO error during creation image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.ERROR_CREATING_IMAGE, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.ERROR_CREATING_IMAGE, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during creation image: {}", e.getError());
             throw e;
@@ -128,10 +128,10 @@ public class ImageServiceImpl implements ImageService {
             return imageRepository.saveAndFlush(image);
         } catch (ConstraintViolationException e) {
             log.error("Constraint violation error during update image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (IOException e) {
             log.error("IO error during update image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during update image: {}", e.getError());
             throw e;
@@ -149,7 +149,7 @@ public class ImageServiceImpl implements ImageService {
             imageRepository.deleteById(id);
         } catch (IOException e) {
             log.error("IO error during deleting image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deleting image: {}", e.getError());
             throw e;
@@ -170,7 +170,7 @@ public class ImageServiceImpl implements ImageService {
             return imageRepository.saveAndFlush(image);
         } catch (IOException e) {
             log.error("IO error during deletion image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deletion image: {}", e.getError());
             throw e;
@@ -185,12 +185,12 @@ public class ImageServiceImpl implements ImageService {
             if (image == null) return null;
             Path filePath = Paths.get(image.getPath());
             if (!Files.exists(filePath)) {
-                throw new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, Message.IMAGE_NOT_FOUND);
+                throw new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SMessage.IMAGE_NOT_FOUND);
             }
             return new UrlResource(filePath.toUri());
         } catch (IOException e) {
             log.error("IO error during loading image image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.FETCHING_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.FETCHING_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during loading image image: {}", e.getError());
             throw e;
@@ -202,7 +202,7 @@ public class ImageServiceImpl implements ImageService {
         Image image = findByIdOrThrow(id);
 
         ImageResponse response = ImageResponse.from(image);
-        return ApiResponse.success(response, Message.IMAGE_FOUND);
+        return ApiResponse.success(response, SMessage.IMAGE_FOUND);
     }
 
     @Override
@@ -221,11 +221,11 @@ public class ImageServiceImpl implements ImageService {
             
             ImageResponse response = ImageResponse.from(image);
 
-            return ApiResponse.success(response, Message.IMAGE_UPDATED);
+            return ApiResponse.success(response, SMessage.IMAGE_UPDATED);
         } catch (ConstraintViolationException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (IOException e) {
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.UPDATE_FAILED, e.getMessage());
         }
     }
 

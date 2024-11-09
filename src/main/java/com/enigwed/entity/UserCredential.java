@@ -1,7 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.ERole;
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.USER_CREDENTIAL)
+@Table(name = SPathDb.USER_CREDENTIAL)
 public class UserCredential extends AuditEntity implements UserDetails {
     private String email;
 

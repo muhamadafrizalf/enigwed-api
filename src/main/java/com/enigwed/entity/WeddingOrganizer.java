@@ -1,13 +1,12 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Cascade;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.WEDDING_ORGANIZER)
+@Table(name = SPathDb.WEDDING_ORGANIZER)
 public class WeddingOrganizer extends AuditEntity{
 
     private String name;

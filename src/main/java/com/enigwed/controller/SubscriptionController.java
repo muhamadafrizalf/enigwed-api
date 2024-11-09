@@ -2,7 +2,7 @@ package com.enigwed.controller;
 
 import com.enigwed.constant.ERole;
 import com.enigwed.constant.ESubscriptionPaymentStatus;
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
@@ -34,7 +34,7 @@ public class SubscriptionController {
             summary = "For admin and wedding organizer to get list of subscription packages [ADMIN, WO] (WEB)"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE)
+    @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> getSubscriptionPrice() {
         return ResponseEntity.ok(subscriptionService.getSubscriptionPrices());
     }
@@ -43,7 +43,7 @@ public class SubscriptionController {
             summary = "For admin and wedding organizer to get subscription package information by subscription_package_id [ADMIN, WO] (WEB)"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
+    @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
     public ResponseEntity<?> getSubscriptionPriceId(
             @PathVariable String id
     ) {
@@ -54,7 +54,7 @@ public class SubscriptionController {
             summary = "For admin to create new subscription package [ADMIN] (WEB)"
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE)
+    @PostMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> addSubscriptionPrice(
             @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
@@ -65,7 +65,7 @@ public class SubscriptionController {
             summary = "For admin to update existing subscription package [ADMIN] (WEB)"
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE)
+    @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> updateSubscriptionPrice(
             @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
@@ -76,7 +76,7 @@ public class SubscriptionController {
             summary = "For admin to delete subscription package by subscription_package_id [ADMIN] (WEB)"
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping(PathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
+    @DeleteMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
     public ResponseEntity<?> deleteSubscriptionPrice(@PathVariable String id) {
         return ResponseEntity.ok(subscriptionService.deleteSubscriptionPrice(id));
     }
@@ -86,7 +86,7 @@ public class SubscriptionController {
             description = "Receive form-data String subscriptionPriceId (subscription package id) and MultipartFile paymentImage (payment image)"
     )
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(value = PathApi.PROTECTED_SUBSCRIPTION, consumes = "multipart/form-data")
+    @PostMapping(value = SPathApi.PROTECTED_SUBSCRIPTION, consumes = "multipart/form-data")
     public ResponseEntity<?> paySubscription(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -107,7 +107,7 @@ public class SubscriptionController {
             description = "Admin can retrieve all subscription invoice, wedding organizer can only get their own invoice"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION)
+    @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION)
     public ResponseEntity<?> getSubscriptions(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -138,7 +138,7 @@ public class SubscriptionController {
             summary = "For wedding organizer to get list of active subscription they own (Default pagination {page:1, size:8}) [WO] (WEB)"
     )
     @PreAuthorize("hasRole('WO')")
-    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION_ACTIVE)
+    @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_ACTIVE)
     public ResponseEntity<?> getActiveSubscription(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -156,7 +156,7 @@ public class SubscriptionController {
             description = "Admin can get subscription invoice, wedding organizer can only get their own invoice"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_SUBSCRIPTION_ID)
+    @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_ID)
     public ResponseEntity<?> getSubscriptionById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -172,7 +172,7 @@ public class SubscriptionController {
             description = "Extend user active until duration"
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(PathApi.PROTECTED_SUBSCRIPTION_ID)
+    @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_ID)
     public ResponseEntity<?> confirmSubscriptionById(@PathVariable String id) {
         ApiResponse<?> response = subscriptionService.confirmPaymentSubscriptionById(id);
         return ResponseEntity.ok(response);

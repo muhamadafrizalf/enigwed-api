@@ -1,6 +1,6 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -26,7 +26,7 @@ public class NotificationController {
             description = "Each user can only  retrieve their own notification (order by read = false and created at)"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_NOTIFICATION)
+    @GetMapping(SPathApi.PROTECTED_NOTIFICATION)
     public ResponseEntity<?> getOwnNotification(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
@@ -41,7 +41,7 @@ public class NotificationController {
             description = "Each user can only  read their own notification"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @PutMapping(PathApi.PROTECTED_NOTIFICATION_ID)
+    @PutMapping(SPathApi.PROTECTED_NOTIFICATION_ID)
     public ResponseEntity<?> readNotification(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable String id
@@ -55,7 +55,7 @@ public class NotificationController {
     @Operation(
             summary = "For development to get all notification in database (FOR DEVELOPMENT ONLY, DON'T USE)"
     )
-    @GetMapping(PathApi.PUBLIC_NOTIFICATION + "/dev")
+    @GetMapping(SPathApi.PUBLIC_NOTIFICATION + "/dev")
     public ResponseEntity<?> getAllNotifications() {
         return ResponseEntity.ok(notificationService.getAllNotifications());
     }

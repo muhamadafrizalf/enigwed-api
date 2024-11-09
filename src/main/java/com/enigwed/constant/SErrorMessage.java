@@ -1,6 +1,6 @@
 package com.enigwed.constant;
 
-public class ErrorMessage {
+public class SErrorMessage {
     // Constraint violation
     public static final String CONSTRAINT_VIOLATION = "Constraint violation";
     // Null or Empty
@@ -38,6 +38,7 @@ public class ErrorMessage {
     public static final String INVALID_DATE = "Start date must be before end date";
     public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account id is required";
     public static final String BANK_ACCOUNT_NOT_FOUND = "Bank account not found";
+    public static final String INVALID_ORDER_STATUS = "Order not in the right status";
 
     public static String PROVINCE_NOT_FOUND(String id) {
         return "Province with id: " + id + " not found";

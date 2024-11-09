@@ -1,6 +1,6 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.REVIEW)
+@Table(name = SPathDb.REVIEW)
 public class Review extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -35,4 +35,6 @@ public class Review extends BaseEntity {
     private double rating;
 
     private String comment;
+
+    private boolean visiblePublic;
 }

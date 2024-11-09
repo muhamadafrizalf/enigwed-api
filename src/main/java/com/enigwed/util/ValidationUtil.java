@@ -1,6 +1,6 @@
 package com.enigwed.util;
 
-import com.enigwed.constant.ErrorMessage;
+import com.enigwed.constant.SErrorMessage;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class ValidationUtil {
             for (ConstraintViolation<T> violation : violations) {
                 errors.add(violation.getMessage());
             }
-            throw new ValidationException(ErrorMessage.CONSTRAINT_VIOLATION, errors);
+            throw new ValidationException(SErrorMessage.CONSTRAINT_VIOLATION, errors);
         }
     }
 }

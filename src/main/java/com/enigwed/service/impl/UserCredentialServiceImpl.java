@@ -1,8 +1,8 @@
 package com.enigwed.service.impl;
 
 import com.enigwed.constant.ERole;
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.entity.UserCredential;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.UserCredentialRepository;
@@ -57,21 +57,21 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        if (email == null || email.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.EMAIL_IS_REQUIRED);
+        if (email == null || email.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.EMAIL_IS_REQUIRED);
         return userCredentialRepository.findByEmailAndDeletedAtIsNull(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
     @Transactional(readOnly = true)
     @Override
     public UserCredential loadUserById(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.ID_IS_REQUIRED);
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
         return userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserCredential createUser(UserCredential userCredential) {
-        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
+        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE);
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 
@@ -79,7 +79,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Override
     public UserCredential updateUser(UserCredential userCredential) {
         UserCredential possibleConflict = userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).orElse(null);
-        if (possibleConflict != null && !possibleConflict.getId().equals(userCredential.getId())) throw new DataIntegrityViolationException(ErrorMessage.EMAIL_ALREADY_IN_USE);
+        if (possibleConflict != null && !possibleConflict.getId().equals(userCredential.getId())) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE);
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 
@@ -87,14 +87,14 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Override
     public UserCredential deleteUser(String id) {
         try {
-            if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, ErrorMessage.ID_IS_REQUIRED);
+            if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DELETE_FAILED, SErrorMessage.ID_IS_REQUIRED);
             UserCredential user = userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
             user.setEmail("deleted_" + user.getEmail());
             user.setDeletedAt(LocalDateTime.now());
             user.setActive(false);
             return userCredentialRepository.saveAndFlush(user);
         } catch (UsernameNotFoundException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DELETE_FAILED, e.getMessage());
         }
     }
 

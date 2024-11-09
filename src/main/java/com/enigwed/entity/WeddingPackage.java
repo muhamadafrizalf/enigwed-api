@@ -1,6 +1,6 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.WEDDING_PACKAGE)
+@Table(name = SPathDb.WEDDING_PACKAGE)
 public class WeddingPackage extends AuditEntity {
 
     private String name;

@@ -1,6 +1,6 @@
 package com.enigwed.dto.request;
 
-import com.enigwed.constant.Constraint;
+import com.enigwed.constant.SConstraint;
 import com.enigwed.constant.ESubscriptionLength;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static com.enigwed.constant.SConstraint.*;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,13 +20,14 @@ public class SubscriptionPacketRequest {
 
     private String id;
 
-    @NotBlank(message = Constraint.SUBSCRIPTION_PACKET_NAME_BLANK)
+    @NotBlank(message = SUBSCRIPTION_PACKAGE_NAME_BLANK)
     private String name;
 
-    @NotNull
+    @NotNull(message = SUBSCRIPTION_PACKAGE_LENGTH_NULL)
     private ESubscriptionLength subscriptionLength;
 
-    @Positive(message = Constraint.PRICE_POSITIVE)
-    private double price;
+    @Positive(message = PRICE_INVALID)
+    @NotNull(message = PRICE_NULL)
+    private Double price;
 
 }

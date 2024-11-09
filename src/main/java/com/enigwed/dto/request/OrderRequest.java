@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.enigwed.constant.Constraint.*;
+import static com.enigwed.constant.SConstraint.*;
 
 @Data
 @AllArgsConstructor
@@ -22,8 +22,8 @@ public class OrderRequest {
     @NotNull(message = CUSTOMER_NULL)
     private CustomerRequest customer;
 
+    @Future(message = WEDDING_DATE_INVALID)
     @NotNull(message = WEDDING_DATE_NULL)
-    @Future(message = WEDDING_DATE_FUTURE)
     private LocalDateTime weddingDate;
 
     @NotBlank(message = WEDDING_PACKAGE_ID_BLANK)

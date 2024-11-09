@@ -1,14 +1,10 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.ERole;
-import com.enigwed.constant.ESubscriptionPaymentStatus;
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
-import com.enigwed.service.OrderService;
 import com.enigwed.service.StatisticService;
-import com.enigwed.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -35,7 +31,7 @@ public class StatisticController {
             description = "Admin get income statistic from confirmed subscription and list of wedding organizer status. Wedding organizer get income statistic from finished order and information of wedding packages"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_STATISTIC)
+    @GetMapping(SPathApi.PROTECTED_STATISTIC)
     public ResponseEntity<?> getStatistic(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

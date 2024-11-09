@@ -1,6 +1,7 @@
 package com.enigwed.dto.request;
 
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SConstraint;
+import com.enigwed.constant.SMessage;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,13 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PagingRequest {
 
-    @Positive(message = Message.PAGE_INVALID)
+    @Positive(message = SConstraint.PAGE_INVALID)
     private Integer page;
 
-    @Positive(message = Message.SIZE_INVALID)
+    @Positive(message = SConstraint.SIZE_INVALID)
     private Integer size;
-
-    public static PagingRequest of(Integer page, Integer size) {
-        return PagingRequest.builder().page(page).size(size).build();
-    }
 }

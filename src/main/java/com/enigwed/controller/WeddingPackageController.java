@@ -1,7 +1,7 @@
 package com.enigwed.controller;
 
 import com.enigwed.constant.ERole;
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
@@ -29,7 +29,7 @@ public class WeddingPackageController {
     @Operation(
             summary = "For customer to get wedding package information by wedding_package_id (MOBILE)"
     )
-    @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE_ID)
+    @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
         ApiResponse<?> response = weddingPackageService.customerFindWeddingPackageById(id);
         return ResponseEntity.ok(response);
@@ -39,7 +39,7 @@ public class WeddingPackageController {
             summary = "For customer to get list of wedding packages (Default pagination {page:1, size:8}) (MOBILE)",
             description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
     )
-    @GetMapping(PathApi.PUBLIC_WEDDING_PACKAGE)
+    @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> customerGetAllWeddingPackages(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
@@ -74,7 +74,7 @@ public class WeddingPackageController {
             description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
+    @GetMapping(SPathApi.PROTECTED_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> getOwnWeddingPackageById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -95,7 +95,7 @@ public class WeddingPackageController {
             description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    @GetMapping(SPathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> getOwnWeddingPackages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -141,7 +141,7 @@ public class WeddingPackageController {
             summary = "For wedding organizer to create wedding package [WO] (WEB)"
     )
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    @PostMapping(SPathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> createWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -157,7 +157,7 @@ public class WeddingPackageController {
             description = "Wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(PathApi.PROTECTED_WEDDING_PACKAGE)
+    @PutMapping(SPathApi.PROTECTED_WEDDING_PACKAGE)
     public ResponseEntity<?> updateWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -173,7 +173,7 @@ public class WeddingPackageController {
             description = "Wedding organizer can only delete their own wedding package"
     )
     @PreAuthorize("hasAnyRole('WO')")
-    @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID)
+    @DeleteMapping(SPathApi.PROTECTED_WEDDING_PACKAGE_ID)
     public ResponseEntity<?> deleteWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -189,7 +189,7 @@ public class WeddingPackageController {
             description = "Wedding organizer can only update their own wedding package"
     )
     @PreAuthorize("hasRole('WO')")
-    @PutMapping(value = PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
+    @PutMapping(value = SPathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addWeddingPackageImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
@@ -206,7 +206,7 @@ public class WeddingPackageController {
             description = "Wedding organizer can only delete their own wedding package images"
     )
     @PreAuthorize("hasAnyRole('WO')")
-    @DeleteMapping(PathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)
+    @DeleteMapping(SPathApi.PROTECTED_WEDDING_PACKAGE_ID_IMAGE_ID)
     public ResponseEntity<?> deleteWeddingPackageImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,

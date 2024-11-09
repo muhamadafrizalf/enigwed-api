@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-import static com.enigwed.constant.Constraint.*;
+import static com.enigwed.constant.SConstraint.*;
 
 @Data
 @AllArgsConstructor
@@ -21,19 +21,21 @@ public class WeddingPackageRequest {
 
     private String id;
 
-    @NotBlank(message = NAME_BLANK)
+    @NotBlank(message = WEDDING_PACKAGE_NAME_BLANK)
     private String name;
 
     @Size(max = 10000, message = DESCRIPTION_MAX_10000)
+    @NotBlank(message = WEDDING_PACKAGE_DESCRIPTION_BLANK)
     private String description;
 
-    @Positive(message = PRICE_POSITIVE)
-    private double price;
+    @Positive(message = PRICE_INVALID)
+    @NotNull(message = PRICE_NULL)
+    private Double price;
 
-    @NotNull
+    @NotNull(message = PROVINCE_NULL)
     private ProvinceRequest province;
 
-    @NotNull
+    @NotNull(message = REGENCY_NULL)
     private RegencyRequest regency;
 
     private List<BonusDetailRequest> bonusDetails;

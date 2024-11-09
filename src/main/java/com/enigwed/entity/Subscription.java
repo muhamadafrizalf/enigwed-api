@@ -1,8 +1,7 @@
 package com.enigwed.entity;
 
-import com.enigwed.constant.ESubscriptionLength;
 import com.enigwed.constant.ESubscriptionPaymentStatus;
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.SUBSCRIPTION)
+@Table(name = SPathDb.SUBSCRIPTION)
 public class Subscription extends BaseEntity {
 
     @ManyToOne

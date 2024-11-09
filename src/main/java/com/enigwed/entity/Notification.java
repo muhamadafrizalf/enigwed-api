@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.NOTIFICATION)
+@Table(name = SPathDb.NOTIFICATION)
 public class Notification extends BaseEntity {
 
     @Enumerated(EnumType.STRING)

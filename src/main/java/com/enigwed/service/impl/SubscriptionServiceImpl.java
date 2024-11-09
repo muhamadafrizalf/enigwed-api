@@ -111,8 +111,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     private SubscriptionPacket findSubscriptionPriceByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ID_IS_REQUIRED);
-        return subscriptionPriceRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ID_IS_REQUIRED);
+        return subscriptionPriceRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
     }
 
     private List<Subscription> filterResult(FilterRequest filter, List<Subscription> list) {
@@ -186,7 +186,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } else if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
             return;
         }
-        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     @Override
@@ -198,21 +198,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public ApiResponse<List<SubscriptionPacket>> getSubscriptionPrices() {
         List<SubscriptionPacket> response = subscriptionPriceRepository.findByDeletedAtIsNull();
         if (response == null || response.isEmpty())
-            return ApiResponse.success(new ArrayList<>(), Message.NO_SUBSCRIPTION_PRICE_FOUND);
-        return ApiResponse.success(response, Message.SUBSCRIPTION_PRICES_FOUND);
+            return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PRICE_FOUND);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICES_FOUND);
     }
 
     @Override
     public ApiResponse<SubscriptionPacket> getSubscriptionPriceById(String subscriptionPriceId) {
         SubscriptionPacket subscriptionPrice = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
-        return ApiResponse.success(subscriptionPrice, Message.SUBSCRIPTION_PRICE_FOUND);
+        return ApiResponse.success(subscriptionPrice, SMessage.SUBSCRIPTION_PRICE_FOUND);
     }
 
     @Override
     public ApiResponse<SubscriptionPacket> addSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest) {
         validationUtil.validateAndThrow(subscriptionPacketRequest);
         if (subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).isPresent())
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
+            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
 
         SubscriptionPacket subscriptionPrice = SubscriptionPacket.builder()
                 .subscriptionLength(subscriptionPacketRequest.getSubscriptionLength())
@@ -220,7 +220,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .build();
 
         subscriptionPrice = subscriptionPriceRepository.save(subscriptionPrice);
-        return ApiResponse.success(subscriptionPrice, Message.SUBSCRIPTION_PRICE_CREATED);
+        return ApiResponse.success(subscriptionPrice, SMessage.SUBSCRIPTION_PRICE_CREATED);
     }
 
     @Override
@@ -229,21 +229,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubscriptionPacket subscriptionPacket = findSubscriptionPriceByIdOrThrow(subscriptionPacketRequest.getId());
         SubscriptionPacket possibleConflict = subscriptionPriceRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).orElse(null);
         if (possibleConflict != null && !subscriptionPacket.getId().equals(possibleConflict.getId())) {
-            throw new ErrorResponse(HttpStatus.CONFLICT, Message.CREATE_FAILED, ErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
+            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
         }
 
         subscriptionPacket.setSubscriptionLength(subscriptionPacketRequest.getSubscriptionLength());
         subscriptionPacket.setPrice(subscriptionPacketRequest.getPrice());
 
         subscriptionPacket = subscriptionPriceRepository.save(subscriptionPacket);
-        return ApiResponse.success(subscriptionPacket, Message.SUBSCRIPTION_PRICE_UPDATED);
+        return ApiResponse.success(subscriptionPacket, SMessage.SUBSCRIPTION_PRICE_UPDATED);
     }
 
     @Override
     public ApiResponse<?> deleteSubscriptionPrice(String subscriptionId) {
         findSubscriptionPriceByIdOrThrow(subscriptionId);
         subscriptionPriceRepository.deleteById(subscriptionId);
-        return ApiResponse.success(Message.SUBSCRIPTION_PRICE_DELETED);
+        return ApiResponse.success(SMessage.SUBSCRIPTION_PRICE_DELETED);
     }
 
     @Override
@@ -270,10 +270,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription = subscriptionRepository.save(subscription);
 
         /* CREATE NOTIFICATION */
-        sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, Message.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
+        sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, SMessage.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
-        return ApiResponse.success(response, Message.SUBSCRIPTION_PAID);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAID);
     }
 
     @Override
@@ -283,19 +283,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
         Map<String, Integer> countByStatus = countByStatus(subscriptionList);
         if (subscriptionList == null || subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         subscriptionList = filterResult(filterRequest, subscriptionList);
         if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         countByStatus = countByStatus(subscriptionList);
         subscriptionList = filterByStatus(filterRequest, subscriptionList);
         if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.successSubscription(responses, pagingRequest, Message.SUBSCRIPTIONS_FOUND, countByStatus);
+        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
     }
 
     @Override
@@ -309,14 +309,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .toList();
 
         List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.SUBSCRIPTIONS_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND);
     }
 
     @Override
     public ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId) {
         if (subscriptionId == null || subscriptionId.isEmpty())
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
-        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_NOT_FOUND));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND));
 
         subscription.setStatus(ESubscriptionPaymentStatus.CONFIRMED);
         LocalDateTime activeFrom = subscription.getWeddingOrganizer().getUserCredential().getActiveUntil();
@@ -329,26 +329,26 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
 
         /* SEND NOTIFICATION */
-        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, Message.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPacket().getName()));
+        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPacket().getName()));
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
-        return ApiResponse.success(response, Message.SUBSCRIPTION_PAYMENT_CONFIRMED);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAYMENT_CONFIRMED);
     }
 
     @Override
     public ApiResponse<SubscriptionResponse> getSubscriptionById(JwtClaim userInfo, String subscriptionId) {
         try {
             if (subscriptionId == null || subscriptionId.isEmpty())
-                throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
-            Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.SUBSCRIPTION_NOT_FOUND));
+                throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
+            Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND));
 
             validateUserAccess(userInfo, subscription.getWeddingOrganizer());
 
             SubscriptionResponse response = SubscriptionResponse.all(subscription);
-            return ApiResponse.success(response, Message.SUBSCRIPTION_FOUND);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND);
         } catch (AccessDeniedException e) {
             log.error("Access denied while loading subscription: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.FETCHING_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.FETCHING_FAILED, e.getMessage());
         }
     }
 
@@ -357,18 +357,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<Subscription> subscriptionList = subscriptionRepository.findAll();
         Map<String, Integer> countByStatus = countByStatus(subscriptionList);
         if (subscriptionList == null || subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         subscriptionList = filterResult(filterRequest, subscriptionList);
         if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         countByStatus = countByStatus(subscriptionList);
         subscriptionList = filterByStatus(filterRequest, subscriptionList);
         if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.successSubscription(responses, pagingRequest, Message.SUBSCRIPTIONS_FOUND, countByStatus);
+        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
     }
 }

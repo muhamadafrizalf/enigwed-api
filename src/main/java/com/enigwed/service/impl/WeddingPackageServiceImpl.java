@@ -1,7 +1,7 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ErrorMessage;
-import com.enigwed.constant.Message;
+import com.enigwed.constant.SErrorMessage;
+import com.enigwed.constant.SMessage;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.BonusDetailRequest;
 import com.enigwed.dto.request.FilterRequest;
@@ -39,8 +39,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     private final ValidationUtil validationUtil;
 
     private WeddingPackage findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.WEDDING_PACKAGE_ID_IS_REQUIRED);
-        return weddingPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_PACKAGE_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_PACKAGE_ID_IS_REQUIRED);
+        return weddingPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_PACKAGE_NOT_FOUND));
     }
 
     private List<WeddingPackage> filterResult(FilterRequest filter, List<WeddingPackage> list) {
@@ -61,7 +61,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         if (userInfo.getUserId().equals(userCredentialId)) {
             return;
         }
-        throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED);
+        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     @Transactional(readOnly = true)
@@ -88,8 +88,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         try {
             // ErrorResponse
             WeddingPackage weddingPackage = findByIdOrThrow(id);
-            WeddingPackageResponse response = WeddingPackageResponse.information(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_FOUND);
+            WeddingPackageResponse response = WeddingPackageResponse.publicInformation(weddingPackage);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_FOUND);
         } catch (ErrorResponse e) {
             log.error("Error during loading wedding package: {}", e.getMessage());
             throw e;
@@ -101,12 +101,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByDeletedAtIsNull();
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(readOnly = true)
@@ -114,12 +114,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     public ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchWeddingPackage(keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
     @Override
@@ -131,11 +131,11 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             validateUserAccess(userInfo, weddingPackage);
 
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_FOUND);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_FOUND);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during loading wedding package: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during loading wedding package: {}", e.getMessage());
             throw e;
@@ -148,12 +148,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(readOnly = true)
@@ -164,12 +164,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findByWeddingOrganizerIdAndKeyword(wo.getId(), keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -215,11 +215,11 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             weddingPackage = weddingPackageRepository.save(weddingPackage);
 
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_CREATED);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_CREATED);
 
         } catch (ValidationException e) {
             log.error("Validation error creating wedding package: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.CREATE_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error during creating wedding package: {}", e.getMessage());
             throw e;
@@ -273,13 +273,13 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             weddingPackage = weddingPackageRepository.save(weddingPackage);
 
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_UPDATED);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_UPDATED);
         } catch (AccessDeniedException e) {
             log.error("Access denied during updating wedding package: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ValidationException e) {
             log.error("Validation error during updating wedding package: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error during updating wedding package: {}", e.getError());
             throw e;
@@ -300,11 +300,11 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
             weddingPackageRepository.save(weddingPackage);
 
-            return ApiResponse.success(Message.WEDDING_PACKAGE_DELETED);
+            return ApiResponse.success(SMessage.WEDDING_PACKAGE_DELETED);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during deletion wedding package: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.DELETE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deleting wedding package: {}", e.getError());
             throw e;
@@ -322,7 +322,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             validateUserAccess(userInfo, weddingPackage);
 
             // ErrorResponse
-            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.UPDATE_FAILED, ErrorMessage.IMAGE_IS_NULL);
+            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_NULL);
 
             // ErrorResponse
             Image addedImage = imageService.createImage(image);
@@ -334,11 +334,11 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             weddingPackage = weddingPackageRepository.save(weddingPackage);
 
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_UPDATED);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_UPDATED);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during adding wedding package image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during adding wedding package image: {}", e.getError());
             throw e;
@@ -364,11 +364,11 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             weddingPackage = weddingPackageRepository.save(weddingPackage);
 
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, Message.WEDDING_PACKAGE_UPDATED);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_UPDATED);
 
         } catch (AccessDeniedException e) {
             log.error("Access denied during deleting wedding package image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, Message.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during deleting wedding package image: {}", e.getError());
             throw e;
@@ -377,34 +377,34 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
     @Override
     public ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.WEDDING_PACKAGE_ID_IS_REQUIRED);
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_PACKAGE_ID_IS_REQUIRED);
         WeddingPackage weddingPackage = weddingPackageRepository.findById(id)
-                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, Message.FETCHING_FAILED, ErrorMessage.WEDDING_PACKAGE_NOT_FOUND));
+                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_PACKAGE_NOT_FOUND));
         WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-        return ApiResponse.success(response, Message.WEDDING_PACKAGE_FOUND);
+        return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_FOUND);
     }
 
     @Override
     public ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll();
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
     @Override
     public ApiResponse<List<WeddingPackageResponse>> searchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
         List<WeddingPackage> weddingPackageList = weddingPackageRepository.searchAllWeddingPackages(keyword);
-        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, Message.NO_WEDDING_PACKAGE_FOUND);
+        if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, Message.WEDDING_PACKAGES_FOUND);
+        return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 }

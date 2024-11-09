@@ -1,13 +1,12 @@
 package com.enigwed.dto.request;
 
-import com.enigwed.constant.Constraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.enigwed.constant.Constraint.*;
+import static com.enigwed.constant.SConstraint.*;
 
 @Data
 @AllArgsConstructor

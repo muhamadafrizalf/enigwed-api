@@ -1,6 +1,6 @@
 package com.enigwed.controller;
 
-import com.enigwed.constant.PathApi;
+import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.RefreshToken;
 import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(PathApi.AUTH)
+@RequestMapping(SPathApi.AUTH)
 public class AuthController {
     private final AuthService authService;
 
     @Operation(summary = "Login to get token and other addition info")
-    @PostMapping(PathApi.LOGIN)
+    @PostMapping(SPathApi.LOGIN)
     public ResponseEntity<?> login (
             @RequestBody LoginRequest loginRequest
     ) {
@@ -30,7 +30,7 @@ public class AuthController {
     }
 
     @Operation(summary = "Register to create new wedding organizer account")
-    @PostMapping(PathApi.REGISTER)
+    @PostMapping(SPathApi.REGISTER)
     public ResponseEntity<?> register (
             @RequestBody RegisterRequest registerRequest
     ) {
@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @Operation(summary = "To get new token by sending active old token")
-    @PostMapping(PathApi.REFRESH_TOKEN)
+    @PostMapping(SPathApi.REFRESH_TOKEN)
     public ResponseEntity<?> refreshToken (
             @RequestBody RefreshToken refreshToken
     ) {

@@ -1,7 +1,7 @@
 package com.enigwed.entity;
 
 import com.enigwed.constant.ESubscriptionLength;
-import com.enigwed.constant.PathDb;
+import com.enigwed.constant.SPathDb;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = PathDb.SUBSCRIPTION_PRICE)
+@Table(name = SPathDb.SUBSCRIPTION_PRICE)
 public class SubscriptionPacket extends AuditEntity{
 
     private String name;
