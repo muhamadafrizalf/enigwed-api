@@ -26,8 +26,6 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     private final UserCredentialRepository userCredentialRepository;
     private final PasswordEncoder passwordEncoder;
 
-
-
     @Value("${com.enigwed.email-admin}")
     private String emailAdmin;
 
@@ -48,6 +46,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
         userCredentialRepository.save(admin);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String loadAdminId() {
         UserCredential admin = userCredentialRepository.findByEmailAndDeletedAtIsNull(emailAdmin).orElse(null);
@@ -63,8 +62,8 @@ public class UserCredentialServiceImpl implements UserCredentialService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserCredential loadUserById(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
+    public UserCredential loadUserById(String id) throws UsernameNotFoundException {
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.USER_CREDENTIAL_ID_IS_REQUIRED);
         return userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
     }
 
@@ -85,23 +84,40 @@ public class UserCredentialServiceImpl implements UserCredentialService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UserCredential deleteUser(String id) {
-        try {
-            if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DELETE_FAILED, SErrorMessage.ID_IS_REQUIRED);
-            UserCredential user = userCredentialRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new UsernameNotFoundException(id));
-            user.setEmail("deleted_" + user.getEmail());
-            user.setDeletedAt(LocalDateTime.now());
-            user.setActive(false);
-            return userCredentialRepository.saveAndFlush(user);
-        } catch (UsernameNotFoundException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DELETE_FAILED, e.getMessage());
-        }
+    public UserCredential deleteUser(UserCredential userCredential) {
+        userCredential.setEmail("deleted_" + userCredential.getEmail());
+        userCredential.setDeletedAt(LocalDateTime.now());
+        userCredential.setActive(false);
+        return userCredentialRepository.saveAndFlush(userCredential);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserCredential activateUser(UserCredential userCredential) {
+        /* SET ACTIVE TRUE */
         userCredential.setActive(true);
+
+        // Check if the current activeUntil is more than 1 month ahead
+        if (userCredential.getActiveUntil() == null || userCredential.getActiveUntil().isBefore(LocalDateTime.now().plusMonths(1))) {
+            /* SET ACTIVE UNTIL FIRST DAY OF NEXT MONTH */
+            userCredential.setActiveUntil(LocalDateTime.now()
+                    .plusMonths(1)
+                    .withDayOfMonth(1)
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0)
+                    .withNano(0)
+            );
+        }
+
+        return userCredentialRepository.saveAndFlush(userCredential);
+    }
+
+
+    @Override
+    public UserCredential deactivateUser(UserCredential userCredential) {
+        /* SET ACTIVE FALSE */
+        userCredential.setActive(false);
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 }

@@ -47,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<LoginResponse> login(LoginRequest loginRequest) {
         try {
+            /* VALIDATE INPUT */
             // ValidationException
             validationUtil.validateAndThrow(loginRequest);
             // AuthenticationException
@@ -133,6 +134,7 @@ public class AuthServiceImpl implements AuthService {
                     .avatar(avatar)
                     .userCredential(userCredential)
                     .build();
+
             /* VALIDATE DATA INTEGRITY AND SAVE WEDDING ORGANIZER */
             // DataIntegrityViolationException
             weddingOrganizerService.createWeddingOrganizer(wo);
@@ -148,6 +150,7 @@ public class AuthServiceImpl implements AuthService {
                     .message(SMessage.NEW_ACCOUNT_REGISTRATION(wo.getName()))
                     .build();
             notificationService.createNotification(notification);
+
             /*
 
             Create notification for email [SOON]
@@ -164,6 +167,9 @@ public class AuthServiceImpl implements AuthService {
             throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.REGISTER_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during register: {}", e.getError());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during register: {}", e.getMessage());
             throw e;
         }
     }
@@ -191,7 +197,6 @@ public class AuthServiceImpl implements AuthService {
             /* CREATE NEW TOKEN */
             // JWTCreationException
             String token = jwtUtil.generateToken(user);
-            
             RefreshToken newToken = RefreshToken.builder()
                     .token(token)
                     .build();
@@ -209,6 +214,9 @@ public class AuthServiceImpl implements AuthService {
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.LOGIN_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error during refresh token: {}", e.getError());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during refresh token: {}", e.getMessage());
             throw e;
         }
     }

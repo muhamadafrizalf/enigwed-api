@@ -1,6 +1,8 @@
 package com.enigwed.security;
 
+import com.enigwed.constant.SErrorMessage;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.exception.JwtAuthenticationException;
 import com.enigwed.service.UserCredentialService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,9 +23,9 @@ import java.io.IOException;
 @AllArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final UserCredentialService userCredentialService;
     private final JwtUtil jwtUtil;
-
 
     @Override
     protected void doFilterInternal(
@@ -46,9 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authenticationToken.setDetails(new WebAuthenticationDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            } else {
+                throw new JwtAuthenticationException(SErrorMessage.JWT_INVALID);
             }
         } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+            log.error("Error in JWT authentication: {}", e.getMessage());
+            throw new JwtAuthenticationException(SErrorMessage.JWT_AUTHENTICATION_FAILED);
         }
         filterChain.doFilter(request, response);
     }
@@ -60,5 +64,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
 }
+

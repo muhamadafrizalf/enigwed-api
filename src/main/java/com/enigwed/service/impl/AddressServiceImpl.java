@@ -30,39 +30,50 @@ public class AddressServiceImpl implements AddressService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Province saveOrLoadProvince(ProvinceRequest provinceRequest) {
+        /* VALIDATE INPUT */
         validationUtil.validateAndThrow(provinceRequest);
+        /* CREATE PROVINCE */
         Province province = Province.builder()
                 .id(provinceRequest.getId())
                 .name(provinceRequest.getName())
                 .build();
+        /* LOAD OR SAVE PROVINCE */
         return provinceRepository.findById(province.getId()).orElse(provinceRepository.saveAndFlush(province));
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Regency saveOrLoadRegency(RegencyRequest regencyRequest) {
+        /* VALIDATE INPUT */
         validationUtil.validateAndThrow(regencyRequest);
+        /* LOAD PROVINCE */
         Province province = provinceRepository.findById(regencyRequest.getProvince_id())
                 .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
+        /* CREATE REGENCY */
         Regency regency = Regency.builder()
                 .id(regencyRequest.getId())
                 .name(regencyRequest.getName())
                 .province(province)
                 .build();
+        /* LOAD OR SAVE REGENCY */
         return regencyRepository.findById(regency.getId()).orElse(regencyRepository.saveAndFlush(regency));
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public District saveOrLoadDistrict(DistrictRequest districtRequest) {
+        /* VALIDATE INPUT */
         validationUtil.validateAndThrow(districtRequest);
+        /* LOAD REGENCY */
         Regency regency = regencyRepository.findById(districtRequest.getRegency_id())
                 .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
+        /* CREATE DISTRICT */
         District district = District.builder()
                 .id(districtRequest.getId())
                 .name(districtRequest.getName())
                 .regency(regency)
                 .build();
+        /* LOAD OR SAVE DISTRICT */
         return districtRepository.findById(district.getId()).orElse(districtRepository.saveAndFlush(district));
     }
 }

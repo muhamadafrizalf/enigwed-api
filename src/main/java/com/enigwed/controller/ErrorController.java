@@ -3,6 +3,7 @@ package com.enigwed.controller;
 import com.enigwed.constant.SMessage;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.JwtAuthenticationException;
 import com.enigwed.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,15 @@ public class ErrorController {
         return ResponseEntity.status(e.getHttpStatus()).body(response);
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<?> handle(JwtAuthenticationException e) {
+        ApiResponse<?> response = ApiResponse.failed(SMessage.AUTHENTICATION_FAILED, e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<?> handle(AuthenticationException e) {
-        ApiResponse<?> response = ApiResponse.failed(SMessage.ERROR, e.getMessage());
+        ApiResponse<?> response = ApiResponse.failed(SMessage.UNAUTHORIZED, e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 

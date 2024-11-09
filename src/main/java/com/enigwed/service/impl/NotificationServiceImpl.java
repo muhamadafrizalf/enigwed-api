@@ -1,8 +1,6 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ENotificationChannel;
-import com.enigwed.constant.SErrorMessage;
-import com.enigwed.constant.SMessage;
+import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.NotificationResponse;
@@ -73,7 +71,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public ApiResponse<List<NotificationResponse>> getOwnNotifications(JwtClaim userInfo) {
         Sort sort = Sort.by(Sort.Order.asc("read"), Sort.Order.desc("createdAt"));
-        List<Notification> notificationList = notificationRepository.findByReceiverIdAndChannel(userInfo.getUserId(), ENotificationChannel.SYSTEM, sort);
+        List<Notification> notificationList;
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            notificationList = notificationRepository.findByReceiverAndChannel(EReceiver.ADMIN, ENotificationChannel.SYSTEM, sort);
+        } else {
+            notificationList = notificationRepository.findByReceiverIdAndChannel(userInfo.getUserId(), ENotificationChannel.SYSTEM, sort);
+        }
         if (notificationList == null || notificationList.isEmpty()) {
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_NOTIFICATION_FOUND);
         }

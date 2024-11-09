@@ -1,6 +1,5 @@
 package com.enigwed.service.impl;
 
-import com.enigwed.constant.ERole;
 import com.enigwed.constant.EUserStatus;
 import com.enigwed.constant.SErrorMessage;
 import com.enigwed.constant.SMessage;
@@ -15,6 +14,7 @@ import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.WeddingOrganizerRepository;
 import com.enigwed.service.*;
+import com.enigwed.util.AccessValidationUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +40,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     private final ImageService imageService;
     private final AddressService addressService;
     private final ValidationUtil validationUtil;
+    private final AccessValidationUtil accessValidationUtil;
 
     private WeddingOrganizer findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_ORGANIZER_ID_IS_REQUIRED);
@@ -85,24 +86,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             map.put(getUserStatus(wo).name(), map.get(getUserStatus(wo).name()) + 1);
         }
         return map;
-    }
-
-    private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
-        String userCredentialId = weddingOrganizer.getUserCredential().getId();
-        if (userInfo.getUserId().equals(userCredentialId)) {
-            return;
-        }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
-    }
-
-    private void validateUserAccessDelete(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
-        String userCredentialId = weddingOrganizer.getUserCredential().getId();
-        if (userInfo.getUserId().equals(userCredentialId)) {
-            return;
-        } else if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
-            return;
-        }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -227,7 +210,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
             /* VALIDATE ACCESS */
             // AccessDeniedException
-            validateUserAccess(userInfo, wo);
+            accessValidationUtil.validateUser(userInfo, wo);
 
             /* VALIDATE INPUT */
             // ValidationException
@@ -283,36 +266,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id) {
-        try {
-            /* LOAD WEDDING ORGANIZER */
-            // ErrorResponse
-            WeddingOrganizer wo = findByIdOrThrow(id);
-
-            /* VALIDATE ACCESS */
-            // AccessDeniedException
-            validateUserAccessDelete(userInfo, wo);
-
-            /* SOFT DELETE WEDDING ORGANIZER */
-            // ErrorResponse
-            wo.setUserCredential(userCredentialService.deleteUser(wo.getUserCredential().getId()));
-            wo.setDeletedAt(LocalDateTime.now());
-
-            /* SAVE WEDDING ORGANIZER */
-            weddingOrganizerRepository.save(wo);
-
-            return ApiResponse.success(SMessage.WEDDING_ORGANIZER_DELETED);
-
-        } catch (AccessDeniedException e) {
-            log.error("Access denied while deleting wedding organizer: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
-        } catch (ErrorResponse e) {
-            log.error("Error while deleting wedding organizer: {}", e.getError());
-            throw e;
-        }
-    }
-
-    @Override
     public ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizerImage(JwtClaim userInfo, String id, MultipartFile avatar) {
         try {
             /* LOAD WEDDING ORGANIZER */
@@ -321,7 +274,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
             /* VALIDATE ACCESS */
             // AccessDeniedException
-            validateUserAccess(userInfo, wo);
+            accessValidationUtil.validateUser(userInfo, wo);
 
             /* VALIDATE INPUT */
             // ErrorResponse
@@ -347,8 +300,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         }
     }
 
-    // ADMIN
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id) {
         try {
@@ -358,7 +310,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
             /* VALIDATE ACCESS */
             // AccessDeniedException
-            validateUserAccess(userInfo, wo);
+            accessValidationUtil.validateUser(userInfo, wo);
 
             /* DELETE IMAGE */
             // ErrorResponse
@@ -380,6 +332,39 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id) {
+        try {
+            /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse
+            WeddingOrganizer wo = findByIdOrThrow(id);
+
+            /* VALIDATE ACCESS */
+            // AccessDeniedException
+            accessValidationUtil.validateUserOrAdmin(userInfo, wo);
+
+            /* SOFT DELETE WEDDING ORGANIZER */
+            // ErrorResponse
+            UserCredential user = userCredentialService.deleteUser(wo.getUserCredential());
+            wo.setUserCredential(user);
+            wo.setDeletedAt(LocalDateTime.now());
+
+            /* SAVE WEDDING ORGANIZER */
+            weddingOrganizerRepository.save(wo);
+
+            return ApiResponse.success(SMessage.WEDDING_ORGANIZER_DELETED);
+
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while deleting wedding organizer: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error while deleting wedding organizer: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id) {
         WeddingOrganizer wo = weddingOrganizerRepository.findById(id)
@@ -388,6 +373,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return ApiResponse.success(response, SMessage.WEDDING_ORGANIZER_FOUND);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id) {
         /* LOAD WEDDING ORGANIZER */
@@ -396,18 +382,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
         /* ACTIVATE USER */
         UserCredential user = userCredentialService.activateUser(wo.getUserCredential());
-
-        /* SET ACTIVE UNTIL FIRST DAY OF NEXT MOTH */
-        user.setActiveUntil(LocalDateTime.now()
-                .plusMonths(1)
-                .withDayOfMonth(1)
-                .withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-        );
-
-        /* SAVE USER CREDENTIAL */
         wo.setUserCredential(user);
 
         /* SAVE WEDDING ORGANIZER */
@@ -417,6 +391,26 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return ApiResponse.success(response, SMessage.WEDDING_ORGANIZERS_ACTIVATED);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<WeddingOrganizerResponse> deactivateWeddingOrganizer(String id) {
+        /* LOAD WEDDING ORGANIZER */
+        // ErrorResponse
+        WeddingOrganizer wo = weddingOrganizerRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.UPDATE_FAILED, SErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+
+        /* DEACTIVATE USER */
+        UserCredential user = userCredentialService.deactivateUser(wo.getUserCredential());
+
+        wo.setUserCredential(user);
+
+        /* SAVE WEDDING ORGANIZER */
+        weddingOrganizerRepository.save(wo);
+
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.all(wo);
+        return ApiResponse.success(response, SMessage.WEDDING_ORGANIZERS_DEACTIVATED);
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);
@@ -438,6 +432,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return ApiResponse.successWeddingOrganizerList(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND, countByStatus);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
         validationUtil.validateAndThrow(pagingRequest);

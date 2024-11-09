@@ -8,6 +8,7 @@ public class SMessage {
     public static final String DELETE_FAILED = "Delete failed";
     // Error Message
     public static final String ERROR = "An unexpected error occurred";
+    public static final String UNAUTHORIZED = "Invalid or missing authentication token";
     // Auth
     public static final String REGISTER_SUCCESS = "Register success";
     public static final String REGISTER_FAILED = "Register failed";
@@ -38,7 +39,7 @@ public class SMessage {
     public static final String NO_WEDDING_ORGANIZER_FOUND = "No wedding organizer found";
     public static final String WEDDING_ORGANIZER_AVATAR_UPDATED = "Wedding organizer avatar updated";
     public static final String WEDDING_ORGANIZER_AVATAR_DELETED = "Wedding organizer avatar deleted";
-    public static final String WEDDING_ORGANIZERS_ACTIVATED = "Wedding organizer activated";
+    public static final String WEDDING_ORGANIZERS_ACTIVATED = "Wedding organizer account activated";
     // Product
     public static final String PRODUCT_CREATED = "Product created";
     public static final String PRODUCT_FOUND = "Product found";
@@ -85,10 +86,13 @@ public class SMessage {
     public static final String BANK_ACCOUNT_UPDATED = "Bank account updated";
     public static final String BANK_ACCOUNT_DELETED = "Bank account deleted";
     public static final String NO_BANK_ACCOUNT_FOUND = "No bank account found";
+    public static final String AUTHENTICATION_FAILED = "Authentication failed";
+    public static final String WEDDING_ORGANIZERS_DEACTIVATED = "Wedding organizer account deactivated";
 
-    public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName){
-        return "New account registered: " + weddingOrganizerName + " join our application, click to activate their account";
+    public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName) {
+        return "A new account has been registered. " + weddingOrganizerName + " has joined our application. Click here to activate their account.";
     }
+
     public static String NEW_ORDER_RECEIVED(String name) {
         return "New order received: Order receive from customer " + name + ", click to check order detail.";
     }

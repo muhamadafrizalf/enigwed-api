@@ -39,6 +39,10 @@ public class SErrorMessage {
     public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account id is required";
     public static final String BANK_ACCOUNT_NOT_FOUND = "Bank account not found";
     public static final String INVALID_ORDER_STATUS = "Order not in the right status";
+    public static final String USER_CREDENTIAL_ID_IS_REQUIRED = "User credential ID is required";
+    public static final String JWT_INVALID = "JWT token is invalid or missing";
+    public static final String JWT_AUTHENTICATION_FAILED = "JWT authentication failed";
+
 
     public static String PROVINCE_NOT_FOUND(String id) {
         return "Province with id: " + id + " not found";

@@ -65,4 +65,11 @@ public class UserCredential extends AuditEntity implements UserDetails {
     public boolean isEnabled() {
         return active;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        super.onCreate();
+        this.active = false;
+        this.activeUntil = LocalDateTime.now();
+    }
 }

@@ -13,7 +13,6 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class ValidationUtil {
-
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = validatorFactory.getValidator();
 

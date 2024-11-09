@@ -8,6 +8,7 @@ import com.enigwed.entity.Province;
 import com.enigwed.entity.Regency;
 
 public interface AddressService {
+    // Use in other service
     Province saveOrLoadProvince(ProvinceRequest provinceRequest);
     Regency saveOrLoadRegency(RegencyRequest regencyRequest);
     District saveOrLoadDistrict(DistrictRequest districtRequest);
