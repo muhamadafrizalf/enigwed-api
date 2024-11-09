@@ -5,6 +5,7 @@ import com.enigwed.constant.ErrorMessage;
 import com.enigwed.constant.Message;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.StatisticResponse;
 import com.enigwed.entity.Order;
 import com.enigwed.entity.Subscription;
 import com.enigwed.entity.WeddingOrganizer;
@@ -70,17 +71,19 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public ApiResponse<Map<String, Double>> getStatisticsIncome(JwtClaim userInfo, LocalDateTime from, LocalDateTime to) {
+    public ApiResponse<StatisticResponse> getStatisticsIncome(JwtClaim userInfo, LocalDateTime from, LocalDateTime to) {
         if (from.isAfter(to)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, Message.FETCHING_FAILED, ErrorMessage.INVALID_DATE);
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
             List<Order> orderList = orderService.loadAllOrders(wo.getId(), from, to);
             Map<String, Double> statistic = getStatisticOrder(orderList, from, to);
-            return ApiResponse.success(statistic, Message.STATISTIC_FETCHED);
+            StatisticResponse response = StatisticResponse.from(wo, statistic);
+            return ApiResponse.success(response, Message.STATISTIC_FETCHED);
         } else {
             List<Subscription> subscriptionList = subscriptionService.getSubscriptions(from, to);
             Map<String, Double> statistic = getStatisticSubscription(subscriptionList, from, to);
-            return ApiResponse.success(statistic, Message.STATISTIC_FETCHED);
+            StatisticResponse response = StatisticResponse.from(null, statistic);
+            return ApiResponse.success(response, Message.STATISTIC_FETCHED);
         }
     }
 }

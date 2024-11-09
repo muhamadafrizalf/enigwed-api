@@ -97,7 +97,9 @@ public class WeddingOrganizerResponse {
         response.setId(weddingOrganizer.getId());
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
+        response.setProvinceName(weddingOrganizer.getProvince().getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
+        response.setDistrictName(weddingOrganizer.getDistrict().getName());
         response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
             response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
