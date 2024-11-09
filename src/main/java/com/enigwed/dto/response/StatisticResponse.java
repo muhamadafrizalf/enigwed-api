@@ -23,7 +23,6 @@ public class StatisticResponse {
 
     public static StatisticResponse admin(Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
-        g
         response.setIncome(income);
         return response;
     }
