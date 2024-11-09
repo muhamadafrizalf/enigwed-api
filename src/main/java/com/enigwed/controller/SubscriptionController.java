@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -65,12 +66,17 @@ public class SubscriptionController {
     }
 
     @PreAuthorize("hasRole('WO')")
-    @PostMapping(PathApi.PROTECTED_SUBSCRIPTION)
+    @PostMapping(value = PathApi.PROTECTED_SUBSCRIPTION, consumes = "multipart/form-data")
     public ResponseEntity<?> paySubscription(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody SubscriptionRequest subscriptionRequest
+            @RequestPart String subscriptionPriceId,
+            @RequestPart MultipartFile paymentImage
     ) {
+        SubscriptionRequest subscriptionRequest = SubscriptionRequest.builder()
+                .subscriptionPriceId(subscriptionPriceId)
+                .paymentImage(paymentImage)
+                .build();
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response = subscriptionService.paySubscription(userInfo, subscriptionRequest);
         return ResponseEntity.ok(response);

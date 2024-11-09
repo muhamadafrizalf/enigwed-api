@@ -8,12 +8,14 @@ import com.enigwed.dto.request.SubscriptionPacketRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
+import com.enigwed.entity.Image;
 import com.enigwed.entity.Subscription;
 import com.enigwed.entity.SubscriptionPacket;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.SubscriptionPriceRepository;
 import com.enigwed.repository.SubscriptionRepository;
+import com.enigwed.service.ImageService;
 import com.enigwed.service.SubscriptionService;
 import com.enigwed.service.WeddingOrganizerService;
 import com.enigwed.util.ValidationUtil;
@@ -38,6 +40,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPriceRepository subscriptionPriceRepository;
     private final WeddingOrganizerService weddingOrganizerService;
+    private final ImageService imageService;
     private final ValidationUtil validationUtil;
 
     @Value("${com.enigwed.subscription-price-one-month}")
@@ -221,12 +224,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         SubscriptionPacket packet = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
 
+        Image paymentImage = imageService.createImage(subscriptionRequest.getPaymentImage());
+
         Subscription subscription = Subscription.builder()
                 .weddingOrganizer(wo)
                 .subscriptionPacket(packet)
                 .totalPaid(packet.getPrice())
                 .status(ESubscriptionPaymentStatus.PAID)
+                .paymentImage(paymentImage)
                 .build();
+
+        subscription = subscriptionRepository.save(subscription);
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
         return ApiResponse.success(response, Message.SUBSCRIPTION_PAID);
@@ -306,7 +314,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest) {
-        List<Subscription> subscriptionList = subscriptionRepository.findAllByOrderByTransactionDateDesc();
+        List<Subscription> subscriptionList = subscriptionRepository.findAll();
         Map<String, Integer> countByStatus = countByStatus(subscriptionList);
         if (subscriptionList == null || subscriptionList.isEmpty())
             return ApiResponse.successSubscription(new ArrayList<>(), pagingRequest, Message.NO_SUBSCRIPTION_FOUND, countByStatus);

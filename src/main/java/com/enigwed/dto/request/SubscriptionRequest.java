@@ -22,6 +22,5 @@ public class SubscriptionRequest {
     @Email(message = Constraint.EMAIL_VALID)
     private String email;
 
-    @NotNull(message = Constraint.PAYMENT_IMAGE_NULL)
     private MultipartFile paymentImage;
 }
