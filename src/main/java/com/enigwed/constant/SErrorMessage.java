@@ -58,4 +58,9 @@ public class SErrorMessage {
     public static String REGENCY_NOT_FOUND(String id) {return String.format("Regency with ID %s not found", id);}
     public static String DISTRICT_NOT_FOUND(String id) {return String.format("District with ID %s not found", id);}
 
+    // Conflict
+    public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}
+    public static String REGENCY_ID_ALREADY_EXIST(String id, String name) {return String.format("Regency with ID %s already exists with the name %s", id, name);}
+    public static String DISTRICT_ID_ALREADY_EXIST(String id, String name) {return String.format("District with ID %s already exists with the name %s", id, name);}
+
 }
