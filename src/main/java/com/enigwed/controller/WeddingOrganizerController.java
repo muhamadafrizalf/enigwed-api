@@ -181,7 +181,7 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
-            summary = "For admin activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
+            summary = "For admin to activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
             description = "Set active to TRUE and active until to first day next month"
     )
     @PreAuthorize("hasRole('ADMIN')")
@@ -190,6 +190,19 @@ public class WeddingOrganizerController {
             @PathVariable String id
     ) {
         ApiResponse<?> response = weddingOrganizerService.activateWeddingOrganizer(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "For admin to deactivate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
+            description = "Set active to TRUE and active until to first day next month"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(SPathApi.PROTECTED_WO_ID_DEACTIVATE)
+    public ResponseEntity<?> deactivateWeddingOrganizer(
+            @PathVariable String id
+    ) {
+        ApiResponse<?> response = weddingOrganizerService.deactivateWeddingOrganizer(id);
         return ResponseEntity.ok(response);
     }
 }

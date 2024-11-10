@@ -20,6 +20,7 @@ public class SPathApi {
     public static final String PROTECTED_WO_ID = PROTECTED_WO + "/{id}";
     public static final String PROTECTED_WO_ID_IMAGE = PROTECTED_WO_ID + "/images";
     public static final String PROTECTED_WO_ID_ACTIVATE = PROTECTED_WO_ID + "/activate";
+    public static final String PROTECTED_WO_ID_DEACTIVATE = PROTECTED_WO_ID + "/deactivate";
     // Bank Account API
     public static final String PUBLIC_BANK_ACCOUNT = PUBLIC + "/bank-accounts";
     public static final String PROTECTED_BANK_ACCOUNT = PROTECTED + "/bank-accounts";

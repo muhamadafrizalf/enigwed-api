@@ -188,7 +188,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         UserCredential user = weddingOrganizer.getUserCredential();
 
         /* EXTEND ACTIVE UNTIL */
-        user.setActiveUntil(user.getActiveUntil().plusMonths(subscriptionPacket.getSubscriptionLength().getMonths()));
+        user = userCredentialService.extendActiveUntil(user, subscriptionPacket);
 
         /* SET AND SAVE USER CREDENTIAL */
         weddingOrganizer.setUserCredential(user);
