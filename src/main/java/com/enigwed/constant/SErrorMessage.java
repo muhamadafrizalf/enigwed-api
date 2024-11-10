@@ -43,17 +43,6 @@ public class SErrorMessage {
     public static final String JWT_INVALID = "JWT token is invalid or missing";
     public static final String JWT_AUTHENTICATION_FAILED = "JWT authentication failed";
 
-
-    public static String PROVINCE_NOT_FOUND(String id) {
-        return "Province with id: " + id + " not found";
-    }
-    public static String REGENCY_NOT_FOUND(String id) {
-        return "Regency with id: " + id + " not found";
-    }
-    public static String DISTRICT_NOT_FOUND(String id) {
-        return "District with id: " + id + " not found";
-    }
-
     public static final String MANDATORY_BONUS_PACKAGE_NOT_FOUND = "Mandatory bonus package not found";
     public static final String BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE = "Bonus package quantity not adjustable";
     public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
@@ -63,8 +52,10 @@ public class SErrorMessage {
         return "Subscription price with length: " + length + " already exists";
     }
 
-    public static String BANK_ACCOUNT_NOT_FOUND(String id) {
-        return String.format("Bank account with ID %s not found.", id);
-    }
+    // Not Found
+    public static String BANK_ACCOUNT_NOT_FOUND(String id) {return String.format("Bank account with ID %s not found.", id);}
+    public static String PROVINCE_NOT_FOUND(String id) {return String.format("Province with ID %s not found", id);}
+    public static String REGENCY_NOT_FOUND(String id) {return String.format("Regency with ID %s not found", id);}
+    public static String DISTRICT_NOT_FOUND(String id) {return String.format("District with ID %s not found", id);}
 
 }

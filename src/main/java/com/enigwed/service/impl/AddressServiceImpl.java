@@ -9,18 +9,21 @@ import com.enigwed.entity.District;
 import com.enigwed.entity.Province;
 import com.enigwed.entity.Regency;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.DistrictRepository;
 import com.enigwed.repository.ProvinceRepository;
 import com.enigwed.repository.RegencyRepository;
 import com.enigwed.service.AddressService;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AddressServiceImpl implements AddressService {
     private final ProvinceRepository provinceRepository;
     private final RegencyRepository regencyRepository;
@@ -30,15 +33,21 @@ public class AddressServiceImpl implements AddressService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Province saveOrLoadProvince(ProvinceRequest provinceRequest) {
-        /* VALIDATE INPUT */
-        validationUtil.validateAndThrow(provinceRequest);
-        /* CREATE PROVINCE */
-        Province province = Province.builder()
-                .id(provinceRequest.getId())
-                .name(provinceRequest.getName())
-                .build();
-        /* LOAD OR SAVE PROVINCE */
-        return provinceRepository.findById(province.getId()).orElse(provinceRepository.saveAndFlush(province));
+        try {
+            /* VALIDATE INPUT */
+            validationUtil.validateAndThrow(provinceRequest);
+            /* CREATE PROVINCE */
+            Province province = Province.builder()
+                    .id(provinceRequest.getId())
+                    .name(provinceRequest.getName())
+                    .build();
+            /* LOAD OR SAVE PROVINCE */
+            return provinceRepository.findById(province.getId()).orElse(provinceRepository.saveAndFlush(province));
+        } catch (ValidationException e) {
+            log.error("Validation error while creating bank accounts: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, e.getErrors().get(0));
+        }
+
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -9,6 +9,7 @@ import com.enigwed.dto.response.BankAccountResponse;
 import com.enigwed.entity.BankAccount;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.BankAccountRepository;
 import com.enigwed.service.BankAccountService;
 import com.enigwed.service.WeddingOrganizerService;
@@ -28,7 +29,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BankAccountImpl implements BankAccountService {
+public class BankAccountServiceImpl implements BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final WeddingOrganizerService weddingOrganizerService;
     private final ValidationUtil validationUtil;
@@ -51,7 +52,7 @@ public class BankAccountImpl implements BankAccountService {
     public ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId) {
         try {
             /* LOAD WEDDING ORGANIZER */
-            // ErrorResponse
+            // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerById(weddingOrganizerId);
 
             /* FIND BANK ACCOUNTS */
@@ -71,7 +72,7 @@ public class BankAccountImpl implements BankAccountService {
     public ApiResponse<List<BankAccountResponse>> getOwnBankAccount(JwtClaim userInfo) {
         try {
             /* LOAD WEDDING ORGANIZER */
-            // ErrorResponse
+            // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
             /* FIND BANK ACCOUNTS */
@@ -91,7 +92,7 @@ public class BankAccountImpl implements BankAccountService {
     public ApiResponse<BankAccountResponse> findBankAccountById(String id) {
         try {
             /* FIND BANK ACCOUNTS */
-            // ErrorResponse
+            // ErrorResponse //
             BankAccount bankAccount =  findByIdOrThrow(id);
 
             /* GET RESPONSE */
@@ -109,10 +110,11 @@ public class BankAccountImpl implements BankAccountService {
     public ApiResponse<BankAccountResponse> createBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest) {
         try {
             /* VALIDATE INPUT */
-            // ErrorResponse //
+            // ValidationException //
             validationUtil.validateAndThrow(bankAccountRequest);
 
             /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
             /* CREATE AND SAVE BANK ACCOUNT */
@@ -129,6 +131,9 @@ public class BankAccountImpl implements BankAccountService {
             BankAccountResponse response = BankAccountResponse.all(bankAccount);
             return ApiResponse.success(response, SMessage.BANK_ACCOUNT_CREATED(bankAccount.getId()));
 
+        } catch (ValidationException e) {
+            log.error("Validation error while creating bank accounts: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error while creating bank accounts: {}", e.getError());
             throw e;
@@ -141,7 +146,7 @@ public class BankAccountImpl implements BankAccountService {
     public ApiResponse<BankAccountResponse> updateBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest) {
         try {
             /* VALIDATE INPUT */
-            // ErrorResponse //
+            // ValidationException //
             validationUtil.validateAndThrow(bankAccountRequest);
 
             /* LOAD BANK ACCOUNT */
@@ -163,6 +168,9 @@ public class BankAccountImpl implements BankAccountService {
             BankAccountResponse response = BankAccountResponse.all(bankAccount);
             return ApiResponse.success(response, SMessage.BANK_ACCOUNT_UPDATED(bankAccount.getId()));
 
+        } catch (ValidationException e) {
+            log.error("Validation error while updating bank accounts: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, e.getErrors().get(0));
         } catch (AccessDeniedException e) {
             log.error("Access denied while updating bank accounts: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
