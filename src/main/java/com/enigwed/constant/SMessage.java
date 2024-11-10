@@ -89,10 +89,6 @@ public class SMessage {
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
     public static final String WEDDING_ORGANIZERS_DEACTIVATED = "Wedding organizer account deactivated";
 
-    public static String NEW_ACCOUNT_REGISTRATION(String weddingOrganizerName) {
-        return "A new account has been registered. " + weddingOrganizerName + " has joined our application. Click here to activate their account.";
-    }
-
     public static String NEW_ORDER_RECEIVED(String name) {
         return "New order received: Order receive from customer " + name + ", click to check order detail.";
     }

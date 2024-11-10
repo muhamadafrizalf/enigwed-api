@@ -22,14 +22,14 @@ public class WeddingOrganizer extends AuditEntity{
 
     private String name;
 
+    @Column(length = 1000)
+    private String description;
+
     private String npwp;
 
     private String nib;
 
     private String phone;
-
-    @Column(length = 1000)
-    private String description;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "province_id")

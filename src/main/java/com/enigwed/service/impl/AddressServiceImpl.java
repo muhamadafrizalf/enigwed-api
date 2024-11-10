@@ -141,6 +141,7 @@ public class AddressServiceImpl implements AddressService {
 
             /* SAVE DISTRICT */
             return districtRepository.saveAndFlush(district);
+
         } catch (ValidationException e) {
             log.error("Validation error while creating district: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));

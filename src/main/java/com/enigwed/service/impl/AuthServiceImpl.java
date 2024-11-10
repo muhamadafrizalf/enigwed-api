@@ -48,29 +48,32 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse<LoginResponse> login(LoginRequest loginRequest) {
         try {
             /* VALIDATE INPUT */
-            // ValidationException
+            // ValidationException //
             validationUtil.validateAndThrow(loginRequest);
-            // AuthenticationException
+
+            /* AUTHENTICATE EMAIL AND PASSWORD */
+            // AuthenticationException //
             Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
             ));
             UserCredential userCredential = (UserCredential) authenticate.getPrincipal();
             SecurityContextHolder.getContext().setAuthentication(authenticate);
-            // JWTCreationException
+
+            /* GENERATE TOKEN */
+            // JWTCreationException //
             String token = jwtUtil.generateToken(userCredential);
-            // ErrorResponse
-            LoginResponse response = LoginResponse.builder()
-                    .token(token)
-                    .role(userCredential.getRole().name())
-                    .build();
+
+            /* MAP RESPONSE */
+            LoginResponse response;
             if (userCredential.getRole() == ERole.ROLE_WO) {
                 WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
-                UserResponse user = UserResponse.all(weddingOrganizer);
-                response.setUser(user);
+                response = LoginResponse.weddingOrganizer(userCredential, token, weddingOrganizer);
+            } else {
+                response = LoginResponse.admin(userCredential, token);
             }
-
             return ApiResponse.success(response, SMessage.LOGIN_SUCCESS);
+
         } catch (ValidationException e) {
             log.error("Validation error during login: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.LOGIN_FAILED, e.getErrors().get(0));
@@ -94,9 +97,9 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse<?> register(RegisterRequest registerRequest) {
         try {
             /* VALIDATE INPUT */
-            // ValidationException
+            // ValidationException //
             validationUtil.validateAndThrow(registerRequest);
-            // ErrorResponse
+            // ErrorResponse //
             if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
                 throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, SErrorMessage.CONFIRM_PASSWORD_MISMATCH);
 
@@ -106,28 +109,29 @@ public class AuthServiceImpl implements AuthService {
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
                     .role(ERole.ROLE_WO)
                     .build();
-            // DataIntegrityViolationException
+            // DataIntegrityViolationException //
             userCredential = userCredentialService.createUser(userCredential);
 
             /* CREATE OR LOAD ADDRESS */
+            // ErrorResponse //
             Province province = addressService.saveOrLoadProvince(registerRequest.getProvince());
-            // ErrorResponse
+            // ErrorResponse //
             Regency regency = addressService.saveOrLoadRegency(registerRequest.getRegency());
-            // ErrorResponse
+            // ErrorResponse //
             District district = addressService.saveOrLoadDistrict(registerRequest.getDistrict());
 
             /* INITIALIZE AVATAR */
-            // ErrorResponse
+            // ErrorResponse //
             Image avatar = imageService.createImage(null);
 
             /* CREATE WEDDING ORGANIZER */
             WeddingOrganizer wo = WeddingOrganizer.builder()
                     .name(registerRequest.getName())
                     .description(registerRequest.getDescription())
-                    .address(registerRequest.getAddress())
                     .npwp(registerRequest.getNpwp())
                     .nib(registerRequest.getNib())
                     .phone(registerRequest.getPhone())
+                    .address(registerRequest.getAddress())
                     .province(province)
                     .regency(regency)
                     .district(district)
@@ -136,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
             /* VALIDATE DATA INTEGRITY AND SAVE WEDDING ORGANIZER */
-            // DataIntegrityViolationException
+            // DataIntegrityViolationException //
             weddingOrganizerService.createWeddingOrganizer(wo);
 
             /* CREATE NOTIFICATION FOR ADMIN */
@@ -147,7 +151,7 @@ public class AuthServiceImpl implements AuthService {
                     .receiverId(userCredentialService.loadAdminId())
                     .dataType(EDataType.WEDDING_ORGANIZER)
                     .dataId(wo.getId())
-                    .message(SMessage.NEW_ACCOUNT_REGISTRATION(wo.getName()))
+                    .message(SNotificationMessage.NEW_ACCOUNT_REGISTERED(wo.getName()))
                     .build();
             notificationService.createNotification(notification);
 
@@ -178,11 +182,11 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse<RefreshToken> refresh(RefreshToken refreshToken) {
         try {
             /* VALIDATE INPUT */
-            // ValidationException
+            // ValidationException //
             validationUtil.validateAndThrow(refreshToken);
 
             /* VALIDATE TOKEN */
-            // ErrorResponse
+            // ErrorResponse //
             if (!jwtUtil.verifyJwtToken(refreshToken.getToken())) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, SMessage.REFRESH_TOKEN_FAILED, SErrorMessage.INVALID_TOKEN);
 
             /* GET USER INFO */
@@ -191,11 +195,11 @@ public class AuthServiceImpl implements AuthService {
             if (userInfo == null) throw new ErrorResponse(HttpStatus.UNAUTHORIZED, SMessage.REFRESH_TOKEN_FAILED, SErrorMessage.INVALID_TOKEN);
 
             /* LOAD USER */
-            // UsernameNotFoundException
+            // UsernameNotFoundException //
             UserCredential user = userCredentialService.loadUserById(userInfo.getUserId());
 
             /* CREATE NEW TOKEN */
-            // JWTCreationException
+            // JWTCreationException //
             String token = jwtUtil.generateToken(user);
             RefreshToken newToken = RefreshToken.builder()
                     .token(token)

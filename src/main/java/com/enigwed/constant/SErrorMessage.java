@@ -18,7 +18,7 @@ public class SErrorMessage {
     // Invalid
     public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
     public static final String CONFIRM_PASSWORD_MISMATCH = "Passwords do not match";
-    public static final String ACCOUNT_NOT_ACTIVE = "Account not active";
+    public static final String ACCOUNT_NOT_ACTIVE = "Account is inactive";
     public static final String INVALID_TOKEN = "Invalid token";
     public static final String ACCESS_DENIED = "Access denied";
     // Not found
