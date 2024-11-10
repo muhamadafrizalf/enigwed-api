@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface SubscriptionPriceRepository extends JpaRepository<SubscriptionPacket, String> {
+public interface SubscriptionPacketRepository extends JpaRepository<SubscriptionPacket, String> {
     Optional<SubscriptionPacket> findByIdAndDeletedAtIsNull(String id);
     Optional<SubscriptionPacket> findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength length);
     List<SubscriptionPacket> findByDeletedAtIsNull();
