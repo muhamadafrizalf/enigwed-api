@@ -36,7 +36,7 @@ public class SubscriptionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> getSubscriptionPrice() {
-        return ResponseEntity.ok(subscriptionService.getSubscriptionPrices());
+        return ResponseEntity.ok(subscriptionService.findSubscriptionPackages());
     }
 
     @Operation(
@@ -47,7 +47,7 @@ public class SubscriptionController {
     public ResponseEntity<?> getSubscriptionPriceId(
             @PathVariable String id
     ) {
-        return ResponseEntity.ok(subscriptionService.getSubscriptionPriceById(id));
+        return ResponseEntity.ok(subscriptionService.findSubscriptionPackageById(id));
     }
 
     @Operation(
@@ -58,7 +58,7 @@ public class SubscriptionController {
     public ResponseEntity<?> addSubscriptionPrice(
             @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.addSubscriptionPrice(subscriptionPacketRequest));
+        return ResponseEntity.ok(subscriptionService.createSubscriptionPackage(subscriptionPacketRequest));
     }
 
     @Operation(
@@ -69,7 +69,7 @@ public class SubscriptionController {
     public ResponseEntity<?> updateSubscriptionPrice(
             @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.updateSubscriptionPrice(subscriptionPacketRequest));
+        return ResponseEntity.ok(subscriptionService.updateSubscriptionPackage(subscriptionPacketRequest));
     }
 
     @Operation(
@@ -78,7 +78,7 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
     public ResponseEntity<?> deleteSubscriptionPrice(@PathVariable String id) {
-        return ResponseEntity.ok(subscriptionService.deleteSubscriptionPrice(id));
+        return ResponseEntity.ok(subscriptionService.deleteSubscriptionPackage(id));
     }
 
     @Operation(

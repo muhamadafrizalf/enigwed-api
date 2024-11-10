@@ -6,7 +6,7 @@ import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.WeddingOrganizerRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.WeddingOrganizerResponse;
-import com.enigwed.entity.SubscriptionPacket;
+import com.enigwed.entity.SubscriptionPackage;
 import com.enigwed.entity.WeddingOrganizer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +19,7 @@ public interface WeddingOrganizerService {
     WeddingOrganizer loadWeddingOrganizerById(String id);
     WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
     WeddingOrganizer loadWeddingOrganizerByEmail(String email);
-    void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPacket subscriptionPacket);
+    void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPackage subscriptionPackage);
     List<WeddingOrganizer> findAllWeddingOrganizers();
 
     // Customer

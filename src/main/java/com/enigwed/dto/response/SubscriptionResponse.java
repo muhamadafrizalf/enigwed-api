@@ -1,9 +1,8 @@
 package com.enigwed.dto.response;
 
-import com.enigwed.constant.ESubscriptionLength;
 import com.enigwed.constant.ESubscriptionPaymentStatus;
 import com.enigwed.entity.Subscription;
-import com.enigwed.entity.SubscriptionPacket;
+import com.enigwed.entity.SubscriptionPackage;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +22,7 @@ public class SubscriptionResponse {
     private LocalDateTime activeFrom;
     private LocalDateTime activeUntil;
     private WeddingOrganizerResponse weddingOrganizer;
-    private SubscriptionPacket subscriptionPacket;
+    private SubscriptionPackage subscriptionPackage;
     private Double totalPaid;
     private ESubscriptionPaymentStatus paymentStatus;
     private ImageResponse paymentImage;
@@ -36,7 +35,7 @@ public class SubscriptionResponse {
         response.setActiveFrom(subscription.getActiveFrom());
         response.setActiveUntil(subscription.getActiveUntil());
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(subscription.getWeddingOrganizer()));
-        response.setSubscriptionPacket(subscription.getSubscriptionPacket());
+        response.setSubscriptionPackage(subscription.getSubscriptionPackage());
         response.setTotalPaid(subscription.getTotalPaid());
         response.setPaymentStatus(subscription.getStatus());
         response.setPaymentImage(ImageResponse.from(subscription.getPaymentImage()));

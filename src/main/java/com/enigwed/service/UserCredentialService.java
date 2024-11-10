@@ -1,6 +1,6 @@
 package com.enigwed.service;
 
-import com.enigwed.entity.SubscriptionPacket;
+import com.enigwed.entity.SubscriptionPackage;
 import com.enigwed.entity.UserCredential;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,5 +14,5 @@ public interface UserCredentialService extends UserDetailsService {
     UserCredential deleteUser(UserCredential userCredential);
     UserCredential activateUser(UserCredential userCredential);
     UserCredential deactivateUser(UserCredential userCredential);
-    UserCredential extendActiveUntil(UserCredential userCredential, SubscriptionPacket subscriptionPacket);
+    UserCredential extendActiveUntil(UserCredential userCredential, SubscriptionPackage subscriptionPackage);
 }

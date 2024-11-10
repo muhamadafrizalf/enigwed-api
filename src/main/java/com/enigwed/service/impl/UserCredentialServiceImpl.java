@@ -2,7 +2,7 @@ package com.enigwed.service.impl;
 
 import com.enigwed.constant.*;
 import com.enigwed.entity.Notification;
-import com.enigwed.entity.SubscriptionPacket;
+import com.enigwed.entity.SubscriptionPackage;
 import com.enigwed.entity.UserCredential;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.UserCredentialRepository;
@@ -193,7 +193,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UserCredential extendActiveUntil(UserCredential userCredential, SubscriptionPacket subscriptionPacket) {
+    public UserCredential extendActiveUntil(UserCredential userCredential, SubscriptionPackage subscriptionPackage) {
         /* SET ACTIVE TRUE */
         userCredential.setActive(true);
 
@@ -201,7 +201,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
         // Check if the current activeUntil is already expired
         if (userCredential.getActiveUntil() == null || userCredential.getActiveUntil().isBefore(LocalDateTime.now())) {
             userCredential.setActiveUntil(LocalDateTime.now()
-                    .plusMonths(subscriptionPacket.getSubscriptionLength().getMonths())
+                    .plusMonths(subscriptionPackage.getSubscriptionLength().getMonths())
                     .withDayOfMonth(1)
                     .withHour(0)
                     .withMinute(0)
@@ -210,7 +210,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
             );
         } else {
             userCredential.setActiveUntil(userCredential.getActiveUntil()
-                    .plusMonths(subscriptionPacket.getSubscriptionLength().getMonths())
+                    .plusMonths(subscriptionPackage.getSubscriptionLength().getMonths())
             );
         }
 

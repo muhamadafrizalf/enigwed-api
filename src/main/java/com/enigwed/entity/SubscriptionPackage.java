@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @Table(name = SPathDb.SUBSCRIPTION_PRICE)
-public class SubscriptionPacket extends AuditEntity{
+public class SubscriptionPackage extends AuditEntity{
 
     private String name;
 
@@ -31,6 +31,7 @@ public class SubscriptionPacket extends AuditEntity{
     @PrePersist
     @PreUpdate
     public void updateDescription() {
+        super.onUpdate();
         if (subscriptionLength != null) {
             this.description = subscriptionLength.getDescription();
         }

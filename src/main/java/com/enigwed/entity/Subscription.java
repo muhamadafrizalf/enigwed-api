@@ -29,7 +29,7 @@ public class Subscription extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "subscription_packet_id")
-    private SubscriptionPacket subscriptionPacket;
+    private SubscriptionPackage subscriptionPackage;
 
     @ManyToOne
     @JoinColumn(name = "payment_image")

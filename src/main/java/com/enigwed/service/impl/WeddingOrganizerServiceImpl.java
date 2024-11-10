@@ -183,12 +183,12 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPacket subscriptionPacket) {
+    public void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPackage subscriptionPackage) {
         /* LOAD USER CREDENTIAL */
         UserCredential user = weddingOrganizer.getUserCredential();
 
         /* EXTEND ACTIVE UNTIL */
-        user = userCredentialService.extendActiveUntil(user, subscriptionPacket);
+        user = userCredentialService.extendActiveUntil(user, subscriptionPackage);
 
         /* SET AND SAVE USER CREDENTIAL */
         weddingOrganizer.setUserCredential(user);

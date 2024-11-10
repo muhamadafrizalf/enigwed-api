@@ -7,10 +7,11 @@ import com.enigwed.dto.request.PagingRequest;
 import com.enigwed.dto.request.SubscriptionPacketRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
+import com.enigwed.dto.response.SubscriptionPackageResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
 import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
-import com.enigwed.repository.SubscriptionPacketRepository;
+import com.enigwed.repository.SubscriptionPackageRepository;
 import com.enigwed.repository.SubscriptionRepository;
 import com.enigwed.service.*;
 import com.enigwed.util.ValidationUtil;
@@ -23,17 +24,14 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
-    private final SubscriptionPacketRepository subscriptionPacketRepository;
+    private final SubscriptionPackageRepository subscriptionPackageRepository;
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
     private final NotificationService notificationService;
@@ -55,64 +53,64 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @PostConstruct
     public void init() {
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.A_MONTH).isEmpty()) {
-            SubscriptionPacket oneMonth = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.A_MONTH).isEmpty()) {
+            SubscriptionPackage oneMonth = SubscriptionPackage.builder()
                     .name("Starter")
                     .subscriptionLength(ESubscriptionLength.A_MONTH)
                     .price(oneMonthPrice)
                     .build();
-            subscriptionPacketRepository.save(oneMonth);
+            subscriptionPackageRepository.save(oneMonth);
         }
 
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.TWO_MONTHS).isEmpty()) {
-            SubscriptionPacket twoMonths = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.TWO_MONTHS).isEmpty()) {
+            SubscriptionPackage twoMonths = SubscriptionPackage.builder()
                     .name("Basic")
                     .subscriptionLength(ESubscriptionLength.TWO_MONTHS)
                     .price(twoMonthsPrice)
                     .build();
-            subscriptionPacketRepository.save(twoMonths);
+            subscriptionPackageRepository.save(twoMonths);
         }
 
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.THREE_MONTHS).isEmpty()) {
-            SubscriptionPacket threeMonths = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.THREE_MONTHS).isEmpty()) {
+            SubscriptionPackage threeMonths = SubscriptionPackage.builder()
                     .name("Bronze")
                     .subscriptionLength(ESubscriptionLength.THREE_MONTHS)
                     .price(threeMonthsPrice)
                     .build();
-            subscriptionPacketRepository.save(threeMonths);
+            subscriptionPackageRepository.save(threeMonths);
         }
 
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FOUR_MONTHS).isEmpty()) {
-            SubscriptionPacket fourMonths = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FOUR_MONTHS).isEmpty()) {
+            SubscriptionPackage fourMonths = SubscriptionPackage.builder()
                     .name("Silver")
                     .subscriptionLength(ESubscriptionLength.FOUR_MONTHS)
                     .price(fourMonthsPrice)
                     .build();
-            subscriptionPacketRepository.save(fourMonths);
+            subscriptionPackageRepository.save(fourMonths);
         }
 
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FIVE_MONTHS).isEmpty()) {
-            SubscriptionPacket fiveMonths = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.FIVE_MONTHS).isEmpty()) {
+            SubscriptionPackage fiveMonths = SubscriptionPackage.builder()
                     .name("Gold")
                     .subscriptionLength(ESubscriptionLength.FIVE_MONTHS)
                     .price(fiveMonthsPrice)
                     .build();
-            subscriptionPacketRepository.save(fiveMonths);
+            subscriptionPackageRepository.save(fiveMonths);
         }
 
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.SIX_MONTHS).isEmpty()) {
-            SubscriptionPacket sixMonths = SubscriptionPacket.builder()
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(ESubscriptionLength.SIX_MONTHS).isEmpty()) {
+            SubscriptionPackage sixMonths = SubscriptionPackage.builder()
                     .name("Platinum")
                     .subscriptionLength(ESubscriptionLength.SIX_MONTHS)
                     .price(sixMonthsPrice)
                     .build();
-            subscriptionPacketRepository.save(sixMonths);
+            subscriptionPackageRepository.save(sixMonths);
         }
     }
 
-    private SubscriptionPacket findSubscriptionPriceByIdOrThrow(String id) {
+    private SubscriptionPackage findSubscriptionPriceByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ID_IS_REQUIRED);
-        return subscriptionPacketRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
+        return subscriptionPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
     }
 
     private List<Subscription> filterResult(FilterRequest filter, List<Subscription> list) {
@@ -195,56 +193,72 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionPacket>> getSubscriptionPrices() {
-        List<SubscriptionPacket> response = subscriptionPacketRepository.findByDeletedAtIsNull();
-        if (response == null || response.isEmpty())
+    public ApiResponse<List<SubscriptionPackageResponse>> findSubscriptionPackages() {
+        List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull();
+        if (subscriptionPackageList == null || subscriptionPackageList.isEmpty())
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PRICE_FOUND);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICES_FOUND);
+        Map<String, Long> orders = subscriptionRepository.countSubscriptionsGroupedBySubscriptionPacket(ESubscriptionPaymentStatus.CONFIRMED);
+        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream()
+                .map(subscriptionPackage -> SubscriptionPackageResponse.all(subscriptionPackage, orders))
+                .sorted(Comparator.comparingLong(SubscriptionPackageResponse::getOrderCount).reversed())
+                .toList();
+        for (int i = 0; i < Math.min(3, responses.size()); i++) {
+            responses.get(i).setPopular(true);
+        }
+        responses = responses.stream()
+                .sorted(Comparator.comparingInt(response -> response.getSubscriptionLength().getMonths()))
+                .toList();
+        return ApiResponse.success(responses, SMessage.SUBSCRIPTION_PRICES_FOUND);
     }
 
     @Override
-    public ApiResponse<SubscriptionPacket> getSubscriptionPriceById(String subscriptionPriceId) {
-        SubscriptionPacket subscriptionPrice = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
-        return ApiResponse.success(subscriptionPrice, SMessage.SUBSCRIPTION_PRICE_FOUND);
+    public ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPriceId) {
+        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_FOUND);
     }
 
     @Override
-    public ApiResponse<SubscriptionPacket> addSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest) {
+    public ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest) {
         validationUtil.validateAndThrow(subscriptionPacketRequest);
-        if (subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).isPresent())
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).isPresent())
             throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
 
-        SubscriptionPacket subscriptionPrice = SubscriptionPacket.builder()
+        SubscriptionPackage subscriptionPackage = SubscriptionPackage.builder()
                 .name(subscriptionPacketRequest.getName())
                 .subscriptionLength(subscriptionPacketRequest.getSubscriptionLength())
                 .price(subscriptionPacketRequest.getPrice())
                 .build();
 
-        subscriptionPrice = subscriptionPacketRepository.save(subscriptionPrice);
-        return ApiResponse.success(subscriptionPrice, SMessage.SUBSCRIPTION_PRICE_CREATED);
+        subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
+
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
     }
 
     @Override
-    public ApiResponse<SubscriptionPacket> updateSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest) {
+    public ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest) {
         validationUtil.validateAndThrow(subscriptionPacketRequest);
-        SubscriptionPacket subscriptionPacket = findSubscriptionPriceByIdOrThrow(subscriptionPacketRequest.getId());
-        SubscriptionPacket possibleConflict = subscriptionPacketRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).orElse(null);
-        if (possibleConflict != null && !subscriptionPacket.getId().equals(possibleConflict.getId())) {
+        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPacketRequest.getId());
+        SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).orElse(null);
+        if (possibleConflict != null && !subscriptionPackage.getId().equals(possibleConflict.getId())) {
             throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
         }
 
-        subscriptionPacket.setSubscriptionLength(subscriptionPacketRequest.getSubscriptionLength());
-        subscriptionPacket.setPrice(subscriptionPacketRequest.getPrice());
+        subscriptionPackage.setSubscriptionLength(subscriptionPacketRequest.getSubscriptionLength());
+        subscriptionPackage.setPrice(subscriptionPacketRequest.getPrice());
 
-        subscriptionPacket = subscriptionPacketRepository.save(subscriptionPacket);
-        return ApiResponse.success(subscriptionPacket, SMessage.SUBSCRIPTION_PRICE_UPDATED);
+        subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
+
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_UPDATED);
     }
 
     @Override
-    public ApiResponse<?> deleteSubscriptionPrice(String subscriptionId) {
-        SubscriptionPacket packet = findSubscriptionPriceByIdOrThrow(subscriptionId);
+    public ApiResponse<?> deleteSubscriptionPackage(String subscriptionId) {
+        SubscriptionPackage packet = findSubscriptionPriceByIdOrThrow(subscriptionId);
         packet.setDeletedAt(LocalDateTime.now());
-        subscriptionPacketRepository.save(packet);
+        subscriptionPackageRepository.save(packet);
         return ApiResponse.success(SMessage.SUBSCRIPTION_PRICE_DELETED);
     }
 
@@ -257,13 +271,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } else {
             wo = weddingOrganizerService.loadWeddingOrganizerByEmail(subscriptionRequest.getEmail());
         }
-        SubscriptionPacket packet = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
+        SubscriptionPackage packet = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
 
         Image paymentImage = imageService.createImage(subscriptionRequest.getPaymentImage());
 
         Subscription subscription = Subscription.builder()
                 .weddingOrganizer(wo)
-                .subscriptionPacket(packet)
+                .subscriptionPackage(packet)
                 .totalPaid(packet.getPrice())
                 .status(ESubscriptionPaymentStatus.PAID)
                 .paymentImage(paymentImage)
@@ -322,16 +336,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscription.setStatus(ESubscriptionPaymentStatus.CONFIRMED);
         LocalDateTime activeFrom = subscription.getWeddingOrganizer().getUserCredential().getActiveUntil();
-        LocalDateTime activeUntil = activeFrom.plusMonths(subscription.getSubscriptionPacket().getSubscriptionLength().getMonths());
+        LocalDateTime activeUntil = activeFrom.plusMonths(subscription.getSubscriptionPackage().getSubscriptionLength().getMonths());
 
         subscription.setActiveFrom(activeFrom);
         subscription.setActiveUntil(activeUntil);
         subscription = subscriptionRepository.saveAndFlush(subscription);
 
-        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPacket());
+        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPackage());
 
         /* SEND NOTIFICATION */
-        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPacket().getName()));
+        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPackage().getName()));
 
         SubscriptionResponse response = SubscriptionResponse.all(subscription);
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAYMENT_CONFIRMED);
