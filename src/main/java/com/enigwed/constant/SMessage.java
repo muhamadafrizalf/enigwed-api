@@ -86,12 +86,6 @@ public class SMessage {
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
     public static final String WEDDING_ORGANIZERS_DEACTIVATED = "Wedding organizer account deactivated";
 
-    public static String NEW_ORDER_RECEIVED(String name) {return "New order received: Order receive from customer " + name + ", click to check order detail.";}
-    public static String CONFIRM_PAYMENT(String name) {return "Payment received: Payment receive from " + name + ", click to check order detail.";}
-    public static String ORDER_CANCELED(String name) {return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";}
-    public static String ORDER_FINISHED(String name) {return "Order from " + name + " has been finished, click to check order detail.";}
-    public static String ORDER_PAID(String name) {return "Order from " + name + " has been paid, click to check order detail.";}
-
     public static String NEW_SUBSCRIPTION_RECEIVED(String name) {return "New subscription from " + name + " has been received";}
     public static String SUBSCRIPTION_CONFIRMED(String name) {return "Subscription with subscription package " + name + " has been confirmed";}
 
@@ -129,5 +123,16 @@ public class SMessage {
     public static String PRODUCTS_FOUND(int size) {return String.format("Found %d product(s)", size);}
 
 
-
+    // Order
+    public static String ORDER_FOUNDS(int size) {return String.format("%d order(s) found", size);}
+    public static String ORDER_FOUND(String id) {return String.format("Order with ID %s found", id);}
+    public static String ORDER_FOUND_BOOK_CODE(String bookCode) {return String.format("Order with book code '%s' found", bookCode);}
+    public static String ORDER_CREATED(String bookCode) {return String.format("Order with book code '%s' has been created", bookCode);}
+    public static String ORDER_ACCEPTED(String bookCode) {return String.format("Order with book code '%s' accepted", bookCode);}
+    public static String ORDER_REJECTED(String bookCode) {return String.format("Order with book code '%s' rejected", bookCode);}
+    public static String ORDER_PAYED(String bookCode) {return String.format("Order with book code '%s' has been paid", bookCode);}
+    public static String ORDER_CANCELED(String bookCode) {return String.format("Order with book code '%s' has been canceled", bookCode);}
+    public static String PAYMENT_CONFIRMED(String bookCode) {return String.format("Payment for order with book code '%s' has been confirmed", bookCode);}
+    public static String ORDER_FINISHED(String bookCode) {return String.format("Order with book code '%s' has been finished", bookCode);}
+    public static String ORDER_REVIEWED(String bookCode) {return String.format("Order with book code '%s' has been reviewed", bookCode);}
 }

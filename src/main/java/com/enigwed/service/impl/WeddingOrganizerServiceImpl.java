@@ -104,8 +104,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     private ApiResponse<List<WeddingOrganizerResponse>> getApiResponse(FilterRequest filter, PagingRequest pagingRequest, List<WeddingOrganizer> woList) {
         /* COUNT WEDDING ORGANIZER BY STATUS */
         Map<String, Integer> countByStatus = countByStatus(woList);
-        if (woList.isEmpty())
-            return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+        if (woList.isEmpty()) return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* FILTER RESULT */
         woList = filterResult(filter, woList);

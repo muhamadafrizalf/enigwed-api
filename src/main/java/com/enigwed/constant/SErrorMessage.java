@@ -44,14 +44,16 @@ public class SErrorMessage {
     public static final String BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE = "Bonus package quantity not adjustable";
     public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
     public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
-    public static final String PRODUCT_ID_IS_REQUIRED = "Product ID is required";
+    
 
     public static String SUBSCRIPTION_PRICE_ALREADY_EXIST(String length) {
         return "Subscription price with length: " + length + " already exists";
     }
 
     // Required
-    public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account id is required";
+    public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account ID is required";
+    public static final String PRODUCT_ID_IS_REQUIRED = "Product ID is required";
+    public static final String ORDER_ID_IS_REQUIRED = "Order ID is required";
 
     // Not Found
     public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
@@ -63,9 +65,14 @@ public class SErrorMessage {
     public static String REGENCY_NOT_FOUND(String id) {return String.format("Regency with ID %s not found", id);}
     public static String DISTRICT_NOT_FOUND(String id) {return String.format("District with ID %s not found", id);}
     public static String PRODUCT_NOT_FOUND(String id) {return String.format("Product with ID %s not found", id);}
+    public static String ORDER_NOT_FOUND(String id) {return String.format("Order with ID %s not found", id);}
 
     // Conflict
     public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}
     public static String REGENCY_ID_ALREADY_EXIST(String id, String name) {return String.format("Regency with ID %s already exists with the name %s", id, name);}
     public static String DISTRICT_ID_ALREADY_EXIST(String id, String name) {return String.format("District with ID %s already exists with the name %s", id, name);}
+
+    // Order
+    public static String INVALID_ORDER_STATUS(EStatus before, String message) {return String.format("Cannot %s order, order not in %s status", message, before);}
+    public static String INVALID_ORDER_NOT_STATUS(EStatus before, String message) {return String.format("Cannot %s order, order already %s", message, before);}
 }

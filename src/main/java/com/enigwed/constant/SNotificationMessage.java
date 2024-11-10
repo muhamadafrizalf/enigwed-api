@@ -13,4 +13,9 @@ public class SNotificationMessage {
         return String.format("Thank you for being a loyal customer! You have %d months remaining on your subscription.", remainingMonths);
     }
 
+    public static String NEW_ORDER_RECEIVED(String name) {return "New order received: Order receive from " + name + ", click to check order detail.";}
+    public static String ORDER_PAID(String name) {return "Payment received: Payment receive from " + name + ", click to check order detail.";}
+    public static String ORDER_CANCELED(String name) {return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";}
+    public static String ORDER_FINISHED(String name) {return "Order finished: Order from " + name + " has been finished, click to check order detail.";}
+    public static String ORDER_REVIEWED(String name) {return "Order reviewed: Order from " + name + " has been reviewed, click to check order detail.";}
 }

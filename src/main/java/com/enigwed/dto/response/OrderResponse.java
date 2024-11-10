@@ -15,10 +15,10 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
     private String id;
+    private String bookCode;
     private LocalDateTime transactionDate;
     private LocalDateTime updatedAt;
     private LocalDateTime transactionFinishDate;
-    private String bookCode;
     private LocalDateTime weddingDate;
     private Double basePrice;
     private Double totalPrice;
@@ -30,6 +30,21 @@ public class OrderResponse {
     private List<OrderDetailResponse> orderDetails = new ArrayList<>();
     private Boolean reviewed;
     private ReviewResponse review;
+
+    public static OrderResponse simple(Order order) {
+        OrderResponse response = new OrderResponse();
+        response.setId(order.getId());
+        response.setBookCode(order.getBookCode());
+        response.setTransactionDate(order.getTransactionDate());
+        response.setWeddingDate(order.getWeddingDate());
+        response.setTotalPrice(order.getTotalPrice());
+        response.setStatus(order.getStatus().name());
+        response.setCustomer(CustomerResponse.all(order.getCustomer()));
+        response.setWeddingPackage(WeddingPackageResponse.order(order.getWeddingPackage()));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(order.getWeddingOrganizer()));
+        response.setReviewed(order.isReviewed());
+        return response;
+    }
 
     public static OrderResponse all(Order order) {
         OrderResponse response = new OrderResponse();
@@ -86,17 +101,5 @@ public class OrderResponse {
         return response;
     }
 
-    public static OrderResponse simple(Order order) {
-        OrderResponse response = new OrderResponse();
-        response.setId(order.getId());
-        response.setBookCode(order.getBookCode());
-        response.setTotalPrice(order.getTotalPrice());
-        response.setTransactionDate(order.getTransactionDate());
-        response.setWeddingPackage(WeddingPackageResponse.order(order.getWeddingPackage()));
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(order.getWeddingOrganizer()));
-        response.setStatus(order.getStatus().name());
-        response.setCustomer(CustomerResponse.all(order.getCustomer()));
-        response.setReviewed(order.isReviewed());
-        return response;
-    }
+
 }

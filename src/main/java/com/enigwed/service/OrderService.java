@@ -16,22 +16,21 @@ import java.util.List;
 public interface OrderService {
     // Use In Other Service
     Order loadOrderById(String id);
-    List<Order> loadAllOrders(String weddingOrganizerId, LocalDateTime from, LocalDateTime to);
+    List<Order> loadFinishedOrderByWeddingOrganizerIdAndTransactionDateBetween(String weddingOrganizerId, LocalDateTime from, LocalDateTime to);
     // Customer
-    ApiResponse<OrderResponse> createOrder(OrderRequest orderRequest);
-    ApiResponse<OrderResponse> findOrderByBookCode(String bookCode);
-    ApiResponse<OrderResponse> payOrder(MultipartFile image, String orderId);
-    ApiResponse<OrderResponse> cancelOrder(String orderId);
-    ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest);
+    ApiResponse<OrderResponse> customerCreateOrder(OrderRequest orderRequest);
+    ApiResponse<OrderResponse> customerFindOrderByBookCode(String bookCode);
+    ApiResponse<OrderResponse> customerPayOrder(MultipartFile image, String orderId);
+    ApiResponse<OrderResponse> customerCancelOrder(String orderId);
+    ApiResponse<OrderResponse> customerReviewOrder(String orderId, ReviewRequest reviewRequest);
     // Wedding Organizer
-    ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<OrderResponse> findOwnOrderById(JwtClaim userInfo, String id);
     ApiResponse<OrderResponse> acceptOrder(JwtClaim userInfo, String orderId);
     ApiResponse<OrderResponse> rejectOrder(JwtClaim userInfo, String orderId);
     ApiResponse<OrderResponse> confirmPayment(JwtClaim userInfo, String orderId);
     ApiResponse<OrderResponse> finishOrder(JwtClaim userInfo, String orderId);
     // Admin
-    ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest);
-    ApiResponse<List<OrderResponse>> searchOrders(FilterRequest filter, PagingRequest pagingRequest, String keyword);
+    ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<OrderResponse> findOrderById(String id);
 }

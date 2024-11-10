@@ -30,38 +30,41 @@ public class OrderController {
     private final OrderService orderService;
     private final JwtUtil jwtUtil;
 
-    // Customer
+    @Operation(summary = "For customer to get order information by book_code (MOBILE)")
+    @GetMapping(SPathApi.PUBLIC_ORDER)
+    public ResponseEntity<?> getOrderByBookCode(
+            @Parameter(description = "bookCode is required")
+            @RequestParam String bookCode
+    ) {
+        ApiResponse<?> response = orderService.customerFindOrderByBookCode(bookCode);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(
             summary = "For customer to create order (MOBILE)",
             description = "Create order, send notification to wedding organizer"
     )
     @PostMapping(SPathApi.PUBLIC_ORDER)
     public ResponseEntity<?> createOrder(
+            @Parameter(description = "Additional product is optional")
             @RequestBody OrderRequest orderRequest
     ) {
-        ApiResponse<?> response = orderService.createOrder(orderRequest);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "For customer to get order information by book_code (MOBILE)")
-    @GetMapping(SPathApi.PUBLIC_ORDER)
-    public ResponseEntity<?> getOrderByBookCode(
-            @RequestParam String bookCode
-    ) {
-        ApiResponse<?> response = orderService.findOrderByBookCode(bookCode);
+        ApiResponse<?> response = orderService.customerCreateOrder(orderRequest);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "For customer to upload order payment image, update order by order_id (MOBILE)",
-            description = "Add payment image, update status to CHECKING_PAYMENT, send notification to wedding organizer, Only accessible if order status is WAITING_PAYMENT"
+            summary = "For customer to upload order payment image, update order by order_id (consume=multipart/form-data) (MOBILE)",
+            description = "Add payment image, update status to CHECKING_PAYMENT, send notification to wedding organizer, Only accessible if order status is WAITING_FOR_PAYMENT"
     )
     @PutMapping(value = SPathApi.PUBLIC_ORDER_ID_PAY, consumes = {"multipart/form-data"})
-    public ResponseEntity<?> updateOrder(
+    public ResponseEntity<?> payOrder(
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Form-data part image is required")
             @RequestPart(name = "image", required = false) MultipartFile image
     ) {
-        ApiResponse<?> response = orderService.payOrder(image, id);
+        ApiResponse<?> response = orderService.customerPayOrder(image, id);
         return ResponseEntity.ok(response);
     }
 
@@ -73,7 +76,7 @@ public class OrderController {
     public ResponseEntity<?> cancelOrder(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = orderService.cancelOrder(id);
+        ApiResponse<?> response = orderService.customerCancelOrder(id);
         return ResponseEntity.ok(response);
     }
 
@@ -83,10 +86,55 @@ public class OrderController {
     )
     @PutMapping(SPathApi.PUBLIC_ORDER_ID_REVIEW)
     public ResponseEntity<?> reviewOrder(
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Customer name and visible public is optional default={customerName:'Anonymous',visiblePublic:'false'}")
             @RequestBody ReviewRequest reviewRequest
     ) {
-        ApiResponse<?> response = orderService.reviewOrder(id, reviewRequest);
+        ApiResponse<?> response = orderService.customerReviewOrder(id, reviewRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "For admin and wedding organizer to get list of all orders (order by transaction date) [ADMIN, WO] (WEB)",
+            description = "Admin can get all orders, wedding organizer can only get own orders"
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @GetMapping(SPathApi.PROTECTED_ORDER)
+    public ResponseEntity<?> getAllOrders(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "8") int size,
+            @Parameter(description = "Keyword can search bookCode, customerName, customerPhone, customerEmail, weddingOrganizerName, weddingPackageName")
+            @RequestParam(required = false) String keyword,
+            @Parameter(description = "For admin to filter order by wedding_organizer_id")
+            @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "Filter by order status")
+            @RequestParam(required = false) EStatus status,
+            @Parameter(description = "Filter by order wedding package id")
+            @RequestParam(required = false) String weddingPackageId,
+            @Parameter(description = "Filter by transaction date from")
+            @RequestParam(required = false) LocalDateTime startDate,
+            @Parameter(description = "Filter by transaction date to")
+            @RequestParam(required = false) LocalDateTime endDate
+    ) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+
+        FilterRequest filter = new FilterRequest();
+        if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
+        if (status != null) filter.setOrderStatus(status);
+        if (weddingPackageId != null && !weddingPackageId.isEmpty()) filter.setWeddingPackageId(weddingPackageId);
+        if (startDate != null) filter.setStartDate(startDate);
+        if (endDate != null) filter.setEndDate(endDate);
+
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = orderService.findOwnOrders(userInfo, filter, pagingRequest, keyword);
+        } else {
+            response = orderService.findAllOrders(filter, pagingRequest, keyword);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -99,6 +147,7 @@ public class OrderController {
     public ResponseEntity<?> getOrderById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -107,47 +156,6 @@ public class OrderController {
             response = orderService.findOwnOrderById(userInfo, id);
         } else {
             response = orderService.findOrderById(id);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(
-            summary = "For admin and wedding organizer to get list of all orders [ADMIN, WO] (WEB)",
-            description = "Admin can get all orders, wedding organizer can only get own orders"
-    )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(SPathApi.PROTECTED_ORDER)
-    public ResponseEntity<?> getAllOrders(
-            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size,
-            @Parameter(description = "Keyword can search bookCode, customerName, customerPhone, customerEmail, weddingOrganizerName, weddingPackageName")
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String weddingOrganizerId,
-            @RequestParam(required = false) EStatus status,
-            @RequestParam(required = false) String weddingPackageId,
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate
-    ) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        FilterRequest filter = new FilterRequest();
-        if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);
-        if (status != null) filter.setOrderStatus(status);
-        if (weddingPackageId != null && !weddingPackageId.isEmpty()) filter.setWeddingPackageId(weddingPackageId);
-        if (startDate != null) filter.setStartDate(startDate);
-        if (endDate != null) filter.setEndDate(endDate);
-
-        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = orderService.findOwnOrders(userInfo, filter, pagingRequest);
-        } else {
-            if(keyword != null && !keyword.isEmpty()) {
-                response = orderService.searchOrders(filter, pagingRequest, keyword);
-            } else {
-                response = orderService.findAllOrders(filter, pagingRequest);
-            }
         }
         return ResponseEntity.ok(response);
     }
@@ -177,6 +185,7 @@ public class OrderController {
     public ResponseEntity<?> acceptOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -193,6 +202,7 @@ public class OrderController {
     public ResponseEntity<?> rejectOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -209,6 +219,7 @@ public class OrderController {
     public ResponseEntity<?> finishOrder(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
