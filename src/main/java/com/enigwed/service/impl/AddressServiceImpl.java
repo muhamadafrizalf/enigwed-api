@@ -79,14 +79,25 @@ public class AddressServiceImpl implements AddressService {
             Province province = provinceRepository.findById(regencyRequest.getProvince_id())
                     .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
 
+            /* CHECK AND VALIDATE IF REGENCY ALREADY EXIST */
+            // DataIntegrityViolationException //
+            Regency existingRegency = regencyRepository.findById(regencyRequest.getId()).orElse(null);
+            if (existingRegency != null && !existingRegency.getName().equals(regencyRequest.getName())) {
+                throw new DataIntegrityViolationException(SErrorMessage.REGENCY_ID_ALREADY_EXIST(existingRegency.getId(), existingRegency.getName()));
+            } else if (existingRegency != null) {
+                return existingRegency;
+            }
+
             /* CREATE REGENCY */
             Regency regency = Regency.builder()
                     .id(regencyRequest.getId())
                     .name(regencyRequest.getName())
                     .province(province)
                     .build();
-            /* LOAD OR SAVE REGENCY */
-            return regencyRepository.findById(regency.getId()).orElse(regencyRepository.saveAndFlush(regency));
+
+            /* SAVE REGENCY */
+            return regencyRepository.saveAndFlush(regency);
+
         } catch (ValidationException e) {
             log.error("Validation error while creating regency: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
@@ -97,24 +108,48 @@ public class AddressServiceImpl implements AddressService {
             log.error("Error while creating regency: {}", e.getMessage());
             throw e;
         }
-
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public District saveOrLoadDistrict(DistrictRequest districtRequest) {
-        /* VALIDATE INPUT */
-        validationUtil.validateAndThrow(districtRequest);
-        /* LOAD REGENCY */
-        Regency regency = regencyRepository.findById(districtRequest.getRegency_id())
-                .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
-        /* CREATE DISTRICT */
-        District district = District.builder()
-                .id(districtRequest.getId())
-                .name(districtRequest.getName())
-                .regency(regency)
-                .build();
-        /* LOAD OR SAVE DISTRICT */
-        return districtRepository.findById(district.getId()).orElse(districtRepository.saveAndFlush(district));
+        try {
+            /* VALIDATE INPUT */
+            // ValidationException //
+            validationUtil.validateAndThrow(districtRequest);
+
+            /* LOAD REGENCY */
+            // ErrorResponse //
+            Regency regency = regencyRepository.findById(districtRequest.getRegency_id())
+                    .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
+
+            /* CHECK AND VALIDATE IF DISTRICT ALREADY EXIST */
+            // DataIntegrityViolationException //
+            District existingDistrict = districtRepository.findById(districtRequest.getId()).orElse(null);
+            if (existingDistrict != null && !existingDistrict.getName().equals(districtRequest.getName())) {
+                throw new DataIntegrityViolationException(SErrorMessage.DISTRICT_ID_ALREADY_EXIST(existingDistrict.getId(), existingDistrict.getName()));
+            } else if (existingDistrict != null) {
+                return existingDistrict;
+            }
+
+            /* CREATE DISTRICT */
+            District district = District.builder()
+                    .id(districtRequest.getId())
+                    .name(districtRequest.getName())
+                    .regency(regency)
+                    .build();
+
+            /* SAVE DISTRICT */
+            return districtRepository.saveAndFlush(district);
+        } catch (ValidationException e) {
+            log.error("Validation error while creating district: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Database conflict error during creating district: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error while creating district: {}", e.getMessage());
+            throw e;
+        }
     }
 }
