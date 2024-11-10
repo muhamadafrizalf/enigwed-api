@@ -44,7 +44,9 @@ public class SErrorMessage {
     public static final String BONUS_PACKAGE_QUANTITY_NOT_ADJUSTABLE = "Bonus package quantity not adjustable";
     public static final String INVALID_BONUS_PACKAGE_QUANTITY = "Invalid bonus package quantity";
     public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
+
     public static final String PRODUCT_FORBIDDEN = "Can only add bonus package from own product";
+    public static final String CANNOT_DELETE_BANK_ACCOUNT = "The bank account cannot be deleted because this wedding organizer has no other payment method available.";
 
 
     public static String SUBSCRIPTION_PRICE_ALREADY_EXIST(String length) {

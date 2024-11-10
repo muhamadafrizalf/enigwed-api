@@ -192,6 +192,9 @@ public class BankAccountServiceImpl implements BankAccountService {
             // AccessDeniedException //
             accessValidationUtil.validateUser(userInfo, bankAccount.getWeddingOrganizer());
 
+            if (bankAccountRepository.countByWeddingOrganizerIdAndDeletedAtIsNull(bankAccount.getWeddingOrganizer().getId()) <= 1)
+                throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, SErrorMessage.CANNOT_DELETE_BANK_ACCOUNT);
+
             /* SET DELETED AT AND SAVE BANK ACCOUNT */
             bankAccount.setDeletedAt(LocalDateTime.now());
             bankAccountRepository.save(bankAccount);
