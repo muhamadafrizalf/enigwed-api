@@ -195,7 +195,7 @@ public class WeddingOrganizerController {
 
     @Operation(
             summary = "For admin to deactivate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
-            description = "Set active to TRUE and active until to first day next month"
+            description = "Set active to FALSE"
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_WO_ID_DEACTIVATE)
