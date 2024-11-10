@@ -27,15 +27,6 @@ public class WeddingPackageController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "For customer to get wedding package information by wedding_package_id (MOBILE)"
-    )
-    @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE_ID)
-    public ResponseEntity<?> getWeddingPackageById(@PathVariable String id) {
-        ApiResponse<?> response = weddingPackageService.customerFindWeddingPackageById(id);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(
             summary = "For customer to get list of wedding packages (Default pagination {page:1, size:8}) (MOBILE)",
             description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
     )
@@ -43,12 +34,17 @@ public class WeddingPackageController {
     public ResponseEntity<?> customerGetAllWeddingPackages(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-            @Parameter(description = "Keyword can filter result by name, description, city name, and wedding organizer name", required = false)
+            @Parameter(description = "Keyword can filter result by name, description, province name, regency name, and wedding organizer name", required = false)
             @RequestParam(required = false) String keyword,
+            @Parameter(description = "To filter by wedding_organizer_id", required = false)
             @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "To filter by province_id", required = false)
             @RequestParam(required = false) String provinceId,
+            @Parameter(description = "To filter by regency_id", required = false)
             @RequestParam(required = false) String regencyId,
+            @Parameter(description = "To filter by min_price", required = false)
             @RequestParam(required = false) Double minPrice,
+            @Parameter(description = "To filter by max_price", required = false)
             @RequestParam(required = false) Double maxPrice
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -60,33 +56,19 @@ public class WeddingPackageController {
         if (minPrice != null) filter.setMinPrice(minPrice);
         if (maxPrice != null) filter.setMaxPrice(maxPrice);
 
-        ApiResponse<?> response;
-        if (keyword != null && !keyword.isEmpty()) {
-            response = weddingPackageService.customerSearchWeddingPackage(keyword, filter, pagingRequest);
-        } else {
-            response = weddingPackageService.customerFindAllWeddingPackages(filter, pagingRequest);
-        }
+        ApiResponse<?> response = weddingPackageService.customerFindAllWeddingPackages(filter, pagingRequest, keyword);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "For admin and wedding organizer to get wedding package information by wedding_package_id [ADMIN, WO] (WEB)",
-            description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
+            summary = "For customer to get wedding package information by wedding_package_id (MOBILE)"
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
-    @GetMapping(SPathApi.PROTECTED_WEDDING_PACKAGE_ID)
-    public ResponseEntity<?> getOwnWeddingPackageById(
-            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+    @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE_ID)
+    public ResponseEntity<?> getWeddingPackageById(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
-        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = weddingPackageService.getOwnWeddingPackageById(userInfo, id);
-        } else {
-            response = weddingPackageService.findWeddingPackageById(id);
-        }
+        ApiResponse<?> response = weddingPackageService.customerFindWeddingPackageById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -101,13 +83,17 @@ public class WeddingPackageController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-
-            @Parameter(description = "Keyword can filter result by name, description, and city name", required = false)
+            @Parameter(description = "Keyword can filter result by name, description, province name, regency name, and wedding organizer name", required = false)
             @RequestParam(required = false) String keyword,
+            @Parameter(description = "To filter by wedding_organizer_id", required = false)
             @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "To filter by province_id", required = false)
             @RequestParam(required = false) String provinceId,
+            @Parameter(description = "To filter by regency_id", required = false)
             @RequestParam(required = false) String regencyId,
+            @Parameter(description = "To filter by min_price", required = false)
             @RequestParam(required = false) Double minPrice,
+            @Parameter(description = "To filter by max_price", required = false)
             @RequestParam(required = false) Double maxPrice
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -121,18 +107,32 @@ public class WeddingPackageController {
 
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            if (keyword != null && !keyword.isEmpty()) {
-                response = weddingPackageService.searchOwnWeddingPackages(userInfo, keyword, filter, pagingRequest);
-            } else {
-                response = weddingPackageService.getOwnWeddingPackages(userInfo, filter, pagingRequest);
-            }
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            response = weddingPackageService.findAllWeddingPackages(filter, pagingRequest, keyword);
         } else {
-            if (keyword != null && !keyword.isEmpty()) {
-                response = weddingPackageService.searchWeddingPackage(keyword, filter, pagingRequest);
-            } else {
-                response = weddingPackageService.findAllWeddingPackages(filter, pagingRequest);
-            }
+            response = weddingPackageService.findOwnWeddingPackages(userInfo, filter, pagingRequest, keyword);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "For admin and wedding organizer to get wedding package information by wedding_package_id [ADMIN, WO] (WEB)",
+            description = "Admin can get access to all wedding package, each WO can only access their own wedding package"
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
+    @GetMapping(SPathApi.PROTECTED_WEDDING_PACKAGE_ID)
+    public ResponseEntity<?> getOwnWeddingPackageById(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
+            @PathVariable String id
+    ) {
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = weddingPackageService.findOwnWeddingPackageById(userInfo, id);
+        } else {
+            response = weddingPackageService.findWeddingPackageById(id);
         }
         return ResponseEntity.ok(response);
     }
@@ -145,6 +145,7 @@ public class WeddingPackageController {
     public ResponseEntity<?> createWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Bonus details are optional")
             @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -161,6 +162,7 @@ public class WeddingPackageController {
     public ResponseEntity<?> updateWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Bonus details are optional")
             @RequestBody WeddingPackageRequest weddingPackageRequest
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -177,6 +179,7 @@ public class WeddingPackageController {
     public ResponseEntity<?> deleteWeddingPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -193,7 +196,9 @@ public class WeddingPackageController {
     public ResponseEntity<?> addWeddingPackageImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Form-data part image is required")
             @RequestPart(name = "image") MultipartFile image
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -210,7 +215,9 @@ public class WeddingPackageController {
     public ResponseEntity<?> deleteWeddingPackageImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Path variable imageId")
             @PathVariable(value = "image-id") String imageId
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);

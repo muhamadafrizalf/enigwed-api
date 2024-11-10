@@ -110,13 +110,13 @@ public class OrderController {
             @RequestParam(required = false) String keyword,
             @Parameter(description = "For admin to filter order by wedding_organizer_id")
             @RequestParam(required = false) String weddingOrganizerId,
-            @Parameter(description = "Filter by order status")
+            @Parameter(description = "Filter by order_status")
             @RequestParam(required = false) EStatus status,
-            @Parameter(description = "Filter by order wedding package id")
+            @Parameter(description = "Filter by order wedding_package_id")
             @RequestParam(required = false) String weddingPackageId,
-            @Parameter(description = "Filter by transaction date from")
+            @Parameter(description = "Filter by transaction_date_from")
             @RequestParam(required = false) LocalDateTime startDate,
-            @Parameter(description = "Filter by transaction date to")
+            @Parameter(description = "Filter by transaction_date_to")
             @RequestParam(required = false) LocalDateTime endDate
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -169,6 +169,7 @@ public class OrderController {
     public ResponseEntity<?> confirmPayment(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);

@@ -135,4 +135,15 @@ public class SMessage {
     public static String PAYMENT_CONFIRMED(String bookCode) {return String.format("Payment for order with book code '%s' has been confirmed", bookCode);}
     public static String ORDER_FINISHED(String bookCode) {return String.format("Order with book code '%s' has been finished", bookCode);}
     public static String ORDER_REVIEWED(String bookCode) {return String.format("Order with book code '%s' has been reviewed", bookCode);}
+
+    // Wedding Package
+    public static String WEDDING_PACKAGES_FOUND(int size) {return String.format("%d wedding package(s) found", size);}
+    public static String WEDDING_PACKAGE_FOUND(String id) {return String.format("Wedding package with ID %s found", id);}
+    public static String WEDDING_PACKAGE_CREATED(String id) {return String.format("Wedding package with ID %s successfully created", id);}
+    public static String WEDDING_PACKAGE_UPDATED(String id) {return String.format("Wedding package with ID %s successfully updated", id);}
+    public static String WEDDING_PACKAGE_DELETED(String id) {return String.format("Wedding package with ID %s successfully deleted", id);}
+    public static String WEDDING_PACKAGE_IMAGE_ADDED(String weddingPackageName) {return String.format("A new image has been added for the wedding package %s", weddingPackageName);}
+    public static String WEDDING_PACKAGE_IMAGE_DELETED(String weddingPackageName, String imageId) {return String.format("The image with ID %s has been deleted from the wedding package %s", imageId, weddingPackageName);
+    }
+
 }
