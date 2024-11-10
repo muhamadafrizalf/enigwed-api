@@ -88,7 +88,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         try {
             // ErrorResponse
             WeddingPackage weddingPackage = findByIdOrThrow(id);
-            WeddingPackageResponse response = WeddingPackageResponse.publicInformation(weddingPackage);
+            WeddingPackageResponse response = WeddingPackageResponse.information(weddingPackage);
             return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_FOUND);
         } catch (ErrorResponse e) {
             log.error("Error during loading wedding package: {}", e.getMessage());
@@ -105,7 +105,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
@@ -118,7 +118,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
@@ -152,7 +152,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
@@ -168,7 +168,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
@@ -392,7 +392,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 
@@ -404,7 +404,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         weddingPackageList = filterResult(filter, weddingPackageList);
 
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::simple).toList();
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND);
     }
 }

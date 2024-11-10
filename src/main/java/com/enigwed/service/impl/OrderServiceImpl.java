@@ -103,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderList.isEmpty()) return ApiResponse.successOrderList(new ArrayList<>(), pagingRequest, SMessage.NO_ORDER_FOUND, countByStatus);
 
         /* MAP RESULT */
-        List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::card).toList();
         return ApiResponse.successOrderList(responses, pagingRequest, SMessage.ORDER_FOUNDS(orderList.size()), countByStatus);
     }
 
@@ -401,7 +401,7 @@ public class OrderServiceImpl implements OrderService {
 
             /* FIND ORDERS */
             Sort sort = Sort.by(Sort.Order.desc("transactionDate"));
-            Specification<Order> spec = SearchSpecifications.searchByKeyword(keyword);
+            Specification<Order> spec = SearchSpecifications.searchOrder(keyword);
             List<Order> orderList = orderRepository.findAll(spec, sort);
 
             /* MAP RESPONSE */
@@ -566,6 +566,9 @@ public class OrderServiceImpl implements OrderService {
             // ErrorResponse //
             validateAndUpdateOrderStatus(order, EStatus.PAID, EStatus.FINISHED, "finished");
 
+            /* ADD WEDDING PACKAGE ORDER COUNT */
+            weddingPackageService.addOrderCount(order.getWeddingPackage());
+
             /* SAVE ORDER */
             order = orderRepository.save(order);
 
@@ -596,7 +599,7 @@ public class OrderServiceImpl implements OrderService {
 
             /* FIND ORDERS */
             Sort sort = Sort.by(Sort.Order.desc("transactionDate"));
-            Specification<Order> spec = SearchSpecifications.searchByKeyword(keyword);
+            Specification<Order> spec = SearchSpecifications.searchOrder(keyword);
             List<Order> orderList = orderRepository.findAll(spec, sort);
 
             /* MAP RESPONSE */

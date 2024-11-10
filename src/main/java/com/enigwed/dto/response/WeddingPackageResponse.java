@@ -16,12 +16,12 @@ public class WeddingPackageResponse {
     private String id;
     private ImageResponse thumbnail;
     private String name;
-    private Double price;
-    private String weddingOrganizerName;
-    private Double rating;
-    List<ReviewResponse> reviews;
     private String description;
+    private Double price;
     private Integer orderCount;
+    private Double rating;
+    private String weddingOrganizerName;
+    List<ReviewResponse> reviews;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
@@ -33,90 +33,52 @@ public class WeddingPackageResponse {
     private List<ImageResponse> images;
     List<BonusDetailResponse> bonusDetails;
 
-    public static WeddingPackageResponse all(WeddingPackage weddingPackage) {
+    public static WeddingPackageResponse card(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = new WeddingPackageResponse();
         response.setId(weddingPackage.getId());
-        response.setName(weddingPackage.getName());
-        response.setDescription(weddingPackage.getDescription());
-        response.setOrderCount(weddingPackage.getOrderCount());
-        response.setPrice(weddingPackage.getPrice());
-        response.setCreatedAt(weddingPackage.getCreatedAt());
-        response.setUpdatedAt(weddingPackage.getUpdatedAt());
-        response.setDeletedAt(weddingPackage.getDeletedAt());
-        response.setProvinceId(weddingPackage.getProvince().getId());
-        response.setProvinceName(weddingPackage.getProvince().getName());
-        response.setRegencyId(weddingPackage.getRegency().getId());
-        response.setRegencyName(weddingPackage.getRegency().getName());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingPackage.getWeddingOrganizer()));
         if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
-            response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
+        }
+        response.setName(weddingPackage.getName());
+        response.setDescription(weddingPackage.getDescription());
+        response.setPrice(weddingPackage.getPrice());
+        response.setOrderCount(weddingPackage.getOrderCount());
+        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
+            response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        }
+        response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
+        response.setRegencyName(weddingPackage.getRegency().getName());
+        return response;
+    }
+
+    public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
+        WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
+        response.setProvinceName(weddingPackage.getProvince().getName());
+        response.setRegencyName(weddingPackage.getRegency().getName());
+        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingPackage.getWeddingOrganizer()));
+        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
+            response.setReviews(weddingPackage.getReviews().stream().filter(Review::isVisiblePublic).map(ReviewResponse::simple).toList());
+        }
+        if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
+            response.setImages(weddingPackage.getImages().stream().map(ImageResponse::from).toList());
+        } else {
             response.setImages(List.of(ImageResponse.noImage()));
         }
         if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
             response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::simple).toList());
         }
-        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
-            response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-            response.setReviews(weddingPackage.getReviews().stream().map(ReviewResponse::simple).toList());
-        }
         return response;
     }
 
-    public static WeddingPackageResponse publicInformation(WeddingPackage weddingPackage) {
-        WeddingPackageResponse response = new WeddingPackageResponse();
-        response.setId(weddingPackage.getId());
-        response.setName(weddingPackage.getName());
-        response.setDescription(weddingPackage.getDescription());
-        response.setOrderCount(weddingPackage.getOrderCount());
-        response.setPrice(weddingPackage.getPrice());
-        response.setProvinceName(weddingPackage.getProvince().getName());
-        response.setRegencyName(weddingPackage.getRegency().getName());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingPackage.getWeddingOrganizer()));
-        if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
-            response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::simple).toList());
-        }
-        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
-            response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-            response.setReviews(weddingPackage.getReviews().stream().filter(Review::isVisiblePublic).map(ReviewResponse::simple).toList());
-        }
-        return response;
-    }
-
-    public static WeddingPackageResponse simple(WeddingPackage weddingPackage) {
-        WeddingPackageResponse response = new WeddingPackageResponse();
-        response.setId(weddingPackage.getId());
-        if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
-            response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
-        } else {
-            response.setThumbnail(ImageResponse.noImage());
-        }
-        response.setName(weddingPackage.getName());
-        response.setPrice(weddingPackage.getPrice());
-        response.setOrderCount(weddingPackage.getOrderCount());
-        response.setRegencyName(weddingPackage.getRegency().getName());
-        response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
-        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
-            response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-        }
-        return response;
-    }
-
-    public static WeddingPackageResponse order(WeddingPackage weddingPackage) {
-        WeddingPackageResponse response = new WeddingPackageResponse();
-        response.setId(weddingPackage.getId());
-        if (weddingPackage.getImages() != null && !weddingPackage.getImages().isEmpty()) {
-            response.setThumbnail(ImageResponse.from(weddingPackage.getImages().get(0)));
-        } else {
-            response.setThumbnail(ImageResponse.noImage());
-        }
-        response.setName(weddingPackage.getName());
-        response.setDescription(weddingPackage.getDescription());
-        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
-            response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-        }
+    public static WeddingPackageResponse all(WeddingPackage weddingPackage) {
+        WeddingPackageResponse response = WeddingPackageResponse.information(weddingPackage);
+        response.setCreatedAt(weddingPackage.getCreatedAt());
+        response.setUpdatedAt(weddingPackage.getUpdatedAt());
+        response.setDeletedAt(weddingPackage.getDeletedAt());
+        response.setProvinceId(weddingPackage.getProvince().getId());
+        response.setRegencyId(weddingPackage.getRegency().getId());
         return response;
     }
 }

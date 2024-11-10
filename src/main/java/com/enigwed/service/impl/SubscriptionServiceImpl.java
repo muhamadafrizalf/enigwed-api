@@ -237,6 +237,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscriptionPackage.setSubscriptionLength(subscriptionPackageRequest.getSubscriptionLength());
         subscriptionPackage.setPrice(subscriptionPackageRequest.getPrice());
+        subscriptionPackage.setPopular(subscriptionPackageRequest.getPopular());
 
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 

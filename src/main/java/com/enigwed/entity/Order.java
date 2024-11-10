@@ -76,6 +76,7 @@ public class Order extends BaseEntity{
         transactionDate = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         status = EStatus.PENDING;
+        reviewed = false;
     }
 
     @PreUpdate

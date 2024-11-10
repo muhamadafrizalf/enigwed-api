@@ -1,6 +1,8 @@
 package com.enigwed.repository;
 
 import com.enigwed.entity.WeddingPackage;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,8 @@ public interface WeddingPackageRepository extends JpaRepository<WeddingPackage, 
     Optional<WeddingPackage> findByIdAndDeletedAtIsNull(String id);
     List<WeddingPackage> findByDeletedAtIsNull();
     List<WeddingPackage> findByWeddingOrganizerIdAndDeletedAtIsNull(String weddingOrganizerId);
+
+    List<WeddingPackage> findAll(Specification<WeddingPackage> spec, Sort sort);
 
     @Query("SELECT wp FROM WeddingPackage wp " +
             "JOIN wp.province p " +
