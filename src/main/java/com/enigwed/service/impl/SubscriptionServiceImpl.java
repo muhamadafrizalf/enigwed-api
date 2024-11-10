@@ -241,8 +241,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public ApiResponse<?> deleteSubscriptionPrice(String subscriptionId) {
-        findSubscriptionPriceByIdOrThrow(subscriptionId);
-        subscriptionPriceRepository.deleteById(subscriptionId);
+        SubscriptionPacket packet = findSubscriptionPriceByIdOrThrow(subscriptionId);
+        packet.setDeletedAt(LocalDateTime.now());
+        subscriptionPriceRepository.save(packet);
         return ApiResponse.success(SMessage.SUBSCRIPTION_PRICE_DELETED);
     }
 

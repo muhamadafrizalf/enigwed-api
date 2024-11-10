@@ -22,11 +22,12 @@ public interface SubscriptionService {
     ApiResponse<SubscriptionPacket> updateSubscriptionPrice(SubscriptionPacketRequest subscriptionPacketRequest);
     ApiResponse<?> deleteSubscriptionPrice(String subscriptionId);
 
-    ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest);
     ApiResponse<List<SubscriptionResponse>> getOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
     ApiResponse<List<SubscriptionResponse>> getActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
+    ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest);
+
+    ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
     ApiResponse<SubscriptionResponse> getSubscriptionById(JwtClaim userInfo, String subscriptionId);
     ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId);
-    ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
 
 }
