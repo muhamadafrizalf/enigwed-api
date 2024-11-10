@@ -160,7 +160,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private List<Subscription> filterByStatus(FilterRequest filter, List<Subscription> list) {
         return list.stream()
-                .filter(item -> filter.getOrderStatus() == null || item.getStatus().equals(filter.getSubscriptionPaymentStatus()))
+                .filter(item -> filter.getSubscriptionPaymentStatus() == null || item.getStatus().equals(filter.getSubscriptionPaymentStatus()))
                 .toList();
     }
 
