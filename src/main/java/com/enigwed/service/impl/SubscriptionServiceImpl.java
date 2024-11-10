@@ -197,9 +197,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull();
         if (subscriptionPackageList == null || subscriptionPackageList.isEmpty())
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PRICE_FOUND);
-        Map<String, Long> orders = subscriptionRepository.countSubscriptionsGroupedBySubscriptionPacket(ESubscriptionPaymentStatus.CONFIRMED);
+        List<Subscription> subscriptionList = getSubscriptions(LocalDateTime.now().minusMonths(12), LocalDateTime.now());
+        Map<String, Long> map = new HashMap<>();
+        for (Subscription subscription : subscriptionList) {
+            map.put(subscription.getSubscriptionPackage().getId(), map.getOrDefault(subscription.getSubscriptionPackage().getId(), 0L) + 1);
+        }
         List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream()
-                .map(subscriptionPackage -> SubscriptionPackageResponse.all(subscriptionPackage, orders))
+                .map(subscriptionPackage -> SubscriptionPackageResponse.all(subscriptionPackage, map))
                 .sorted(Comparator.comparingLong(SubscriptionPackageResponse::getOrderCount).reversed())
                 .toList();
         for (int i = 0; i < Math.min(3, responses.size()); i++) {
