@@ -475,7 +475,7 @@ public class OrderServiceImpl implements OrderService {
 
             /* VALIDATE ORDER IN THE RIGHT STATUS BEFORE UPDATING */
             // ErrorResponse
-            validateOrderInStatus(order, EStatus.PAID);
+            validateOrderInStatus(order, EStatus.CHECKING_PAYMENT);
 
             order.setStatus(EStatus.PAID);
 
