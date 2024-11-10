@@ -16,6 +16,7 @@ import com.enigwed.repository.ProductRepository;
 import com.enigwed.service.ProductService;
 import com.enigwed.service.ImageService;
 import com.enigwed.service.WeddingOrganizerService;
+import com.enigwed.util.AccessValidationUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,18 +39,23 @@ public class ProductServiceImpl implements ProductService {
     private final WeddingOrganizerService weddingOrganizerService;
     private final ImageService imageService;
     private final ValidationUtil validationUtil;
+    private final AccessValidationUtil accessValidationUtil;
 
     private Product findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
         return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.BONUS_PACKAGE_NOT_FOUND));
     }
 
-    private void validateUserAccess(JwtClaim userInfo, Product product) throws AccessDeniedException {
-        String userCredentialId = product.getWeddingOrganizer().getUserCredential().getId();
-        if (userInfo.getUserId().equals(userCredentialId)) {
-            return;
+    private ApiResponse<List<ProductResponse>> getListApiResponse(PagingRequest pagingRequest, List<Product> productList, Stream<ProductResponse> productResponseStream) {
+        if (pagingRequest != null) {
+            validationUtil.validateAndThrow(pagingRequest);
+        } else {
+            pagingRequest = new PagingRequest(1, productList.size());
         }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
+
+        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
+        List<ProductResponse> responses = productResponseStream.toList();
+        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +67,22 @@ public class ProductServiceImpl implements ProductService {
             log.error("Error during loading product: {}", e.getMessage());
             throw e;
         }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest) {
+        List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
+
+        return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
+        List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
+
+        return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple));
     }
 
     @Transactional(readOnly = true)
@@ -78,22 +101,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest) {
-        validationUtil.validateAndThrow(pagingRequest);
-        List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
-        List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
-    }
+    public ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest) {
+        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+        List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
 
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
-        validationUtil.validateAndThrow(pagingRequest);
-        List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(),pagingRequest, SMessage.NO_PRODUCT_FOUND);
-        List<ProductResponse> responses = productList.stream().map(ProductResponse::simple).toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
+        return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::all));
     }
 
     @Override
@@ -101,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             Product product = findByIdOrThrow(id);
 
-            validateUserAccess(userInfo, product);
+            accessValidationUtil.validateUser(userInfo, product.getWeddingOrganizer());
 
             ProductResponse response = ProductResponse.all(product);
             return ApiResponse.success(response, SMessage.PRODUCT_FOUND);
@@ -112,17 +124,6 @@ public class ProductServiceImpl implements ProductService {
             log.error("Error during loading own product: {}", e.getError());
             throw e;
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest) {
-        validationUtil.validateAndThrow(pagingRequest);
-        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-        List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
-        if (productList == null || productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
-        List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -164,7 +165,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = findByIdOrThrow(productRequest.getId());
 
             // AccessDeniedException
-            validateUserAccess(userInfo, product);
+            accessValidationUtil.validateUser(userInfo, product.getWeddingOrganizer());
 
             // ValidationException
             validationUtil.validateAndThrow(productRequest);
@@ -199,7 +200,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = findByIdOrThrow(id);
 
             // AccessDeniedException
-            validateUserAccess(userInfo, product);
+            accessValidationUtil.validateUser(userInfo, product.getWeddingOrganizer());
 
             product.setDeletedAt(LocalDateTime.now());
 
@@ -224,7 +225,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = findByIdOrThrow(id);
 
             // AccessDeniedException
-            validateUserAccess(userInfo, product);
+            accessValidationUtil.validateUser(userInfo, product.getWeddingOrganizer());
 
             // ErrorResponse
             Image addedImage = imageService.createImage(image);
@@ -254,7 +255,7 @@ public class ProductServiceImpl implements ProductService {
             // ErrorResponse
             Product product = findByIdOrThrow(id);
             // AccessDeniedException
-            validateUserAccess(userInfo, product);
+            accessValidationUtil.validateUser(userInfo, product.getWeddingOrganizer());
             // ErrorResponse
             imageService.deleteImage(imageId);
             List<Image> images = product.getImages();

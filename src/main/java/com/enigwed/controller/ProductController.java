@@ -24,6 +24,30 @@ public class ProductController {
     private final ProductService productService;
     private final JwtUtil jwtUtil;
 
+    @Operation(
+            summary = "For customer to search product own by one wedding organizer (Default pagination {page:1, size:list.size}) (MOBILE)",
+            description = "wedding_organizer_id is mandatory and keyword is optional"
+    )
+    @GetMapping(SPathApi.PUBLIC_PRODUCT)
+    public ResponseEntity<?> customerGetAllBonusPackages(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @Parameter(description = "To filter by wedding_organizer_id", required = true)
+            @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "Keyword can filter result by name, and description", required = false)
+            @RequestParam(required = false) String keyword
+    ) {
+        PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
+        ApiResponse<?> response;
+        boolean isKeyword = keyword != null && !keyword.isEmpty();
+        if (isKeyword) {
+            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword, pagingRequest);
+        } else {
+            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId, pagingRequest);
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "For customer to get product information by product_id (MOBILE)")
     @GetMapping(SPathApi.PUBLIC_PRODUCT_ID)
     public ResponseEntity<?> customerGetBonusPackageById(
@@ -32,27 +56,22 @@ public class ProductController {
         ApiResponse<?> response = productService.findProductById(id);
         return ResponseEntity.ok(response);
     }
+
     @Operation(
-            summary = "For customer to search product own by one wedding organizer (Default pagination {page:1, size:8}) (MOBILE)",
-            description = "wedding_organizer_id is mandatory and keyword is optional"
+            summary = "For wedding organizer to get all products own by wedding organizer (Default pagination {page:1, size:list.size}) [WO] (WEB)",
+            description = "Wedding organizer can only retrieve their own products"
     )
-    @GetMapping(SPathApi.PUBLIC_PRODUCT)
-    public ResponseEntity<?> customerGetAllBonusPackages(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size,
-            @Parameter(description = "To filter by wedding_organizer_id", required = true)
-            @RequestParam(required = false) String weddingOrganizerId,
-            @Parameter(description = "Keyword can filter result by name, and description", required = false)
-            @RequestParam(required = false) String keyword
+    @PreAuthorize("hasRole('WO')")
+    @GetMapping(SPathApi.PROTECTED_PRODUCT)
+    public ResponseEntity<?> getOwnBonusPackages(
+            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
     ) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        ApiResponse<?> response;
-        boolean isKeyword = keyword != null && !keyword.isEmpty();
-        if (isKeyword) {
-            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword, pagingRequest);
-        } else {
-            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId, pagingRequest);
-        }
+        PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
+        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+        ApiResponse<?> response = productService.getOwnProducts(userInfo, pagingRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -69,24 +88,6 @@ public class ProductController {
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response = productService.getOwnProductById(userInfo, id);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(
-            summary = "For wedding organizer to get all products own by wedding organizer (Default pagination {page:1, size:8}) [WO] (WEB)",
-            description = "Wedding organizer can only retrieve their own products"
-    )
-    @PreAuthorize("hasRole('WO')")
-    @GetMapping(SPathApi.PROTECTED_PRODUCT)
-    public ResponseEntity<?> getOwnBonusPackages(
-            @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size
-    ) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = productService.getOwnProducts(userInfo, pagingRequest);
         return ResponseEntity.ok(response);
     }
 
