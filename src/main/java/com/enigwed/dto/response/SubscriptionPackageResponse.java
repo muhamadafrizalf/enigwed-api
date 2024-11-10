@@ -18,15 +18,7 @@ public class SubscriptionPackageResponse {
     private ESubscriptionLength subscriptionLength;
     private String description;
     private Double price;
-
-    private Long orderCount;
     private Boolean popular;
-
-    public static SubscriptionPackageResponse all(SubscriptionPackage subscriptionPackage, Map<String, Long> orders) {
-        SubscriptionPackageResponse response = simple(subscriptionPackage);
-        response.setOrderCount(orders.get(subscriptionPackage.getId()) != null ? orders.get(subscriptionPackage.getId()) : 0);
-        return response;
-    }
 
     public static SubscriptionPackageResponse simple(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageResponse response = new SubscriptionPackageResponse();
@@ -35,6 +27,7 @@ public class SubscriptionPackageResponse {
         response.setSubscriptionLength(subscriptionPackage.getSubscriptionLength());
         response.setDescription(subscriptionPackage.getDescription());
         response.setPrice(subscriptionPackage.getPrice());
+        response.setPopular(subscriptionPackage.isPopular());
         return response;
     }
 }

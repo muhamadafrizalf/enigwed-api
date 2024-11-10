@@ -22,7 +22,7 @@ public class SubscriptionResponse {
     private LocalDateTime activeFrom;
     private LocalDateTime activeUntil;
     private WeddingOrganizerResponse weddingOrganizer;
-    private SubscriptionPackage subscriptionPackage;
+    private SubscriptionPackageResponse subscriptionPacket;
     private Double totalPaid;
     private ESubscriptionPaymentStatus paymentStatus;
     private ImageResponse paymentImage;
@@ -35,7 +35,7 @@ public class SubscriptionResponse {
         response.setActiveFrom(subscription.getActiveFrom());
         response.setActiveUntil(subscription.getActiveUntil());
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(subscription.getWeddingOrganizer()));
-        response.setSubscriptionPackage(subscription.getSubscriptionPackage());
+        response.setSubscriptionPacket(SubscriptionPackageResponse.simple(subscription.getSubscriptionPackage()));
         response.setTotalPaid(subscription.getTotalPaid());
         response.setPaymentStatus(subscription.getStatus());
         response.setPaymentImage(ImageResponse.from(subscription.getPaymentImage()));

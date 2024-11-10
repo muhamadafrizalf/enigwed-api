@@ -4,7 +4,7 @@ import com.enigwed.constant.*;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.dto.request.SubscriptionPacketRequest;
+import com.enigwed.dto.request.SubscriptionPackageRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionPackageResponse;
@@ -197,21 +197,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull();
         if (subscriptionPackageList == null || subscriptionPackageList.isEmpty())
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PRICE_FOUND);
-        List<Subscription> subscriptionList = getSubscriptions(LocalDateTime.now().minusMonths(12), LocalDateTime.now());
-        Map<String, Long> map = new HashMap<>();
-        for (Subscription subscription : subscriptionList) {
-            map.put(subscription.getSubscriptionPackage().getId(), map.getOrDefault(subscription.getSubscriptionPackage().getId(), 0L) + 1);
-        }
-        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream()
-                .map(subscriptionPackage -> SubscriptionPackageResponse.all(subscriptionPackage, map))
-                .sorted(Comparator.comparingLong(SubscriptionPackageResponse::getOrderCount).reversed())
-                .toList();
-        for (int i = 0; i < Math.min(3, responses.size()); i++) {
-            responses.get(i).setPopular(true);
-        }
-        responses = responses.stream()
-                .sorted(Comparator.comparingInt(response -> response.getSubscriptionLength().getMonths()))
-                .toList();
+        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream().map(SubscriptionPackageResponse::simple).toList();
         return ApiResponse.success(responses, SMessage.SUBSCRIPTION_PRICES_FOUND);
     }
 
@@ -223,15 +209,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest) {
-        validationUtil.validateAndThrow(subscriptionPacketRequest);
-        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).isPresent())
-            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
+    public ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest) {
+        validationUtil.validateAndThrow(subscriptionPackageRequest);
+        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).isPresent())
+            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
 
         SubscriptionPackage subscriptionPackage = SubscriptionPackage.builder()
-                .name(subscriptionPacketRequest.getName())
-                .subscriptionLength(subscriptionPacketRequest.getSubscriptionLength())
-                .price(subscriptionPacketRequest.getPrice())
+                .name(subscriptionPackageRequest.getName())
+                .subscriptionLength(subscriptionPackageRequest.getSubscriptionLength())
+                .price(subscriptionPackageRequest.getPrice())
                 .build();
 
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
@@ -241,16 +227,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest) {
-        validationUtil.validateAndThrow(subscriptionPacketRequest);
-        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPacketRequest.getId());
-        SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPacketRequest.getSubscriptionLength()).orElse(null);
+    public ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest) {
+        validationUtil.validateAndThrow(subscriptionPackageRequest);
+        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPackageRequest.getId());
+        SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).orElse(null);
         if (possibleConflict != null && !subscriptionPackage.getId().equals(possibleConflict.getId())) {
-            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
+            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
         }
 
-        subscriptionPackage.setSubscriptionLength(subscriptionPacketRequest.getSubscriptionLength());
-        subscriptionPackage.setPrice(subscriptionPacketRequest.getPrice());
+        subscriptionPackage.setSubscriptionLength(subscriptionPackageRequest.getSubscriptionLength());
+        subscriptionPackage.setPrice(subscriptionPackageRequest.getPrice());
 
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
@@ -390,5 +376,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
         return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
+    }
+
+    @Override
+    public ApiResponse<List<SubscriptionResponse>> getAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId) {
+        List<Subscription> subscriptionList;
+        if(weddingOrganizerId == null || weddingOrganizerId.isEmpty()) {
+            subscriptionList = subscriptionRepository.findAll();
+        } else {
+            subscriptionList = subscriptionRepository.findByWeddingOrganizerId(weddingOrganizerId);
+        }
+        List<SubscriptionResponse> responses = subscriptionList.stream()
+                .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
+                .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))
+                .map(SubscriptionResponse::all)
+                .toList();
+        return ApiResponse.success(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND);
     }
 }

@@ -28,6 +28,8 @@ public class SubscriptionPackage extends AuditEntity{
 
     private double price;
 
+    private boolean popular = false;
+
     @PrePersist
     @PreUpdate
     public void updateDescription() {

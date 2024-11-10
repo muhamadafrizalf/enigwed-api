@@ -3,7 +3,7 @@ package com.enigwed.service;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.dto.request.SubscriptionPacketRequest;
+import com.enigwed.dto.request.SubscriptionPackageRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.SubscriptionPackageResponse;
@@ -19,8 +19,8 @@ public interface SubscriptionService {
 
     ApiResponse<List<SubscriptionPackageResponse>> findSubscriptionPackages();
     ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPriceId);
-    ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest);
-    ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPacketRequest subscriptionPacketRequest);
+    ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
+    ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
     ApiResponse<?> deleteSubscriptionPackage(String subscriptionId);
 
     ApiResponse<List<SubscriptionResponse>> getOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
@@ -28,6 +28,7 @@ public interface SubscriptionService {
     ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest);
 
     ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
+    ApiResponse<List<SubscriptionResponse>> getAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId);
     ApiResponse<SubscriptionResponse> getSubscriptionById(JwtClaim userInfo, String subscriptionId);
     ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId);
 

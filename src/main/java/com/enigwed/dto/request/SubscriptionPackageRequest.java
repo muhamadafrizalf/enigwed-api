@@ -15,7 +15,7 @@ import static com.enigwed.constant.SConstraint.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SubscriptionPacketRequest {
+public class SubscriptionPackageRequest {
 
     private String id;
 
@@ -28,5 +28,7 @@ public class SubscriptionPacketRequest {
     @Positive(message = PRICE_INVALID)
     @NotNull(message = PRICE_NULL)
     private Double price;
+
+    private Boolean popular;
 
 }

@@ -6,7 +6,7 @@ import com.enigwed.constant.SPathApi;
 import com.enigwed.dto.JwtClaim;
 import com.enigwed.dto.request.FilterRequest;
 import com.enigwed.dto.request.PagingRequest;
-import com.enigwed.dto.request.SubscriptionPacketRequest;
+import com.enigwed.dto.request.SubscriptionPackageRequest;
 import com.enigwed.dto.request.SubscriptionRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.security.JwtUtil;
@@ -56,9 +56,9 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> addSubscriptionPrice(
-            @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
+            @RequestBody SubscriptionPackageRequest subscriptionPackageRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.createSubscriptionPackage(subscriptionPacketRequest));
+        return ResponseEntity.ok(subscriptionService.createSubscriptionPackage(subscriptionPackageRequest));
     }
 
     @Operation(
@@ -67,9 +67,9 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> updateSubscriptionPrice(
-            @RequestBody SubscriptionPacketRequest subscriptionPacketRequest
+            @RequestBody SubscriptionPackageRequest subscriptionPackageRequest
     ) {
-        return ResponseEntity.ok(subscriptionService.updateSubscriptionPackage(subscriptionPacketRequest));
+        return ResponseEntity.ok(subscriptionService.updateSubscriptionPackage(subscriptionPackageRequest));
     }
 
     @Operation(
@@ -113,6 +113,7 @@ public class SubscriptionController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
+            @RequestParam(required = false) String weddingOrganizerId,
             @RequestParam(required = false) ESubscriptionPaymentStatus status,
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate
@@ -120,6 +121,7 @@ public class SubscriptionController {
         PagingRequest pagingRequest = new PagingRequest(page, size);
 
         FilterRequest filterRequest = new FilterRequest();
+        if(weddingOrganizerId != null) filterRequest.setWeddingOrganizerId(weddingOrganizerId);
         if (status != null) filterRequest.setSubscriptionPaymentStatus(status);
         if (startDate != null) filterRequest.setStartDate(startDate);
         if (endDate != null) filterRequest.setEndDate(endDate);
@@ -137,17 +139,24 @@ public class SubscriptionController {
     @Operation(
             summary = "For wedding organizer to get list of active subscription they own (Default pagination {page:1, size:8}) [WO] (WEB)"
     )
-    @PreAuthorize("hasRole('WO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_ACTIVE)
     public ResponseEntity<?> getActiveSubscription(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size
+            @RequestParam(required = false, defaultValue = "8") int size,
+            @RequestParam(required = false) String weddingOrganizerId
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
+
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = subscriptionService.getActiveSubscriptions(userInfo, pagingRequest);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+            response = subscriptionService.getActiveSubscriptions(userInfo, pagingRequest);
+        } else {
+            response = subscriptionService.getAllActiveSubscriptions(pagingRequest, weddingOrganizerId);
+        }
         return ResponseEntity.ok(response);
     }
 
