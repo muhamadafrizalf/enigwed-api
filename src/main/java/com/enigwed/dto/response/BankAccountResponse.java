@@ -18,6 +18,8 @@ public class BankAccountResponse {
 
     private String weddingOrganizerId;
 
+    private String weddingOrganizerName;
+
     private String bankName;
 
     private String bankCode;
@@ -26,10 +28,12 @@ public class BankAccountResponse {
 
     private String accountName;
 
-    public static BankAccountResponse from(BankAccount bankAccount) {
+    public static BankAccountResponse all
+            (BankAccount bankAccount) {
         BankAccountResponse response = new BankAccountResponse();
         response.setId(bankAccount.getId());
         response.setWeddingOrganizerId(bankAccount.getWeddingOrganizer().getId());
+        response.setWeddingOrganizerName(bankAccount.getWeddingOrganizer().getName());
         response.setBankName(bankAccount.getBankName());
         response.setBankCode(bankAccount.getBankCode());
         response.setAccountNumber(bankAccount.getAccountNumber());

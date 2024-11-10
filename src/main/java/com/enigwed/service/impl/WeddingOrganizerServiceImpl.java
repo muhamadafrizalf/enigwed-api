@@ -105,7 +105,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             // ErrorResponse
             return findByIdOrThrow(id);
         } catch (ErrorResponse e) {
-            log.error("Error while loading wedding organizer: {}", e.getError());
+            log.error("Error while loading wedding organizer by ID: {}", e.getError());
             throw e;
         }
     }
@@ -113,9 +113,16 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Transactional(readOnly = true)
     @Override
     public WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId) {
-        if (userCredentialId == null || userCredentialId.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
-        return weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userCredentialId)
-                .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        try {
+            // ErrorResponse
+            if (userCredentialId == null || userCredentialId.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
+            return weddingOrganizerRepository.findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(userCredentialId)
+                    .orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_ORGANIZER_NOT_FOUND));
+        } catch (ErrorResponse e) {
+            log.error("Error while loading wedding organizer by user credential ID: {}", e.getError());
+            throw e;
+        }
+
     }
 
     @Transactional(readOnly = true)

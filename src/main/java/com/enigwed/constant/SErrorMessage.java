@@ -62,4 +62,9 @@ public class SErrorMessage {
     public static String SUBSCRIPTION_PRICE_ALREADY_EXIST(String length) {
         return "Subscription price with length: " + length + " already exists";
     }
+
+    public static String BANK_ACCOUNT_NOT_FOUND(String id) {
+        return String.format("Bank account with ID %s not found.", id);
+    }
+
 }

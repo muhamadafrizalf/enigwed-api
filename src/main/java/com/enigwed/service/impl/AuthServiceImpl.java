@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             if (userCredential.getRole() == ERole.ROLE_WO) {
                 WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
-                UserResponse user = UserResponse.fromUser(weddingOrganizer);
+                UserResponse user = UserResponse.all(weddingOrganizer);
                 response.setUser(user);
             }
 

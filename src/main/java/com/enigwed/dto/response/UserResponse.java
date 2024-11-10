@@ -17,7 +17,7 @@ public class UserResponse {
     private String email;
     private ImageResponse avatar;
 
-    public static UserResponse fromUser(WeddingOrganizer weddingOrganizer) {
+    public static UserResponse all(WeddingOrganizer weddingOrganizer) {
         UserResponse response = new UserResponse();
         response.setName(weddingOrganizer.getName());
         response.setEmail(weddingOrganizer.getUserCredential().getEmail());
