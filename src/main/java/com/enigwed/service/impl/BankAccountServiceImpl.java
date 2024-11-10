@@ -49,7 +49,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId) {
+    public ApiResponse<List<BankAccountResponse>> customerFindAllBankAccountsByWeddingOrganizer(String weddingOrganizerId) {
         try {
             /* LOAD WEDDING ORGANIZER */
             // ErrorResponse //
@@ -69,7 +69,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<BankAccountResponse>> getOwnBankAccount(JwtClaim userInfo) {
+    public ApiResponse<List<BankAccountResponse>> findOwnBankAccounts(JwtClaim userInfo) {
         try {
             /* LOAD WEDDING ORGANIZER */
             // ErrorResponse //
@@ -89,7 +89,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<BankAccountResponse> findBankAccountById(String id) {
+    public ApiResponse<BankAccountResponse> findOwnBankAccountById(String id) {
         try {
             /* FIND BANK ACCOUNTS */
             // ErrorResponse //
@@ -133,7 +133,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         } catch (ValidationException e) {
             log.error("Validation error while creating bank accounts: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error while creating bank accounts: {}", e.getError());
             throw e;
@@ -170,7 +170,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         } catch (ValidationException e) {
             log.error("Validation error while updating bank accounts: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.REGISTER_FAILED, e.getErrors().get(0));
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getErrors().get(0));
         } catch (AccessDeniedException e) {
             log.error("Access denied while updating bank accounts: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());

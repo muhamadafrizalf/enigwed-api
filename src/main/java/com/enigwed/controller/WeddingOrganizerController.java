@@ -104,7 +104,7 @@ public class WeddingOrganizerController {
         if (districtId != null && !districtId.isEmpty()) filter.setDistrictId(districtId);
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = weddingOrganizerService.getOwnWeddingOrganizer(userInfo);
+            response = weddingOrganizerService.findOwnWeddingOrganizer(userInfo);
         } else {
             if (keyword != null && !keyword.isEmpty()) {
                 response = weddingOrganizerService.searchWeddingOrganizer(keyword, filter, pagingRequest);

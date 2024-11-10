@@ -27,7 +27,7 @@ public class BankAccountController {
     public ResponseEntity<?> getBankAccounts(
             @RequestParam String weddingOrganizerId
     ) {
-        ApiResponse<?> response = bankAccountService.getBankAccountsByWeddingOrganizerId(weddingOrganizerId);
+        ApiResponse<?> response = bankAccountService.customerFindAllBankAccountsByWeddingOrganizer(weddingOrganizerId);
         return ResponseEntity.ok(response);
     }
 
@@ -37,7 +37,7 @@ public class BankAccountController {
     public ResponseEntity<?> getBankAccountById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = bankAccountService.findBankAccountById(id);
+        ApiResponse<?> response = bankAccountService.findOwnBankAccountById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -49,7 +49,7 @@ public class BankAccountController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = bankAccountService.getOwnBankAccount(userInfo);
+        ApiResponse<?> response = bankAccountService.findOwnBankAccounts(userInfo);
         return ResponseEntity.ok(response);
     }
 

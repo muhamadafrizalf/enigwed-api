@@ -99,6 +99,7 @@ public class WeddingOrganizerResponse {
         response.setId(weddingOrganizer.getId());
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
+        response.setDescription(weddingOrganizer.getDescription());
         response.setProvinceName(weddingOrganizer.getProvince().getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
@@ -110,14 +111,8 @@ public class WeddingOrganizerResponse {
     }
 
     public static WeddingOrganizerResponse simpleAdmin(WeddingOrganizer weddingOrganizer) {
-        WeddingOrganizerResponse response = new WeddingOrganizerResponse();
-        response.setId(weddingOrganizer.getId());
-        response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
-        response.setName(weddingOrganizer.getName());
-        response.setProvinceName(weddingOrganizer.getProvince().getName());
-        response.setRegencyName(weddingOrganizer.getRegency().getName());
-        response.setDistrictName(weddingOrganizer.getDistrict().getName());
-        response.setWeddingPackageCount(weddingOrganizer.getWeddingPackages().size());
+        WeddingOrganizerResponse response = WeddingOrganizerResponse.simple(weddingOrganizer);
+        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {
@@ -125,15 +120,6 @@ public class WeddingOrganizerResponse {
         } else {
             response.setStatus(EUserStatus.INACTIVE);
         }
-        if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
-            response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
-        }
-        return response;
-    }
-
-    public static WeddingOrganizerResponse statistic(WeddingOrganizer weddingOrganizer) {
-        WeddingOrganizerResponse response = simple(weddingOrganizer);
-        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         return response;
     }
 }

@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface BankAccountService {
     // Customer
-    ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId);
+    ApiResponse<List<BankAccountResponse>> customerFindAllBankAccountsByWeddingOrganizer(String weddingOrganizerId);
     // Wedding organizer
-    ApiResponse<List<BankAccountResponse>> getOwnBankAccount(JwtClaim userInfo);
-    ApiResponse<BankAccountResponse> findBankAccountById(String id);
+    ApiResponse<List<BankAccountResponse>> findOwnBankAccounts(JwtClaim userInfo);
+    ApiResponse<BankAccountResponse> findOwnBankAccountById(String id);
     ApiResponse<BankAccountResponse> createBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest);
     ApiResponse<BankAccountResponse> updateBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest);
     ApiResponse<?> deleteBankAccount(JwtClaim userInfo, String id);

@@ -17,18 +17,19 @@ public class StatisticResponse {
     private Map<String, Integer> countByStatus;
     private List<WeddingOrganizerResponse> weddingOrganizerList;
 
-    public static StatisticResponse wo(WeddingOrganizer weddingOrganizer, Map<String, Double> income) {
+    public static StatisticResponse wo(WeddingOrganizer weddingOrganizer, Map<String, Integer> countByStatus, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
         response.setIncome(income);
         response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingOrganizer));
+        response.setCountByStatus(countByStatus);
         return response;
     }
 
     public static StatisticResponse admin(List<WeddingOrganizer> woList, Map<String, Integer> countByStatus, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
+        response.setIncome(income);
         response.setWeddingOrganizerList(woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList());
         response.setCountByStatus(countByStatus);
-        response.setIncome(income);
         return response;
     }
 }

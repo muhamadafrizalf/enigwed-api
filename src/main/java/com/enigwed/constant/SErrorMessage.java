@@ -22,7 +22,6 @@ public class SErrorMessage {
     public static final String INVALID_TOKEN = "Invalid token";
     public static final String ACCESS_DENIED = "Access denied";
     // Not found
-    public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
     public static final String BONUS_PACKAGE_NOT_FOUND = "Bonus package not found";
     public static final String WEDDING_PACKAGE_NOT_FOUND = "Wedding package not found";
     public static final String ORDER_NOT_FOUND = "Order not found";
@@ -36,8 +35,6 @@ public class SErrorMessage {
     public static final String SUBSCRIPTION_ID_IS_REQUIRED = "Subscription id is required";
     public static final String SUBSCRIPTION_NOT_FOUND = "Subscription not found";
     public static final String INVALID_DATE = "Start date must be before end date";
-    public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account id is required";
-    public static final String BANK_ACCOUNT_NOT_FOUND = "Bank account not found";
     public static final String INVALID_ORDER_STATUS = "Order not in the right status";
     public static final String USER_CREDENTIAL_ID_IS_REQUIRED = "User credential ID is required";
     public static final String JWT_INVALID = "JWT token is invalid or missing";
@@ -53,7 +50,13 @@ public class SErrorMessage {
         return "Subscription price with length: " + length + " already exists";
     }
 
+    // Required
+    public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account id is required";
+
     // Not Found
+    public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
+    public static String WEDDING_ORGANIZER_NOT_FOUND(String id) {return String.format("Wedding organizer with ID %s not found", id);}
+    public static String WEDDING_ORGANIZER_NOT_FOUND_EMAIL(String email) {return String.format("Wedding organizer with email %s not found", email);}
     public static String BANK_ACCOUNT_EMPTY(String weddingOrganizerName) {return String.format("No bank accounts found for wedding organizer %s", weddingOrganizerName);}
     public static String BANK_ACCOUNT_NOT_FOUND(String id) {return String.format("Bank account with ID %s not found.", id);}
     public static String PROVINCE_NOT_FOUND(String id) {return String.format("Province with ID %s not found", id);}
@@ -61,11 +64,8 @@ public class SErrorMessage {
     public static String DISTRICT_NOT_FOUND(String id) {return String.format("District with ID %s not found", id);}
     public static String PRODUCT_NOT_FOUND(String id) {return String.format("Product with ID %s not found", id);}
 
-
     // Conflict
     public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}
     public static String REGENCY_ID_ALREADY_EXIST(String id, String name) {return String.format("Regency with ID %s already exists with the name %s", id, name);}
     public static String DISTRICT_ID_ALREADY_EXIST(String id, String name) {return String.format("District with ID %s already exists with the name %s", id, name);}
-
-
 }

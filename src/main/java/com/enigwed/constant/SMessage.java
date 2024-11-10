@@ -32,8 +32,6 @@ public class SMessage {
     public static final String IMAGE_DELETED = "Image deleted";
     public static final String IMAGE_FOUND = "Image found";
     // Wedding Organization
-    public static final String WEDDING_ORGANIZER_FOUND = "Wedding organizer found";
-    public static final String WEDDING_ORGANIZERS_FOUND = "Wedding organizers found";
     public static final String WEDDING_ORGANIZER_UPDATED = "Wedding organizer updated";
     public static final String WEDDING_ORGANIZER_DELETED = "Wedding organizer deleted";
     public static final String NO_WEDDING_ORGANIZER_FOUND = "No wedding organizer found";
@@ -96,6 +94,17 @@ public class SMessage {
 
     public static String NEW_SUBSCRIPTION_RECEIVED(String name) {return "New subscription from " + name + " has been received";}
     public static String SUBSCRIPTION_CONFIRMED(String name) {return "Subscription with subscription package " + name + " has been confirmed";}
+
+    // Wedding Organizer
+    public static final String WEDDING_ORGANIZER_FOUND = "Wedding organizer found";
+    public static String WEDDING_ORGANIZER_FOUND(String id) {return String.format("Wedding organizer with ID %s found", id);}
+    public static String WEDDING_ORGANIZERS_FOUND(int size) {return String.format("%d wedding organizer(s) found", size);}
+    public static String WEDDING_ORGANIZER_UPDATED(String id) {return String.format("Wedding organizer with ID %s successfully updated", id);}
+    public static String WEDDING_ORGANIZER_DELETED(String id) {return String.format("Wedding organizer with ID %s successfully deleted", id);}
+    public static String WEDDING_ORGANIZER_AVATAR_UPDATED(String weddingOrganizerName) {return String.format("The avatar for wedding organizer %s has been updated", weddingOrganizerName);}
+    public static String WEDDING_ORGANIZER_AVATAR_DELETED(String weddingOrganizerName) {return String.format("The avatar for wedding organizer %s has been deleted", weddingOrganizerName);}
+    public static String WEDDING_ORGANIZERS_ACTIVATED(String name) {return String.format("Wedding organizers for %s have been activated", name);}
+    public static String WEDDING_ORGANIZERS_DEACTIVATED(String name) {return String.format("Wedding organizers for %s have been deactivated", name);}
 
     // Bank Account
     public static String NO_BANK_ACCOUNT_FOUND(String weddingOrganizerName) {return String.format("No bank account found for wedding organizer %s", weddingOrganizerName);}
