@@ -43,7 +43,6 @@ public class SMessage {
     // Product
     public static final String PRODUCT_CREATED = "Product created";
     public static final String PRODUCT_FOUND = "Product found";
-    public static final String NO_PRODUCT_FOUND = "No product found";
     public static final String PRODUCTS_FOUND = "Products found";
     public static final String PRODUCT_UPDATED = "Product updated";
     public static final String PRODUCT_DELETED = "Product deleted";
@@ -89,53 +88,37 @@ public class SMessage {
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
     public static final String WEDDING_ORGANIZERS_DEACTIVATED = "Wedding organizer account deactivated";
 
-    public static String NEW_ORDER_RECEIVED(String name) {
-        return "New order received: Order receive from customer " + name + ", click to check order detail.";
-    }
-    public static String CONFIRM_PAYMENT(String name) {
-        return "Payment received: Payment receive from " + name + ", click to check order detail.";
-    }
-    public static String ORDER_CANCELED(String name) {
-        return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";
-    }
-    public static String ORDER_FINISHED(String name) {
-        return "Order from " + name + " has been finished, click to check order detail.";
-    }
-    public static String ORDER_PAID(String name) {
-        return "Order from " + name + " has been paid, click to check order detail.";
-    }
+    public static String NEW_ORDER_RECEIVED(String name) {return "New order received: Order receive from customer " + name + ", click to check order detail.";}
+    public static String CONFIRM_PAYMENT(String name) {return "Payment received: Payment receive from " + name + ", click to check order detail.";}
+    public static String ORDER_CANCELED(String name) {return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";}
+    public static String ORDER_FINISHED(String name) {return "Order from " + name + " has been finished, click to check order detail.";}
+    public static String ORDER_PAID(String name) {return "Order from " + name + " has been paid, click to check order detail.";}
 
-    public static String NEW_SUBSCRIPTION_RECEIVED(String name) {
-        return "New subscription from " + name + " has been received";
-    }
+    public static String NEW_SUBSCRIPTION_RECEIVED(String name) {return "New subscription from " + name + " has been received";}
+    public static String SUBSCRIPTION_CONFIRMED(String name) {return "Subscription with subscription package " + name + " has been confirmed";}
 
-    public static String SUBSCRIPTION_CONFIRMED(String name) {
-        return "Subscription with subscription package " + name + " has been confirmed";
-    }
-
-    public static String NO_BANK_ACCOUNT_FOUND(String name) {
-        return String.format("No bank account found for wedding organizer: %s", name);
-    }
-
-    public static String BANK_ACCOUNTS_FOUND(String name, int size) {
-        String accountText = (size == 1) ? "bank account" : "bank accounts";
-        return String.format("%d %s found for wedding organizer: %s", size, accountText, name);
-    }
-
-    public static String BANK_ACCOUNT_CREATED(String id) {
-        return String.format("Bank account with ID %s successfully created", id);
-    }
-
-    public static String BANK_ACCOUNT_UPDATED(String id) {
-        return String.format("Bank account with ID %s successfully updated", id);
-    }
-
-    public static String BANK_ACCOUNT_DELETED(String id) {
-        return String.format("Bank account with ID %s successfully deleted", id);
-    }
-
+    // Bank Account
+    public static String NO_BANK_ACCOUNT_FOUND(String weddingOrganizerName) {return String.format("No bank account found for wedding organizer %s", weddingOrganizerName);}
+    public static String BANK_ACCOUNTS_FOUND(String weddingOrganizerName, int size) {return String.format("Found %d bank account(s) for wedding organizer %s", size, weddingOrganizerName);}
     public static String BANK_ACCOUNT_FOUND(String id) {
         return String.format("Bank account with ID %s found", id);
     }
+    public static String BANK_ACCOUNT_CREATED(String id) {return String.format("Bank account with ID %s successfully created", id);}
+    public static String BANK_ACCOUNT_UPDATED(String id) {return String.format("Bank account with ID %s successfully updated", id);}
+    public static String BANK_ACCOUNT_DELETED(String id) {return String.format("Bank account with ID %s successfully deleted", id);}
+
+    // Product
+    public static String NO_PRODUCT_FOUND(String weddingOrganizerName) {return String.format("No product found for wedding organizer %s", weddingOrganizerName);}
+    public static String PRODUCTS_FOUND(String weddingOrganizerName, int size) {return String.format("Found %d product(s) for wedding organizer %s", size, weddingOrganizerName);}
+    public static String PRODUCT_FOUND(String id) {return String.format("Product with ID %s found", id);}
+    public static String PRODUCT_CREATED(String id) {return String.format("Product with ID %s successfully created", id);}
+    public static String PRODUCT_UPDATED(String id) {return String.format("Product with ID %s successfully updated", id);}
+    public static String PRODUCT_DELETED(String id) {return String.format("Product with ID %s successfully deleted", id);}
+    public static String PRODUCT_IMAGE_ADDED(String productName) {return String.format("A new image has been added for the product %s", productName);}
+    public static String PRODUCT_IMAGE_DELETED(String productName, String imageId) {return String.format("The image with ID %s has been deleted from the product %s", imageId, productName);}
+    public static final String NO_PRODUCT_FOUND = "No product found";
+    public static String PRODUCTS_FOUND(int size) {return String.format("Found %d product(s)", size);}
+
+
 
 }

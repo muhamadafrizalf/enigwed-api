@@ -145,10 +145,6 @@ public class BankAccountServiceImpl implements BankAccountService {
     @Override
     public ApiResponse<BankAccountResponse> updateBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest) {
         try {
-            /* VALIDATE INPUT */
-            // ValidationException //
-            validationUtil.validateAndThrow(bankAccountRequest);
-
             /* LOAD BANK ACCOUNT */
             // ErrorResponse //
             BankAccount bankAccount = findByIdOrThrow(bankAccountRequest.getId());
@@ -156,6 +152,10 @@ public class BankAccountServiceImpl implements BankAccountService {
             /* VALIDATE ACCESS */
             // AccessDeniedException //
             accessValidationUtil.validateUser(userInfo, bankAccount.getWeddingOrganizer());
+
+            /* VALIDATE INPUT */
+            // ValidationException //
+            validationUtil.validateAndThrow(bankAccountRequest);
 
             /* UPDATE AND SAVE BANK ACCOUNT */
             bankAccount.setBankCode(bankAccountRequest.getBankCode());

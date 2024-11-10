@@ -11,8 +11,8 @@ public interface BankAccountService {
     // Customer
     ApiResponse<List<BankAccountResponse>> getBankAccountsByWeddingOrganizerId(String weddingOrganizerId);
     // Wedding organizer
-    ApiResponse<BankAccountResponse> findBankAccountById(String id);
     ApiResponse<List<BankAccountResponse>> getOwnBankAccount(JwtClaim userInfo);
+    ApiResponse<BankAccountResponse> findBankAccountById(String id);
     ApiResponse<BankAccountResponse> createBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest);
     ApiResponse<BankAccountResponse> updateBankAccount(JwtClaim userInfo, BankAccountRequest bankAccountRequest);
     ApiResponse<?> deleteBankAccount(JwtClaim userInfo, String id);

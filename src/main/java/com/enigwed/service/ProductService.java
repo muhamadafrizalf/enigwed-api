@@ -15,13 +15,13 @@ public interface ProductService {
     Product loadProductById(String id);
 
     // Customer
-    ApiResponse<List<ProductResponse>> findAllProductsByWeddingOrganizerId(String weddingOrganizerId, PagingRequest pagingRequest);
-    ApiResponse<List<ProductResponse>> searchProductFromWeddingOrganizerId(String weddingOrganizerId, String keyword, PagingRequest pagingRequest);
-    ApiResponse<ProductResponse> findProductById(String id);
+    ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> customerSearchProductFromWeddingOrganizer(String weddingOrganizerId, String keyword, PagingRequest pagingRequest);
+    ApiResponse<ProductResponse> customerFindProductById(String id);
 
     // WO
-    ApiResponse<List<ProductResponse>> getOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest);
-    ApiResponse<ProductResponse> getOwnProductById(JwtClaim userInfo, String id);
+    ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest);
+    ApiResponse<ProductResponse> findOwnProductById(JwtClaim userInfo, String id);
     ApiResponse<ProductResponse> createProduct(JwtClaim userInfo, ProductRequest productRequest);
     ApiResponse<ProductResponse> updateProduct(JwtClaim userInfo, ProductRequest productRequest);
     ApiResponse<?> deleteProduct(JwtClaim userInfo, String id);

@@ -41,9 +41,9 @@ public class ProductController {
         ApiResponse<?> response;
         boolean isKeyword = keyword != null && !keyword.isEmpty();
         if (isKeyword) {
-            response = productService.searchProductFromWeddingOrganizerId(weddingOrganizerId, keyword, pagingRequest);
+            response = productService.customerSearchProductFromWeddingOrganizer(weddingOrganizerId, keyword, pagingRequest);
         } else {
-            response = productService.findAllProductsByWeddingOrganizerId(weddingOrganizerId, pagingRequest);
+            response = productService.customerFindAllProductsFromWeddingOrganizer(weddingOrganizerId, pagingRequest);
         }
         return ResponseEntity.ok(response);
     }
@@ -53,7 +53,7 @@ public class ProductController {
     public ResponseEntity<?> customerGetBonusPackageById(
             @PathVariable String id
     ) {
-        ApiResponse<?> response = productService.findProductById(id);
+        ApiResponse<?> response = productService.customerFindProductById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -71,7 +71,7 @@ public class ProductController {
     ) {
         PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = productService.getOwnProducts(userInfo, pagingRequest);
+        ApiResponse<?> response = productService.findOwnProducts(userInfo, pagingRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -87,7 +87,7 @@ public class ProductController {
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = productService.getOwnProductById(userInfo, id);
+        ApiResponse<?> response = productService.findOwnProductById(userInfo, id);
         return ResponseEntity.ok(response);
     }
 
