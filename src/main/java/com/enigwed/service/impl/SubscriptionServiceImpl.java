@@ -215,6 +215,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPacketRequest.getSubscriptionLength().name()));
 
         SubscriptionPacket subscriptionPrice = SubscriptionPacket.builder()
+                .name(subscriptionPacketRequest.getName())
                 .subscriptionLength(subscriptionPacketRequest.getSubscriptionLength())
                 .price(subscriptionPacketRequest.getPrice())
                 .build();
