@@ -122,6 +122,8 @@ public class OrderController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
+            @Parameter(description = "Keyword can search bookCode, customerName, customerPhone, customerEmail, weddingOrganizerName, weddingPackageName")
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String weddingOrganizerId,
             @RequestParam(required = false) EStatus status,
             @RequestParam(required = false) String weddingPackageId,
@@ -141,7 +143,11 @@ public class OrderController {
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
             response = orderService.findOwnOrders(userInfo, filter, pagingRequest);
         } else {
-            response = orderService.findAllOrders(filter, pagingRequest);
+            if(keyword != null && !keyword.isEmpty()) {
+                response = orderService.searchOrders(filter, pagingRequest, keyword);
+            } else {
+                response = orderService.findAllOrders(filter, pagingRequest);
+            }
         }
         return ResponseEntity.ok(response);
     }

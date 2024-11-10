@@ -10,6 +10,7 @@ import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.OrderRepository;
 import com.enigwed.service.*;
+import com.enigwed.util.AccessValidationUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final WeddingOrganizerService weddingOrganizerService;
     private final NotificationService notificationService;
     private final ValidationUtil validationUtil;
+    private final AccessValidationUtil accessValidationUtil;
 
     private String generateBookCode() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -61,14 +63,6 @@ public class OrderServiceImpl implements OrderService {
     private Order findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
         return orderRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.ORDER_NOT_FOUND));
-    }
-
-    private void validateUserAccess(JwtClaim userInfo, Order order) throws AccessDeniedException {
-        String userCredentialId = order.getWeddingOrganizer().getUserCredential().getId();
-        if (userInfo.getUserId().equals(userCredentialId)) {
-            return;
-        }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
     private Review createReview(ReviewRequest reviewRequest, Order order) {
@@ -143,14 +137,21 @@ public class OrderServiceImpl implements OrderService {
             throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, SErrorMessage.INVALID_ORDER_STATUS);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Order loadOrderById(String id) {
-        return findByIdOrThrow(id);
+        try {
+
+            return findByIdOrThrow(id);
+        } catch (ErrorResponse e) {
+            log.error("Error while loading order by ID: {}", e.getError());
+            throw e;
+        }
     }
 
     @Override
     public List<Order> loadAllOrders(String weddingOrganizerId, LocalDateTime from, LocalDateTime to) {
-        return orderRepository.findByWeddingOrganizerIdAndStatusAndTransactionDateBetween(weddingOrganizerId, EStatus.FINISHED, from, to);
+        return orderRepository.findByWeddingOrganizerIdAndStatusAndTransactionDateBetweenOrderByTransactionDateDesc(weddingOrganizerId, EStatus.FINISHED, from, to);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -368,12 +369,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public ApiResponse<List<OrderResponse>> searchOrders(FilterRequest filter, PagingRequest pagingRequest, String keyword) {
+        validationUtil.validateAndThrow(pagingRequest);
+
+        List<Order> orderList = orderRepository.searchOrders(keyword);
+        Map<String, Integer> countByStatus = countByStatus(orderList);
+        if (orderList.isEmpty()) return ApiResponse.successOrderList(new ArrayList<>(), pagingRequest, SMessage.NO_ORDER_FOUND, countByStatus);
+
+        orderList = filterResult(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.successOrderList(new ArrayList<>(), pagingRequest, SMessage.NO_ORDER_FOUND, countByStatus);
+
+        countByStatus = countByStatus(orderList);
+        orderList = filterByStatus(filter, orderList);
+        if (orderList.isEmpty()) return ApiResponse.successOrderList(new ArrayList<>(), pagingRequest, SMessage.NO_ORDER_FOUND, countByStatus);
+
+        List<OrderResponse> responses = orderList.stream().map(OrderResponse::simple).toList();
+        return ApiResponse.successOrderList(responses, pagingRequest, SMessage.ORDER_FOUND, countByStatus);
+    }
+
+    @Override
     public ApiResponse<OrderResponse> findOwnOrderById(JwtClaim userInfo, String id) {
         try {
             // ErrorResponse
             Order order = findByIdOrThrow(id);
 
-            validateUserAccess(userInfo, order);
+            accessValidationUtil.validateUser(userInfo, order.getWeddingOrganizer());
 
             OrderResponse response = OrderResponse.all(order);
             return ApiResponse.success(response, SMessage.ORDER_FOUND);
@@ -414,7 +434,8 @@ public class OrderServiceImpl implements OrderService {
             // ErrorResponse
             Order order = findByIdOrThrow(orderId);
             // AccessDeniedException
-            validateUserAccess(userInfo, order);
+            accessValidationUtil.validateUser(userInfo, order.getWeddingOrganizer());
+
 
             /* VALIDATE ORDER IN THE RIGHT STATUS BEFORE UPDATING */
             // ErrorResponse
@@ -444,7 +465,8 @@ public class OrderServiceImpl implements OrderService {
             Order order = findByIdOrThrow(orderId);
 
             // AccessDeniedException
-            validateUserAccess(userInfo, order);
+            accessValidationUtil.validateUser(userInfo, order.getWeddingOrganizer());
+
 
             /* VALIDATE ORDER IN THE RIGHT STATUS BEFORE UPDATING */
             // ErrorResponse
@@ -499,7 +521,7 @@ public class OrderServiceImpl implements OrderService {
             Order order = findByIdOrThrow(orderId);
 
             // AccessDeniedException
-            validateUserAccess(userInfo, order);
+            accessValidationUtil.validateUser(userInfo, order.getWeddingOrganizer());
 
             /* VALIDATE ORDER IN THE RIGHT STATUS BEFORE UPDATING */
             // ErrorResponse

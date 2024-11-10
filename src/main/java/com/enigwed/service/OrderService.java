@@ -23,9 +23,6 @@ public interface OrderService {
     ApiResponse<OrderResponse> payOrder(MultipartFile image, String orderId);
     ApiResponse<OrderResponse> cancelOrder(String orderId);
     ApiResponse<OrderResponse> reviewOrder(String orderId, ReviewRequest reviewRequest);
-    // Admin
-    ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest);
-    ApiResponse<OrderResponse> findOrderById(String id);
     // Wedding Organizer
     ApiResponse<List<OrderResponse>> findOwnOrders(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest);
     ApiResponse<OrderResponse> findOwnOrderById(JwtClaim userInfo, String id);
@@ -33,4 +30,8 @@ public interface OrderService {
     ApiResponse<OrderResponse> rejectOrder(JwtClaim userInfo, String orderId);
     ApiResponse<OrderResponse> confirmPayment(JwtClaim userInfo, String orderId);
     ApiResponse<OrderResponse> finishOrder(JwtClaim userInfo, String orderId);
+    // Admin
+    ApiResponse<List<OrderResponse>> findAllOrders(FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<OrderResponse>> searchOrders(FilterRequest filter, PagingRequest pagingRequest, String keyword);
+    ApiResponse<OrderResponse> findOrderById(String id);
 }
