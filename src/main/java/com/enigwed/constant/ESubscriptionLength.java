@@ -1,5 +1,8 @@
 package com.enigwed.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum ESubscriptionLength {
     A_MONTH(1),
     TWO_MONTHS(2),
@@ -18,10 +21,6 @@ public enum ESubscriptionLength {
 
     ESubscriptionLength(int months) {
         this.months = months;
-    }
-
-    public int getMonths() {
-        return months;
     }
 
     public String getDescription() {

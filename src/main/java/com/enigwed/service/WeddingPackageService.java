@@ -17,14 +17,14 @@ public interface WeddingPackageService {
     WeddingPackage addOrderCount(WeddingPackage weddingPackage);
 
     // Customer
-    ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id);
     ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest);
     ApiResponse<List<WeddingPackageResponse>> customerSearchWeddingPackage(String keyword, FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id);
 
     // WO
-    ApiResponse<WeddingPackageResponse> getOwnWeddingPackageById(JwtClaim userInfo, String id);
     ApiResponse<List<WeddingPackageResponse>> getOwnWeddingPackages(JwtClaim userInfo,FilterRequest filter, PagingRequest pagingRequest);
     ApiResponse<List<WeddingPackageResponse>> searchOwnWeddingPackages(JwtClaim userInfo, String keyword, FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<WeddingPackageResponse> getOwnWeddingPackageById(JwtClaim userInfo, String id);
     ApiResponse<WeddingPackageResponse> createWeddingPackage(JwtClaim userInfo,WeddingPackageRequest weddingPackageRequest);
     ApiResponse<WeddingPackageResponse> updateWeddingPackage(JwtClaim userInfo, WeddingPackageRequest weddingPackageRequest);
     ApiResponse<?> deleteWeddingPackage(JwtClaim userInfo, String id);
