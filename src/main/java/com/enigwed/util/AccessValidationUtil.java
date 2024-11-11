@@ -1,8 +1,10 @@
 package com.enigwed.util;
 
+import com.enigwed.constant.EReceiver;
 import com.enigwed.constant.ERole;
 import com.enigwed.constant.SErrorMessage;
 import com.enigwed.dto.JwtClaim;
+import com.enigwed.entity.Notification;
 import com.enigwed.entity.WeddingOrganizer;
 import org.springframework.stereotype.Component;
 
@@ -35,4 +37,15 @@ public class AccessValidationUtil {
         }
         throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
+
+    public void validateUser(JwtClaim userInfo, Notification notification) throws AccessDeniedException {
+        String userCredentialId = notification.getReceiverId() != null ? notification.getReceiverId() : "";
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name()) && notification.getReceiver().equals(EReceiver.ADMIN)) {
+            return;
+        } else if (userInfo.getUserId().equals(userCredentialId)) {
+            return;
+        }
+        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
+    }
+
 }

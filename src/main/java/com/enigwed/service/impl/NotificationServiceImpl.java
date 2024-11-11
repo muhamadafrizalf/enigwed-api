@@ -8,6 +8,7 @@ import com.enigwed.entity.Notification;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.repository.NotificationRepository;
 import com.enigwed.service.NotificationService;
+import com.enigwed.util.AccessValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -25,46 +26,17 @@ import java.util.List;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
+    private final AccessValidationUtil accessValidationUtil;
 
     private Notification findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
         return notificationRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.NOTIFICATION_NOT_FOUND));
     }
 
-    private void validateUserAccess(JwtClaim userInfo, Notification notification) throws AccessDeniedException {
-        String userId = notification.getReceiverId();
-        if (userInfo.getUserId().equals(userId)) {
-            return;
-        }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createNotification(Notification notification) {
         notificationRepository.saveAndFlush(notification);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ApiResponse<NotificationResponse> readNotification(JwtClaim userInfo, String id) {
-        try {
-            // ErrorResponse
-            Notification notification = findByIdOrThrow(id);
-            // AccessDeniedException
-            validateUserAccess(userInfo, notification);
-            notification.setRead(true);
-            notification.setReadAt(LocalDateTime.now());
-            notification = notificationRepository.save(notification);
-            NotificationResponse response = NotificationResponse.from(notification);
-            return ApiResponse.success(response, SMessage.NOTIFICATION_READ);
-        } catch (AccessDeniedException e) {
-            log.error("Access denied during updating notification status: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
-        } catch (ErrorResponse e) {
-            log.error("Error during updating notification status: {}", e.getMessage());
-            throw e;
-        }
     }
 
     @Transactional(readOnly = true)
@@ -84,10 +56,43 @@ public class NotificationServiceImpl implements NotificationService {
         return ApiResponse.success(response, SMessage.NOTIFICATION_FOUNDS);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<NotificationResponse> readNotification(JwtClaim userInfo, String id) {
+        try {
+            /* LOAD NOTIFICATION */
+            // ErrorResponse //
+            Notification notification = findByIdOrThrow(id);
+
+            /* VALIDATE ACCESS */
+            // AccessDeniedException //
+            accessValidationUtil.validateUser(userInfo, notification);
+
+            /* SET READ */
+            notification.setRead(true);
+            notification.setReadAt(LocalDateTime.now());
+
+            /* SAVE NOTIFICATION */
+            notification = notificationRepository.save(notification);
+
+            /* MAP RESPONSE */
+            NotificationResponse response = NotificationResponse.from(notification);
+            return ApiResponse.success(response, SMessage.NOTIFICATION_READ);
+
+        } catch (AccessDeniedException e) {
+            log.error("Access denied while updating notification status: {}", e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
+        } catch (ErrorResponse e) {
+            log.error("Error while updating notification status: {}", e.getMessage());
+            throw e;
+        }
+    }
+
     // For Development Use
     @Transactional(readOnly = true)
     @Override
     public List<Notification> getAllNotifications() {
-        return notificationRepository.findAll();
+        Sort sort = Sort.by(Sort.Order.asc("read"), Sort.Order.desc("createdAt"));
+        return notificationRepository.findAll(sort);
     }
 }
