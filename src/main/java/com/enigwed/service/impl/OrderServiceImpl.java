@@ -192,6 +192,9 @@ public class OrderServiceImpl implements OrderService {
             // Add bonus product (included in wedding package) bonus is true
             if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
                 for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
+                    /* SKIP DELETED PRODUCT */
+                    if (bonusDetail.getProduct().getDeletedAt() != null) continue;
+
                     /* CREATE AND ADD ORDER DETAIL */
                     OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);
