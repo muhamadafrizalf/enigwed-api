@@ -73,7 +73,7 @@ public class WeddingPackageResponse {
             response.setImages(List.of(ImageResponse.noImage()));
         }
         if (weddingPackage.getBonusDetails() != null && !weddingPackage.getBonusDetails().isEmpty()) {
-            response.setBonusDetails(weddingPackage.getBonusDetails().stream().map(BonusDetailResponse::simple).toList());
+            response.setBonusDetails(weddingPackage.getBonusDetails().stream().filter(bonusDetail -> bonusDetail.getProduct().getDeletedAt() == null).map(BonusDetailResponse::simple).toList());
         } else {
             response.setBonusDetails(new ArrayList<>());
         }
