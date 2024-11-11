@@ -30,7 +30,7 @@ public class ProductResponse {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(product.getWeddingOrganizer()));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(product.getWeddingOrganizer()));
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
         response.setDeletedAt(product.getDeletedAt());
@@ -50,7 +50,7 @@ public class ProductResponse {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(product.getWeddingOrganizer()));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(product.getWeddingOrganizer()));
         if (product.getImages() != null && !product.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(product.getImages().get(0)));
             response.setImages(product.getImages().stream().map(ImageResponse::from).toList());

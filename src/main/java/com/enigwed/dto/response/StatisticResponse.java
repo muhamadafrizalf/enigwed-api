@@ -20,7 +20,7 @@ public class StatisticResponse {
     public static StatisticResponse wo(WeddingOrganizer weddingOrganizer, Map<String, Integer> countByStatus, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
         response.setIncome(income);
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingOrganizer));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(weddingOrganizer));
         response.setCountByStatus(countByStatus);
         return response;
     }
@@ -28,7 +28,7 @@ public class StatisticResponse {
     public static StatisticResponse admin(List<WeddingOrganizer> woList, Map<String, Integer> countByStatus, Map<String, Double> income) {
         StatisticResponse response = new StatisticResponse();
         response.setIncome(income);
-        response.setWeddingOrganizerList(woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList());
+        response.setWeddingOrganizerList(woList.stream().map(WeddingOrganizerResponse::cardAdmin).toList());
         response.setCountByStatus(countByStatus);
         return response;
     }

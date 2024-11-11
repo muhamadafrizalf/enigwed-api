@@ -130,10 +130,10 @@ public class OrderController {
 
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = orderService.findOwnOrders(userInfo, filter, pagingRequest, keyword);
-        } else {
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
             response = orderService.findAllOrders(filter, pagingRequest, keyword);
+        } else {
+            response = orderService.findOwnOrders(userInfo, filter, pagingRequest, keyword);
         }
         return ResponseEntity.ok(response);
     }

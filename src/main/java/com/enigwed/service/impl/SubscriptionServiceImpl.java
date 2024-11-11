@@ -19,8 +19,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -108,9 +110,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    private SubscriptionPackage findSubscriptionPriceByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ID_IS_REQUIRED);
-        return subscriptionPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_NOT_FOUND));
+    private SubscriptionPackage findSubscriptionPackageByIdOrThrow(String id) {
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PACKAGE_ID_IS_REQUIRED);
+        return subscriptionPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PACKAGE_NOT_FOUND(id)));
     }
 
     private List<Subscription> filterResult(FilterRequest filter, List<Subscription> list) {
@@ -120,6 +122,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         (filter.getEndDate() == null || !item.getTransactionDate().isAfter(filter.getEndDate()))
                 )
                 .toList();
+    }
+
+    private List<Subscription> filterByStatus(FilterRequest filter, List<Subscription> list) {
+        return list.stream()
+                .filter(item -> filter.getSubscriptionPaymentStatus() == null || item.getStatus().equals(filter.getSubscriptionPaymentStatus()))
+                .toList();
+    }
+
+    private Map<String, Integer> countByStatus(List<Subscription> list) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("ALL", 0);
+        for (ESubscriptionPaymentStatus status : ESubscriptionPaymentStatus.values()) {
+            map.put(status.name(), 0);
+        }
+        for (Subscription subscription : list) {
+            map.put("ALL", map.get("ALL") + 1);
+            map.put(subscription.getStatus().name(), map.get(subscription.getStatus().name()) + 1);
+        }
+        return map;
     }
 
     private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
@@ -158,25 +179,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         */
     }
 
-    private List<Subscription> filterByStatus(FilterRequest filter, List<Subscription> list) {
-        return list.stream()
-                .filter(item -> filter.getSubscriptionPaymentStatus() == null || item.getStatus().equals(filter.getSubscriptionPaymentStatus()))
-                .toList();
-    }
-
-    private Map<String, Integer> countByStatus(List<Subscription> list) {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("ALL", 0);
-        for (ESubscriptionPaymentStatus status : ESubscriptionPaymentStatus.values()) {
-            map.put(status.name(), 0);
-        }
-        for (Subscription subscriptionr : list) {
-            map.put("ALL", map.get("ALL") + 1);
-            map.put(subscriptionr.getStatus().name(), map.get(subscriptionr.getStatus().name()) + 1);
-        }
-        return map;
-    }
-
     private void validateUserAccess(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
         String userCredentialId = weddingOrganizer.getUserCredential().getId();
         if (userInfo.getUserId().equals(userCredentialId)) {
@@ -187,24 +189,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to) {
         return subscriptionRepository.findByStatusAndTransactionDateBetween(ESubscriptionPaymentStatus.CONFIRMED, from, to);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<SubscriptionPackageResponse>> findSubscriptionPackages() {
-        List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull();
+        Sort sort = Sort.by(Sort.Order.asc("price"));
+        List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull(sort);
         if (subscriptionPackageList == null || subscriptionPackageList.isEmpty())
-            return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PRICE_FOUND);
-        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream().map(SubscriptionPackageResponse::simple).toList();
-        return ApiResponse.success(responses, SMessage.SUBSCRIPTION_PRICES_FOUND);
+            return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PACKAGE_FOUND);
+        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream().map(SubscriptionPackageResponse::from).toList();
+        return ApiResponse.success(responses, SMessage.SUBSCRIPTION_PACKAGES_FOUND(subscriptionPackageList.size()));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPriceId) {
-        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPriceId);
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+    public ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPackageId) {
+        SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageId);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_FOUND);
     }
 
@@ -222,14 +228,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
     }
 
     @Override
     public ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest) {
         validationUtil.validateAndThrow(subscriptionPackageRequest);
-        SubscriptionPackage subscriptionPackage = findSubscriptionPriceByIdOrThrow(subscriptionPackageRequest.getId());
+        SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageRequest.getId());
         SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).orElse(null);
         if (possibleConflict != null && !subscriptionPackage.getId().equals(possibleConflict.getId())) {
             throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
@@ -241,13 +247,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_UPDATED);
     }
 
     @Override
     public ApiResponse<?> deleteSubscriptionPackage(String subscriptionId) {
-        SubscriptionPackage packet = findSubscriptionPriceByIdOrThrow(subscriptionId);
+        SubscriptionPackage packet = findSubscriptionPackageByIdOrThrow(subscriptionId);
         packet.setDeletedAt(LocalDateTime.now());
         subscriptionPackageRepository.save(packet);
         return ApiResponse.success(SMessage.SUBSCRIPTION_PRICE_DELETED);
@@ -262,7 +268,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } else {
             wo = weddingOrganizerService.loadWeddingOrganizerByEmail(subscriptionRequest.getEmail());
         }
-        SubscriptionPackage packet = findSubscriptionPriceByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
+        SubscriptionPackage packet = findSubscriptionPackageByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
 
         Image paymentImage = imageService.createImage(subscriptionRequest.getPaymentImage());
 
@@ -284,7 +290,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionResponse>> getOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest) {
+    public ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
@@ -306,7 +312,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionResponse>> getActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
+    public ApiResponse<List<SubscriptionResponse>> findActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
         List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
@@ -320,7 +326,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId) {
+    public ApiResponse<SubscriptionResponse> findOwnSubscriptionById(String subscriptionId) {
+        return null;
+    }
+
+    @Override
+    public ApiResponse<SubscriptionResponse> confirmSubscriptionPaymentById(String subscriptionId) {
         if (subscriptionId == null || subscriptionId.isEmpty())
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
         Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND));
@@ -343,7 +354,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<SubscriptionResponse> getSubscriptionById(JwtClaim userInfo, String subscriptionId) {
+    public ApiResponse<SubscriptionResponse> findSubscriptionById(JwtClaim userInfo, String subscriptionId) {
         try {
             if (subscriptionId == null || subscriptionId.isEmpty())
                 throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
@@ -360,7 +371,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest) {
+    public ApiResponse<List<SubscriptionResponse>> findAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest) {
         List<Subscription> subscriptionList = subscriptionRepository.findAll();
         Map<String, Integer> countByStatus = countByStatus(subscriptionList);
         if (subscriptionList == null || subscriptionList.isEmpty())
@@ -380,7 +391,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ApiResponse<List<SubscriptionResponse>> getAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId) {
+    public ApiResponse<List<SubscriptionResponse>> findAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId) {
         List<Subscription> subscriptionList;
         if(weddingOrganizerId == null || weddingOrganizerId.isEmpty()) {
             subscriptionList = subscriptionRepository.findAll();

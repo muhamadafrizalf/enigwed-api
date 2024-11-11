@@ -30,8 +30,7 @@ public class SErrorMessage {
     public static final String WEDDING_ORGANIZER_ID_IS_REQUIRED = "Wedding organizer id is null or empty";
     public static final String WEDDING_PACKAGE_ID_IS_REQUIRED = "Wedding package id is required";
     public static final String PAGE_OUT_OF_BOUND = "Requested page is out of bounds";
-    public static final String SUBSCRIPTION_PRICE_NOT_FOUND = "Subscription price not found";
-    public static final String SUBSCRIPTION_PRICE_ID_IS_REQUIRED = "Subscription price id is required";
+    public static final String SUBSCRIPTION_PACKAGE_NOT_FOUND = "Subscription price not found";
     public static final String SUBSCRIPTION_ID_IS_REQUIRED = "Subscription id is required";
     public static final String SUBSCRIPTION_NOT_FOUND = "Subscription not found";
     public static final String INVALID_DATE = "Start date must be before end date";
@@ -57,6 +56,7 @@ public class SErrorMessage {
     public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account ID is required";
     public static final String PRODUCT_ID_IS_REQUIRED = "Product ID is required";
     public static final String ORDER_ID_IS_REQUIRED = "Order ID is required";
+    public static final String SUBSCRIPTION_PACKAGE_ID_IS_REQUIRED = "Subscription package id is required";
 
     // Not Found
     public static final String WEDDING_ORGANIZER_NOT_FOUND = "Wedding organizer not found";
@@ -70,6 +70,7 @@ public class SErrorMessage {
     public static String PRODUCT_NOT_FOUND(String id) {return String.format("Product with ID %s not found", id);}
     public static String ORDER_NOT_FOUND(String id) {return String.format("Order with ID %s not found", id);}
     public static String WEDDING_PACKAGE_NOT_FOUND(String id) {return String.format("Wedding package with ID %s not found", id);}
+    public static String SUBSCRIPTION_PACKAGE_NOT_FOUND(String id) {return String.format("Subscription package with ID %s not found", id);}
 
     // Conflict
     public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}

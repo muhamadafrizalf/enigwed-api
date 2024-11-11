@@ -16,20 +16,22 @@ import java.util.List;
 public interface SubscriptionService {
     // Use in other service
     List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to);
-
+    // Wedding organizer & admin
     ApiResponse<List<SubscriptionPackageResponse>> findSubscriptionPackages();
-    ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPriceId);
+    ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPackageId);
+    // Admin
     ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
     ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
     ApiResponse<?> deleteSubscriptionPackage(String subscriptionId);
-
-    ApiResponse<List<SubscriptionResponse>> getOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
-    ApiResponse<List<SubscriptionResponse>> getActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
+    // Wedding organizer
+    ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
+    ApiResponse<List<SubscriptionResponse>> findActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
+    ApiResponse<SubscriptionResponse> findOwnSubscriptionById(String subscriptionId);
     ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest);
-
-    ApiResponse<List<SubscriptionResponse>> getAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
-    ApiResponse<List<SubscriptionResponse>> getAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId);
-    ApiResponse<SubscriptionResponse> getSubscriptionById(JwtClaim userInfo, String subscriptionId);
-    ApiResponse<SubscriptionResponse> confirmPaymentSubscriptionById(String subscriptionId);
+    // Admin
+    ApiResponse<List<SubscriptionResponse>> findAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
+    ApiResponse<List<SubscriptionResponse>> findAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId);
+    ApiResponse<SubscriptionResponse> findSubscriptionById(JwtClaim userInfo, String subscriptionId);
+    ApiResponse<SubscriptionResponse> confirmSubscriptionPaymentById(String subscriptionId);
 
 }

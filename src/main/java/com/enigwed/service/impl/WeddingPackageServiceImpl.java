@@ -418,7 +418,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
             /* MAP RESPONSE */
             WeddingPackageResponse response = WeddingPackageResponse.all(weddingPackage);
-            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_UPDATED);
+            return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_IMAGE_DELETED(weddingPackage.getName(), imageId));
 
         } catch (AccessDeniedException e) {
             log.error("Access denied while deleting wedding package image: {}", e.getMessage());

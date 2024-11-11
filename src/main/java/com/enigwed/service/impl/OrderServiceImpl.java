@@ -104,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
 
         /* MAP RESULT */
         List<OrderResponse> responses = orderList.stream().map(OrderResponse::card).toList();
-        return ApiResponse.successOrderList(responses, pagingRequest, SMessage.ORDER_FOUNDS(orderList.size()), countByStatus);
+        return ApiResponse.successOrderList(responses, pagingRequest, SMessage.ORDERS_FOUND(orderList.size()), countByStatus);
     }
 
     private void sendNotificationWeddingOrganizer(ENotificationType type, Order order, String message) {
@@ -397,12 +397,12 @@ public class OrderServiceImpl implements OrderService {
             /* LOAD WEDDING ORGANIZER */
             // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            filter.setWeddingOrganizerId(wo.getId());
 
             /* FIND ORDERS */
             Sort sort = Sort.by(Sort.Order.desc("transactionDate"));
             Specification<Order> spec = SearchSpecifications.searchOrder(keyword);
             List<Order> orderList = orderRepository.findAll(spec, sort);
+            orderList = orderList.stream().filter(order -> order.getWeddingOrganizer().getId().equals(wo.getId())).toList();
 
             /* MAP RESPONSE */
             return getListApiResponse(filter, pagingRequest, orderList);

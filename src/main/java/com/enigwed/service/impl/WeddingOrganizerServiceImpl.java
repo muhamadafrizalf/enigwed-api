@@ -67,7 +67,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         woList = filterResult(filter, woList);
 
         /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simple).toList();
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::card).toList();
         return ApiResponse.success(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()));
     }
 
@@ -120,7 +120,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
 
         /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::simpleAdmin).toList();
+        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::cardAdmin).toList();
         return ApiResponse.successWeddingOrganizerList(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()), countByStatus);
     }
 

@@ -15,21 +15,14 @@ import lombok.NoArgsConstructor;
 public class BankAccountResponse {
 
     private String id;
-
     private String weddingOrganizerId;
-
     private String weddingOrganizerName;
-
     private String bankName;
-
     private String bankCode;
-
     private String accountNumber;
-
     private String accountName;
 
-    public static BankAccountResponse all
-            (BankAccount bankAccount) {
+    public static BankAccountResponse all(BankAccount bankAccount) {
         BankAccountResponse response = new BankAccountResponse();
         response.setId(bankAccount.getId());
         response.setWeddingOrganizerId(bankAccount.getWeddingOrganizer().getId());

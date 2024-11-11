@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,7 +18,7 @@ public class SubscriptionPackageResponse {
     private Double price;
     private Boolean popular;
 
-    public static SubscriptionPackageResponse simple(SubscriptionPackage subscriptionPackage) {
+    public static SubscriptionPackageResponse from(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageResponse response = new SubscriptionPackageResponse();
         response.setId(subscriptionPackage.getId());
         response.setName(subscriptionPackage.getName());

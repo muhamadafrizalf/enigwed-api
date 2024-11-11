@@ -39,7 +39,7 @@ public class OrderResponse {
         response.setTotalPrice(order.getTotalPrice());
         response.setStatus(order.getStatus().name());
         response.setCustomer(CustomerResponse.all(order.getCustomer()));
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(order.getWeddingOrganizer()));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(order.getWeddingOrganizer()));
         response.setWeddingPackage(WeddingPackageResponse.card(order.getWeddingPackage()));
         response.setReviewed(order.isReviewed());
         return response;

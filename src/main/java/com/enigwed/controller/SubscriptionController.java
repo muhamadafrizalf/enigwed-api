@@ -129,9 +129,9 @@ public class SubscriptionController {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = subscriptionService.getOwnSubscriptions(userInfo, filterRequest, pagingRequest);
+            response = subscriptionService.findOwnSubscriptions(userInfo, filterRequest, pagingRequest);
         } else {
-            response = subscriptionService.getAllSubscriptions(pagingRequest, filterRequest);
+            response = subscriptionService.findAllSubscriptions(pagingRequest, filterRequest);
         }
         return ResponseEntity.ok(response);
     }
@@ -153,9 +153,9 @@ public class SubscriptionController {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = subscriptionService.getActiveSubscriptions(userInfo, pagingRequest);
+            response = subscriptionService.findActiveSubscriptions(userInfo, pagingRequest);
         } else {
-            response = subscriptionService.getAllActiveSubscriptions(pagingRequest, weddingOrganizerId);
+            response = subscriptionService.findAllActiveSubscriptions(pagingRequest, weddingOrganizerId);
         }
         return ResponseEntity.ok(response);
     }
@@ -172,7 +172,7 @@ public class SubscriptionController {
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = subscriptionService.getSubscriptionById(userInfo, id);
+        ApiResponse<?> response = subscriptionService.findSubscriptionById(userInfo, id);
         return ResponseEntity.ok(response);
     }
 
@@ -183,7 +183,7 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_ID)
     public ResponseEntity<?> confirmSubscriptionById(@PathVariable String id) {
-        ApiResponse<?> response = subscriptionService.confirmPaymentSubscriptionById(id);
+        ApiResponse<?> response = subscriptionService.confirmSubscriptionPaymentById(id);
         return ResponseEntity.ok(response);
     }
 }

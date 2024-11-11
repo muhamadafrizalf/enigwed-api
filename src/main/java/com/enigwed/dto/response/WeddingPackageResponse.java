@@ -57,7 +57,7 @@ public class WeddingPackageResponse {
         WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
         response.setProvinceName(weddingPackage.getProvince().getName());
         response.setRegencyName(weddingPackage.getRegency().getName());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.simple(weddingPackage.getWeddingOrganizer()));
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(weddingPackage.getWeddingOrganizer()));
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
             response.setReviews(weddingPackage.getReviews().stream().filter(Review::isVisiblePublic).map(ReviewResponse::simple).toList());
         }
