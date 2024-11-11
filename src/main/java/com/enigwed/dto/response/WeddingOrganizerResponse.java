@@ -78,8 +78,6 @@ public class WeddingOrganizerResponse {
 
     public static WeddingOrganizerResponse information(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = WeddingOrganizerResponse.card(weddingOrganizer);
-        response.setPhone(weddingOrganizer.getPhone());
-        response.setAddress(weddingOrganizer.getAddress());
         if (weddingOrganizer.getBankAccounts() != null && !weddingOrganizer.getBankAccounts().isEmpty()) {
             response.setBankAccounts(weddingOrganizer.getBankAccounts().stream().filter(bankAccount -> bankAccount.getDeletedAt() == null).map(BankAccountResponse::all).toList());
         } else {

@@ -82,6 +82,9 @@ public class WeddingPackageResponse {
 
     public static WeddingPackageResponse all(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = WeddingPackageResponse.information(weddingPackage);
+        if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
+            response.setReviews(weddingPackage.getReviews().stream().map(ReviewResponse::simple).toList());
+        }
         response.setCreatedAt(weddingPackage.getCreatedAt());
         response.setUpdatedAt(weddingPackage.getUpdatedAt());
         response.setDeletedAt(weddingPackage.getDeletedAt());
