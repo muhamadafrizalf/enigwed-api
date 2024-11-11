@@ -377,7 +377,7 @@ public class ProductServiceImpl implements ProductService {
 
             /* MAP RESPONSE */
             // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple));
+            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::all));
 
         } catch (ValidationException e) {
             log.error("Validation error while loading all products: {}", e.getErrors());
