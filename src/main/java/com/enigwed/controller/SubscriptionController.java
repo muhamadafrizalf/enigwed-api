@@ -45,6 +45,7 @@ public class SubscriptionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
     public ResponseEntity<?> getSubscriptionPriceId(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         return ResponseEntity.ok(subscriptionService.findSubscriptionPackageById(id));
@@ -56,6 +57,7 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> addSubscriptionPrice(
+            @Parameter(description = "Popular is optional, default false")
             @RequestBody SubscriptionPackageRequest subscriptionPackageRequest
     ) {
         return ResponseEntity.ok(subscriptionService.createSubscriptionPackage(subscriptionPackageRequest));
@@ -67,6 +69,7 @@ public class SubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE)
     public ResponseEntity<?> updateSubscriptionPrice(
+            @Parameter(description = "Popular is optional, default false")
             @RequestBody SubscriptionPackageRequest subscriptionPackageRequest
     ) {
         return ResponseEntity.ok(subscriptionService.updateSubscriptionPackage(subscriptionPackageRequest));
@@ -77,7 +80,10 @@ public class SubscriptionController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(SPathApi.PROTECTED_SUBSCRIPTION_PRICE_ID)
-    public ResponseEntity<?> deleteSubscriptionPrice(@PathVariable String id) {
+    public ResponseEntity<?> deleteSubscriptionPrice(
+            @Parameter(description = "Path variable id")
+            @PathVariable String id
+    ) {
         return ResponseEntity.ok(subscriptionService.deleteSubscriptionPackage(id));
     }
 
@@ -90,7 +96,9 @@ public class SubscriptionController {
     public ResponseEntity<?> paySubscription(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Form-data part subscriptionPriceId is required")
             @RequestPart String subscriptionPriceId,
+            @Parameter(description = "Form-data part paymentImage is required")
             @RequestPart MultipartFile paymentImage
     ) {
         SubscriptionRequest subscriptionRequest = SubscriptionRequest.builder()
@@ -113,9 +121,13 @@ public class SubscriptionController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
+            @Parameter(description = "For admin to filter subscription by wedding_organizer_id")
             @RequestParam(required = false) String weddingOrganizerId,
+            @Parameter(description = "Filter by subscription")
             @RequestParam(required = false) ESubscriptionPaymentStatus status,
+            @Parameter(description = "Filter by transaction_date_from")
             @RequestParam(required = false) LocalDateTime startDate,
+            @Parameter(description = "Filter by transaction_date_to")
             @RequestParam(required = false) LocalDateTime endDate
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -137,7 +149,7 @@ public class SubscriptionController {
     }
 
     @Operation(
-            summary = "For wedding organizer to get list of active subscription they own (Default pagination {page:1, size:8}) [WO] (WEB)"
+            summary = "For admin wedding organizer to get list of active subscription they own (Default pagination {page:1, size:8}) [WO] (WEB)"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_SUBSCRIPTION_ACTIVE)
@@ -146,6 +158,7 @@ public class SubscriptionController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
+            @Parameter(description = "For admin to filter subscription by wedding_organizer_id", required = false)
             @RequestParam(required = false) String weddingOrganizerId
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -153,7 +166,7 @@ public class SubscriptionController {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response;
         if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = subscriptionService.findActiveSubscriptions(userInfo, pagingRequest);
+            response = subscriptionService.findOwnActiveSubscriptions(userInfo, pagingRequest);
         } else {
             response = subscriptionService.findAllActiveSubscriptions(pagingRequest, weddingOrganizerId);
         }
@@ -172,7 +185,12 @@ public class SubscriptionController {
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = subscriptionService.findSubscriptionById(userInfo, id);
+        ApiResponse<?> response;
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            response = subscriptionService.findSubscriptionById(id);
+        } else {
+            response = subscriptionService.findOwnSubscriptionById(userInfo, id);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -182,7 +200,10 @@ public class SubscriptionController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_SUBSCRIPTION_ID)
-    public ResponseEntity<?> confirmSubscriptionById(@PathVariable String id) {
+    public ResponseEntity<?> confirmSubscriptionById(
+            @Parameter(description = "Path variable id")
+            @PathVariable String id
+    ) {
         ApiResponse<?> response = subscriptionService.confirmSubscriptionPaymentById(id);
         return ResponseEntity.ok(response);
     }

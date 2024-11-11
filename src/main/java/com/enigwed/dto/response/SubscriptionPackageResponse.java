@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubscriptionPackageResponse {
-
     private String id;
     private String name;
     private ESubscriptionLength subscriptionLength;
@@ -18,12 +17,17 @@ public class SubscriptionPackageResponse {
     private Double price;
     private Boolean popular;
 
-    public static SubscriptionPackageResponse from(SubscriptionPackage subscriptionPackage) {
+    public static SubscriptionPackageResponse simple(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageResponse response = new SubscriptionPackageResponse();
         response.setId(subscriptionPackage.getId());
         response.setName(subscriptionPackage.getName());
         response.setSubscriptionLength(subscriptionPackage.getSubscriptionLength());
         response.setDescription(subscriptionPackage.getDescription());
+        return response;
+    }
+
+    public static SubscriptionPackageResponse all(SubscriptionPackage subscriptionPackage) {
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
         response.setPrice(subscriptionPackage.getPrice());
         response.setPopular(subscriptionPackage.isPopular());
         return response;

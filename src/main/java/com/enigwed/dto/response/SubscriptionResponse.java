@@ -34,7 +34,7 @@ public class SubscriptionResponse {
         response.setActiveFrom(subscription.getActiveFrom());
         response.setActiveUntil(subscription.getActiveUntil());
         response.setWeddingOrganizer(WeddingOrganizerResponse.card(subscription.getWeddingOrganizer()));
-        response.setSubscriptionPacket(SubscriptionPackageResponse.from(subscription.getSubscriptionPackage()));
+        response.setSubscriptionPacket(SubscriptionPackageResponse.simple(subscription.getSubscriptionPackage()));
         response.setTotalPaid(subscription.getTotalPaid());
         response.setPaymentStatus(subscription.getStatus());
         response.setPaymentImage(ImageResponse.from(subscription.getPaymentImage()));

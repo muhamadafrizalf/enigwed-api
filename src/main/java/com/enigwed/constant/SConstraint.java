@@ -9,7 +9,7 @@ public class SConstraint {
     public static final String PROVINCE_ID_BLANK = "Province ID is required";
     public static final String REGENCY_ID_BLANK = "Regency ID is required";
     public static final String DISTRICT_ID_BLANK = "District ID is required";
-    public static final String SUBSCRIPTION_PRICE_ID_BLANK = "Subscription price ID is required";
+    public static final String SUBSCRIPTION_PACKAGE_ID_BLANK = "Subscription package ID is required";
     public static final String ORDER_ID_BLANK = "Order ID is required";
     //// NAME BLANK
     public static final String WEDDING_ORGANIZER_NAME_BLANK = "Wedding organizer name is required";

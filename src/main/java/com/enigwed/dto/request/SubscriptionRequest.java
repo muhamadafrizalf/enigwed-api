@@ -17,7 +17,7 @@ import static com.enigwed.constant.SConstraint.*;
 @Builder
 public class SubscriptionRequest {
 
-    @NotBlank(message = SUBSCRIPTION_PRICE_ID_BLANK)
+    @NotBlank(message = SUBSCRIPTION_PACKAGE_ID_BLANK)
     private String subscriptionPriceId;
 
     @NotNull(message = PAYMENT_IMAGE_NULL)

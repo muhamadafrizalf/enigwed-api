@@ -40,7 +40,6 @@ public class SMessage {
     public static final String SUBSCRIPTION_PRICE_DELETED = "Subscription price deleted";
     public static final String SUBSCRIPTION_PAID = "Subscription paid";
     public static final String SUBSCRIPTION_FOUND = "Subscription found";
-    public static final String NO_SUBSCRIPTION_FOUND = "No subscription found";
     public static final String SUBSCRIPTIONS_FOUND = "Subscriptions found";
     public static final String SUBSCRIPTION_PAYMENT_CONFIRMED = "Subscription payment confirmed";
     public static final String STATISTIC_FETCHED = "Statistic fetched";
@@ -48,7 +47,6 @@ public class SMessage {
     public static final String WEDDING_ORGANIZERS_DEACTIVATED = "Wedding organizer account deactivated";
 
     public static String NEW_SUBSCRIPTION_RECEIVED(String name) {return "New subscription from " + name + " has been received";}
-    public static String SUBSCRIPTION_CONFIRMED(String name) {return "Subscription with subscription package " + name + " has been confirmed";}
 
 
 
@@ -121,5 +119,12 @@ public class SMessage {
     public static String SUBSCRIPTION_PACKAGE_DELETED(String id) {return String.format("Subscription package with ID %s successfully deleted", id);}
 
     // Subscription
-
+    public static final String NO_SUBSCRIPTION_FOUND = "No subscription found";
+    public static final String NO_ACTIVE_SUBSCRIPTION_FOUND = "No active subscription found";
+    public static String NO_ACTIVE_SUBSCRIPTION_FOUND(String weddingOrganizerName) {return String.format("No active subscription found for wedding organizer %s", weddingOrganizerName);}
+    public static String SUBSCRIPTION_FOUND(String subscriptionId) {return String.format("Subscription with ID %s found", subscriptionId);}
+    public static String SUBSCRIPTION_PAID(String subscriptionId) {return String.format("A new subscription with ID %s has been paid", subscriptionId);}
+    public static String SUBSCRIPTION_CONFIRMED(String subscriptionId) {return String.format("Subscription with ID %s has been confirmed", subscriptionId);}
+    public static String ACTIVE_SUBSCRIPTIONS_FOUND(int size) {return String.format("Found %d active subscription(s)", size);}
+    public static String ACTIVE_SUBSCRIPTIONS_FOUND(int size, String weddingOrganizerName) {return String.format("Found %d active subscription(s) for wedding organizer %s", size, weddingOrganizerName);}
 }

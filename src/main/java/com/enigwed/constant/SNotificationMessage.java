@@ -18,4 +18,7 @@ public class SNotificationMessage {
     public static String ORDER_CANCELED(String name) {return "Order canceled: Order from " + name + " has been canceled, click to check order detail.";}
     public static String ORDER_FINISHED(String name) {return "Order finished: Order from " + name + " has been finished, click to check order detail.";}
     public static String ORDER_REVIEWED(String name) {return "Order reviewed: Order from " + name + " has been reviewed, click to check order detail.";}
+
+    public static String NEW_SUBSCRIPTION_RECEIVED(String name) {return String.format("New subscription received: new %s subscription has been received, click to check subscription detail.", name);}
+    public static String SUBSCRIPTION_CONFIRMED(String name) {return String.format("Subscription confirmed: Your %s subscription has been confirmed, click to check subscription detail", name);}
 }

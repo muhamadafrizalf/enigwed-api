@@ -68,6 +68,7 @@ public class SErrorMessage {
     public static String ORDER_NOT_FOUND(String id) {return String.format("Order with ID %s not found", id);}
     public static String WEDDING_PACKAGE_NOT_FOUND(String id) {return String.format("Wedding package with ID %s not found", id);}
     public static String SUBSCRIPTION_PACKAGE_NOT_FOUND(String id) {return String.format("Subscription package with ID %s not found", id);}
+    public static String SUBSCRIPTION_NOT_FOUND(String id) {return String.format("Subscription with ID %s not found", id);}
 
     // Conflict
     public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}

@@ -15,6 +15,8 @@ import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.SubscriptionPackageRepository;
 import com.enigwed.repository.SubscriptionRepository;
 import com.enigwed.service.*;
+import com.enigwed.util.AccessValidationUtil;
+import com.enigwed.util.StatisticUtil;
 import com.enigwed.util.ValidationUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final NotificationService notificationService;
     private final UserCredentialService userCredentialService;
     private final ValidationUtil validationUtil;
+    private final StatisticUtil statisticUtil;
+    private final AccessValidationUtil accessValidationUtil;
 
     @Value("${com.enigwed.subscription-price-one-month}")
     private double oneMonthPrice;
@@ -116,6 +120,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionPackageRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_PACKAGE_NOT_FOUND(id)));
     }
 
+    private Subscription findSubscriptionByIdOrThrow(String id) {
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
+        return subscriptionRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND(id)));
+    }
+
     private List<Subscription> filterResult(FilterRequest filter, List<Subscription> list) {
         return list.stream()
                 .filter(item ->
@@ -131,17 +140,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .toList();
     }
 
-    private Map<String, Integer> countByStatus(List<Subscription> list) {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("ALL", 0);
-        for (ESubscriptionPaymentStatus status : ESubscriptionPaymentStatus.values()) {
-            map.put(status.name(), 0);
-        }
-        for (Subscription subscription : list) {
-            map.put("ALL", map.get("ALL") + 1);
-            map.put(subscription.getStatus().name(), map.get(subscription.getStatus().name()) + 1);
-        }
-        return map;
+    private ApiResponse<List<SubscriptionResponse>> getListApiResponse(PagingRequest pagingRequest, FilterRequest filterRequest, List<Subscription> subscriptionList) {
+        /* COUNT SUBSCRIPTION BY STATUS */
+        Map<String, Integer> countByStatus = statisticUtil.countBySubscriptionPaymentStatus(subscriptionList);
+        if (subscriptionList == null || subscriptionList.isEmpty())
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
+
+        /* FILTER RESULT */
+        subscriptionList = filterResult(filterRequest, subscriptionList);
+        if (subscriptionList.isEmpty())
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
+
+        /* RE-COUNT SUBSCRIPTION BY STATUS */
+        countByStatus = statisticUtil.countBySubscriptionPaymentStatus(subscriptionList);
+
+        /* FILTER RESULT BY STATUS */
+        subscriptionList = filterByStatus(filterRequest, subscriptionList);
+        if (subscriptionList.isEmpty())
+            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
+
+        /* MAP RESPONSE */
+        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
     }
 
     private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
@@ -203,7 +223,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<SubscriptionPackage> subscriptionPackageList = subscriptionPackageRepository.findByDeletedAtIsNull(sort);
         if (subscriptionPackageList == null || subscriptionPackageList.isEmpty())
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_SUBSCRIPTION_PACKAGE_FOUND);
-        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream().map(SubscriptionPackageResponse::from).toList();
+        List<SubscriptionPackageResponse> responses = subscriptionPackageList.stream().map(SubscriptionPackageResponse::all).toList();
         return ApiResponse.success(responses, SMessage.SUBSCRIPTION_PACKAGES_FOUND(subscriptionPackageList.size()));
     }
 
@@ -211,7 +231,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPackageId) {
         SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageId);
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.all(subscriptionPackage);
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PACKAGE_FOUND(subscriptionPackageId));
     }
 
@@ -241,7 +261,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
             /* MAP RESPONSE */
-            SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
+            SubscriptionPackageResponse response = SubscriptionPackageResponse.all(subscriptionPackage);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
 
         } catch (ValidationException e) {
@@ -280,7 +300,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
             /* MAP RESPONSE */
-            SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
+            SubscriptionPackageResponse response = SubscriptionPackageResponse.all(subscriptionPackage);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_PACKAGE_UPDATED(subscriptionPackage.getId()));
 
         } catch (ValidationException e) {
@@ -313,152 +333,216 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(readOnly = true)
     @Override
-    public ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest) {
-        validationUtil.validateAndThrow(subscriptionRequest);
-        WeddingOrganizer wo;
-        if (userInfo != null) {
-            wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-        } else {
-            wo = weddingOrganizerService.loadWeddingOrganizerByEmail(subscriptionRequest.getEmail());
+    public ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest) {
+        try {
+            /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse //
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+
+            /* FIND SUBSCRIPTIONS */
+            // ErrorResponse //
+            List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
+
+            /* FILTER AND MAP RESPONSE */
+            return getListApiResponse(pagingRequest, filterRequest, subscriptionList);
+        } catch (ErrorResponse e) {
+            log.error("Error while finding own subscriptions: {}", e.getError());
+            throw e;
         }
-        SubscriptionPackage packet = findSubscriptionPackageByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
-
-        Image paymentImage = imageService.createImage(subscriptionRequest.getPaymentImage());
-
-        Subscription subscription = Subscription.builder()
-                .weddingOrganizer(wo)
-                .subscriptionPackage(packet)
-                .totalPaid(packet.getPrice())
-                .status(ESubscriptionPaymentStatus.PAID)
-                .paymentImage(paymentImage)
-                .build();
-
-        subscription = subscriptionRepository.save(subscription);
-
-        /* CREATE NOTIFICATION */
-        sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, SMessage.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
-
-        SubscriptionResponse response = SubscriptionResponse.all(subscription);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAID);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest) {
-        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-
-        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
-        Map<String, Integer> countByStatus = countByStatus(subscriptionList);
-        if (subscriptionList == null || subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
-
-        subscriptionList = filterResult(filterRequest, subscriptionList);
-        if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
-
-        countByStatus = countByStatus(subscriptionList);
-        subscriptionList = filterByStatus(filterRequest, subscriptionList);
-        if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
-
-        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
-    }
-
-    @Override
-    public ApiResponse<List<SubscriptionResponse>> findActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
-        WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-
-        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
-        subscriptionList = subscriptionList.stream()
-                .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
-                .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))
-                .toList();
-
-        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND);
-    }
-
-    @Override
-    public ApiResponse<SubscriptionResponse> findOwnSubscriptionById(String subscriptionId) {
-        return null;
-    }
-
-    @Override
-    public ApiResponse<SubscriptionResponse> confirmSubscriptionPaymentById(String subscriptionId) {
-        if (subscriptionId == null || subscriptionId.isEmpty())
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
-        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND));
-
-        subscription.setStatus(ESubscriptionPaymentStatus.CONFIRMED);
-        LocalDateTime activeFrom = subscription.getWeddingOrganizer().getUserCredential().getActiveUntil();
-        LocalDateTime activeUntil = activeFrom.plusMonths(subscription.getSubscriptionPackage().getSubscriptionLength().getMonths());
-
-        subscription.setActiveFrom(activeFrom);
-        subscription.setActiveUntil(activeUntil);
-        subscription = subscriptionRepository.saveAndFlush(subscription);
-
-        weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPackage());
-
-        /* SEND NOTIFICATION */
-        sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPackage().getName()));
-
-        SubscriptionResponse response = SubscriptionResponse.all(subscription);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAYMENT_CONFIRMED);
-    }
-
-    @Override
-    public ApiResponse<SubscriptionResponse> findSubscriptionById(JwtClaim userInfo, String subscriptionId) {
+    public ApiResponse<List<SubscriptionResponse>> findOwnActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
         try {
-            if (subscriptionId == null || subscriptionId.isEmpty())
-                throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_ID_IS_REQUIRED);
-            Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.SUBSCRIPTION_NOT_FOUND));
+            /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse //
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
-            validateUserAccess(userInfo, subscription.getWeddingOrganizer());
+            /* FIND SUBSCRIPTIONS */
+            // ErrorResponse //
+            List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
 
+            /* FILTER ACTIVE SUBSCRIPTIONS */
+            subscriptionList = subscriptionList.stream()
+                    .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
+                    .filter(subscription -> subscription.getActiveUntil() != null && subscription.getActiveUntil().isAfter(LocalDateTime.now()))
+                    .toList();
+
+            if(subscriptionList.isEmpty()) {
+                return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_ACTIVE_SUBSCRIPTION_FOUND(wo.getName()));
+            }
+
+            /* MAP RESPONSE */
+            List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+            return ApiResponse.success(responses, pagingRequest, SMessage.ACTIVE_SUBSCRIPTIONS_FOUND(responses.size(), wo.getName()));
+
+        } catch (ErrorResponse e) {
+            log.error("Error while finding active own subscriptions: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<SubscriptionResponse> findOwnSubscriptionById(JwtClaim userInfo, String subscriptionId) {
+        try {
+            /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse //
+            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+
+            /* FIND SUBSCRIPTION */
+            // ErrorResponse //
+            Subscription subscription = findSubscriptionByIdOrThrow(subscriptionId);
+
+            /* VALIDATE ACCESS */
+            // AccessDeniedException //
+            accessValidationUtil.validateUser(userInfo, subscription.getWeddingOrganizer());
+
+            /* MAP SUBSCRIPTION */
             SubscriptionResponse response = SubscriptionResponse.all(subscription);
-            return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND(subscriptionId));
+
         } catch (AccessDeniedException e) {
-            log.error("Access denied while loading subscription: {}", e.getMessage());
+            log.error("Access denied while finding own subscription by ID: {}", e.getMessage());
             throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.FETCHING_FAILED, e.getMessage());
+        }  catch (ErrorResponse e) {
+            log.error("Error while finding own subscription by ID: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest) {
+        try {
+            /* VALIDATE INPUT */
+            // ValidationException //
+            validationUtil.validateAndThrow(subscriptionRequest);
+
+            /* LOAD WEDDING ORGANIZER */
+            // ErrorResponse //
+            WeddingOrganizer wo;
+            if (userInfo != null) {
+                wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
+            } else {
+                wo = weddingOrganizerService.loadWeddingOrganizerByEmail(subscriptionRequest.getEmail());
+            }
+
+            /* LOAD SUBSCRIPTION PACKAGE */
+            SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionRequest.getSubscriptionPriceId());
+
+            /* SAVE PAYMENT IMAGE */
+            Image paymentImage = imageService.createImage(subscriptionRequest.getPaymentImage());
+
+            /* CREATE SUBSCRIPTION */
+            Subscription subscription = Subscription.builder()
+                    .weddingOrganizer(wo)
+                    .subscriptionPackage(subscriptionPackage)
+                    .totalPaid(subscriptionPackage.getPrice())
+                    .status(ESubscriptionPaymentStatus.PAID)
+                    .paymentImage(paymentImage)
+                    .build();
+
+            /* SAVE SUBSCRIPTION */
+            subscription = subscriptionRepository.save(subscription);
+
+            /* CREATE NOTIFICATION */
+            sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, SNotificationMessage.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
+
+            /* MAP RESPONSE */
+            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAID(subscription.getId()));
+
+        } catch (ValidationException e) {
+            log.error("Validation error while creating subscription: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         }
     }
 
     @Override
     public ApiResponse<List<SubscriptionResponse>> findAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest) {
+        /* FIND ALL SUBSCRIPTIONS */
         List<Subscription> subscriptionList = subscriptionRepository.findAll();
-        Map<String, Integer> countByStatus = countByStatus(subscriptionList);
-        if (subscriptionList == null || subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
-        subscriptionList = filterResult(filterRequest, subscriptionList);
-        if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
-
-        countByStatus = countByStatus(subscriptionList);
-        subscriptionList = filterByStatus(filterRequest, subscriptionList);
-        if (subscriptionList.isEmpty())
-            return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
-
-        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
+        /* FILTER AND MAP RESPONSE */
+        return getListApiResponse(pagingRequest, filterRequest, subscriptionList);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<SubscriptionResponse>> findAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId) {
+        /* FIND ALL SUBSCRIPTIONS */
         List<Subscription> subscriptionList;
         if(weddingOrganizerId == null || weddingOrganizerId.isEmpty()) {
             subscriptionList = subscriptionRepository.findAll();
         } else {
             subscriptionList = subscriptionRepository.findByWeddingOrganizerId(weddingOrganizerId);
         }
-        List<SubscriptionResponse> responses = subscriptionList.stream()
+
+        /* FILTER ACTIVE SUBSCRIPTIONS */
+        subscriptionList = subscriptionList.stream()
                 .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
-                .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))
-                .map(SubscriptionResponse::all)
+                .filter(subscription -> subscription.getActiveUntil() != null && subscription.getActiveUntil().isAfter(LocalDateTime.now()))
                 .toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND);
+
+        if(subscriptionList.isEmpty()) {
+            return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_ACTIVE_SUBSCRIPTION_FOUND);
+        }
+
+        /* MAP RESPONSE */
+        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+        return ApiResponse.success(responses, pagingRequest, SMessage.ACTIVE_SUBSCRIPTIONS_FOUND(responses.size()));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ApiResponse<SubscriptionResponse> findSubscriptionById(String subscriptionId) {
+        try {
+            /* FIND SUBSCRIPTION */
+            // ErrorResponse //
+            Subscription subscription = findSubscriptionByIdOrThrow(subscriptionId);
+
+            /* MAP RESPONSE */
+            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND(subscriptionId));
+        } catch (ErrorResponse e) {
+            log.error("Error while finding subscription by ID: {}", e.getError());
+            throw e;
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ApiResponse<SubscriptionResponse> confirmSubscriptionPaymentById(String subscriptionId) {
+        try {
+            /* LOAD SUBSCRIPTION */
+            // ErrorResponse //
+            Subscription subscription = findSubscriptionByIdOrThrow(subscriptionId);
+
+            /* SET ACTIVE FROM AND ACTIVE UNTIL */
+            subscription.setStatus(ESubscriptionPaymentStatus.CONFIRMED);
+            LocalDateTime activeFrom = subscription.getWeddingOrganizer().getUserCredential().getActiveUntil();
+            LocalDateTime activeUntil = activeFrom.plusMonths(subscription.getSubscriptionPackage().getSubscriptionLength().getMonths());
+
+            subscription.setActiveFrom(activeFrom);
+            subscription.setActiveUntil(activeUntil);
+            subscription = subscriptionRepository.saveAndFlush(subscription);
+
+            /* EXTEND USER ACTIVE UNTIL */
+            weddingOrganizerService.extendWeddingOrganizerSubscription(subscription.getWeddingOrganizer(), subscription.getSubscriptionPackage());
+
+            /* SEND NOTIFICATION */
+            sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SNotificationMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPackage().getName()));
+
+            /* MAP RESPONSE */
+            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_CONFIRMED(subscriptionId));
+        } catch (ErrorResponse e) {
+            log.error("Error while confirming subscription: {}", e.getError());
+            throw e;
+        }
     }
 }

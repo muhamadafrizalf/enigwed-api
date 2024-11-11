@@ -1,8 +1,10 @@
 package com.enigwed.util;
 
 import com.enigwed.constant.EStatus;
+import com.enigwed.constant.ESubscriptionPaymentStatus;
 import com.enigwed.constant.EUserStatus;
 import com.enigwed.entity.Order;
+import com.enigwed.entity.Subscription;
 import com.enigwed.entity.WeddingOrganizer;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +48,19 @@ public class StatisticUtil {
         for (Order order : orderList) {
             map.put("ALL", map.get("ALL") + 1);
             map.put(order.getStatus().name(), map.get(order.getStatus().name()) + 1);
+        }
+        return map;
+    }
+
+    public Map<String, Integer> countBySubscriptionPaymentStatus(List<Subscription> list) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("ALL", 0);
+        for (ESubscriptionPaymentStatus status : ESubscriptionPaymentStatus.values()) {
+            map.put(status.name(), 0);
+        }
+        for (Subscription subscription : list) {
+            map.put("ALL", map.get("ALL") + 1);
+            map.put(subscription.getStatus().name(), map.get(subscription.getStatus().name()) + 1);
         }
         return map;
     }

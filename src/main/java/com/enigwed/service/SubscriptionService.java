@@ -24,14 +24,15 @@ public interface SubscriptionService {
     ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
     ApiResponse<?> deleteSubscriptionPackage(String subscriptionId);
     // Wedding organizer
+
     ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
-    ApiResponse<List<SubscriptionResponse>> findActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
-    ApiResponse<SubscriptionResponse> findOwnSubscriptionById(String subscriptionId);
+    ApiResponse<List<SubscriptionResponse>> findOwnActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
+    ApiResponse<SubscriptionResponse> findOwnSubscriptionById(JwtClaim userInfo, String subscriptionId);
     ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest);
     // Admin
     ApiResponse<List<SubscriptionResponse>> findAllSubscriptions(PagingRequest pagingRequest, FilterRequest filterRequest);
     ApiResponse<List<SubscriptionResponse>> findAllActiveSubscriptions(PagingRequest pagingRequest, String weddingOrganizerId);
-    ApiResponse<SubscriptionResponse> findSubscriptionById(JwtClaim userInfo, String subscriptionId);
+    ApiResponse<SubscriptionResponse> findSubscriptionById(String subscriptionId);
     ApiResponse<SubscriptionResponse> confirmSubscriptionPaymentById(String subscriptionId);
 
 }
