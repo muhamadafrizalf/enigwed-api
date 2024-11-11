@@ -27,13 +27,13 @@ public class WeddingPackageController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "For customer to get list of wedding packages (Default pagination {page:1, size:8}) (MOBILE)",
+            summary = "For customer to get list of wedding packages (Default pagination {page:1, size:list.size}) (MOBILE)",
             description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
     )
     @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> customerGetAllWeddingPackages(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             @Parameter(description = "Keyword can filter result by name, description, province name, regency name, and wedding organizer name", required = false)
             @RequestParam(required = false) String keyword,
             @Parameter(description = "To filter by wedding_organizer_id", required = false)
@@ -47,7 +47,7 @@ public class WeddingPackageController {
             @Parameter(description = "To filter by max_price", required = false)
             @RequestParam(required = false) Double maxPrice
     ) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
+        PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
 
         FilterRequest filter = new FilterRequest();
         if (weddingOrganizerId != null && !weddingOrganizerId.isEmpty()) filter.setWeddingOrganizerId(weddingOrganizerId);

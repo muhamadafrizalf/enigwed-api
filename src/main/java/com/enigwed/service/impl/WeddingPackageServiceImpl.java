@@ -54,6 +54,10 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
         /* FILTER RESULT */
         weddingPackageList = filterResult(filter, weddingPackageList);
 
+        if (pagingRequest == null) {
+            pagingRequest = new PagingRequest(1, weddingPackageList.size());
+        }
+
         /* MAP RESULT */
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND(weddingPackageList.size()));
@@ -119,9 +123,10 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     @Override
     public ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest, String keyword) {
         try {
-            /* VALIDATE INPUT */
-            // ValidationException //
-            validationUtil.validateAndThrow(pagingRequest);
+            /* VALIDATE PAGING REQUEST */
+            if (pagingRequest != null) {
+                validationUtil.validateAndThrow(pagingRequest);
+            }
 
             /* FIND WEDDING PACKAGES */
             Sort sort = Sort.by(
