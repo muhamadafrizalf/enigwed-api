@@ -24,6 +24,4 @@ public class PagingResponse {
         response.setTotalPages(Math.max(data.getTotalPages(), 1));
         return response;
     }
-
-
 }

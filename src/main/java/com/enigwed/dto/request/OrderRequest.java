@@ -20,16 +20,16 @@ import static com.enigwed.constant.SConstraint.*;
 @Builder
 public class OrderRequest {
 
-    @NotNull(message = CUSTOMER_NULL)
-    @Valid
-    private CustomerRequest customer;
-
     @Future(message = WEDDING_DATE_INVALID)
     @NotNull(message = WEDDING_DATE_NULL)
     private LocalDateTime weddingDate;
 
     @NotBlank(message = WEDDING_PACKAGE_ID_BLANK)
     private String weddingPackageId;
+
+    @Valid
+    @NotNull(message = CUSTOMER_NULL)
+    private CustomerRequest customer;
 
     @Valid
     private List<AdditionalProduct> additionalProducts;

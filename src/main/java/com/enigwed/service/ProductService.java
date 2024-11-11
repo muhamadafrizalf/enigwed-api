@@ -16,7 +16,7 @@ public interface ProductService {
     // Customer
     ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest, String keyword);
     ApiResponse<ProductResponse> customerFindProductById(String id);
-    // WO
+    // Wedding organizer
     ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest, String keyword);
     ApiResponse<ProductResponse> findOwnProductById(JwtClaim userInfo, String id);
     ApiResponse<ProductResponse> createProduct(JwtClaim userInfo, ProductRequest productRequest);

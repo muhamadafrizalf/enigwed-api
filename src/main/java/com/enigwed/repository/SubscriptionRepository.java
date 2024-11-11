@@ -11,5 +11,4 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     List<Subscription> findAllByOrderByTransactionDateDesc();
     List<Subscription> findByWeddingOrganizerIdOrderByTransactionDateDesc(String weddingOrganizerId);
     List<Subscription> findByStatusAndTransactionDateBetween(ESubscriptionPaymentStatus status, LocalDateTime from, LocalDateTime to);
-    List<Subscription> findByWeddingOrganizerId(String weddingOrganizerId);
 }

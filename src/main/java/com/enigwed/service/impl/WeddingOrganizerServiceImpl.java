@@ -79,9 +79,9 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createWeddingOrganizer(WeddingOrganizer weddingOrganizer) throws DataIntegrityViolationException {
-        if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizer.getPhone()) > 0) throw new DataIntegrityViolationException(SErrorMessage.PHONE_ALREADY_EXIST);
-        if (weddingOrganizerRepository.countByNibAndDeletedAtIsNull(weddingOrganizer.getNib()) > 0) throw new DataIntegrityViolationException(SErrorMessage.NIB_ALREADY_EXIST);
-        if (weddingOrganizerRepository.countByNpwpAndDeletedAtIsNull(weddingOrganizer.getNpwp()) > 0) throw new DataIntegrityViolationException(SErrorMessage.NPWP_ALREADY_EXIST);
+        if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizer.getPhone()) > 0) throw new DataIntegrityViolationException(SErrorMessage.PHONE_ALREADY_EXIST(weddingOrganizer.getPhone()));
+        if (weddingOrganizerRepository.countByNibAndDeletedAtIsNull(weddingOrganizer.getNib()) > 0) throw new DataIntegrityViolationException(SErrorMessage.NIB_ALREADY_EXIST(weddingOrganizer.getNib()));
+        if (weddingOrganizerRepository.countByNpwpAndDeletedAtIsNull(weddingOrganizer.getNpwp()) > 0) throw new DataIntegrityViolationException(SErrorMessage.NPWP_ALREADY_EXIST(weddingOrganizer.getNpwp()));
         weddingOrganizerRepository.saveAndFlush(weddingOrganizer);
     }
 
@@ -253,7 +253,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             validationUtil.validateAndThrow(weddingOrganizerRequest);
             // DataIntegrityViolationException //
             if (weddingOrganizerRepository.countByPhoneAndDeletedAtIsNull(weddingOrganizerRequest.getPhone()) > 0 && !wo.getPhone().equals(weddingOrganizerRequest.getPhone()))
-                throw new DataIntegrityViolationException(SErrorMessage.PHONE_ALREADY_EXIST);
+                throw new DataIntegrityViolationException(SErrorMessage.PHONE_ALREADY_EXIST(weddingOrganizerRequest.getPhone()));
 
             /* UPDATE WEDDING ORGANIZER */
             String phone = weddingOrganizerRequest.getPhone().startsWith("08") ?
@@ -351,7 +351,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
             /* VALIDATE INPUT */
             // ErrorResponse //
-            if (avatar == null || avatar.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_NULL);
+            if (avatar == null || avatar.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_REQUIRED);
 
             /* UPDATE IMAGE */
             // ErrorResponse //

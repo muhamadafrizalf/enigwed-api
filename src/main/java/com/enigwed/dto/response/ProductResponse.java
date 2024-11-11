@@ -15,65 +15,50 @@ import java.util.List;
 public class ProductResponse {
     private String id;
     private String name;
+    private Double price;
     private String description;
-    private double price;
-    private WeddingOrganizerResponse weddingOrganizer;
+    private String weddingOrganizerId;
+    private String weddingOrganizerName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private ImageResponse thumbnail;
+    private WeddingOrganizerResponse weddingOrganizer;
     List<ImageResponse> images = new ArrayList<>();
 
-    public static ProductResponse all(Product product) {
+    public static ProductResponse card(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
-        response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.card(product.getWeddingOrganizer()));
-        response.setCreatedAt(product.getCreatedAt());
-        response.setUpdatedAt(product.getUpdatedAt());
-        response.setDeletedAt(product.getDeletedAt());
+        response.setDescription(product.getDescription());
+        response.setWeddingOrganizerId(product.getWeddingOrganizer().getId());
+        response.setWeddingOrganizerName(product.getWeddingOrganizer().getName());
         if (product.getImages() != null && !product.getImages().isEmpty()) {
             response.setThumbnail(ImageResponse.from(product.getImages().get(0)));
-            response.setImages(product.getImages().stream().map(ImageResponse::from).toList());
         } else {
             response.setThumbnail(ImageResponse.noImage());
-            response.getImages().add(ImageResponse.noImage());
         }
         return response;
     }
 
     public static ProductResponse information(Product product) {
-        ProductResponse response = new ProductResponse();
-        response.setId(product.getId());
-        response.setName(product.getName());
-        response.setDescription(product.getDescription());
-        response.setPrice(product.getPrice());
+        ProductResponse response = ProductResponse.card(product);
         response.setWeddingOrganizer(WeddingOrganizerResponse.card(product.getWeddingOrganizer()));
         if (product.getImages() != null && !product.getImages().isEmpty()) {
-            response.setThumbnail(ImageResponse.from(product.getImages().get(0)));
             response.setImages(product.getImages().stream().map(ImageResponse::from).toList());
         } else {
-            response.setThumbnail(ImageResponse.noImage());
             response.setImages(List.of(ImageResponse.noImage()));
         }
         return response;
     }
 
-    public static ProductResponse simple(Product product) {
-        ProductResponse response = new ProductResponse();
-        response.setId(product.getId());
-        response.setName(product.getName());
-        response.setPrice(product.getPrice());
-        response.setDescription(product.getDescription());
-        if (product.getImages() != null && !product.getImages().isEmpty()) {
-            response.setThumbnail(ImageResponse.from(product.getImages().get(0)));
-        } else {
-            response.setThumbnail(ImageResponse.noImage());
-        }
+    public static ProductResponse all(Product product) {
+        ProductResponse response = ProductResponse.information(product);
+        response.setCreatedAt(product.getCreatedAt());
+        response.setUpdatedAt(product.getUpdatedAt());
+        response.setDeletedAt(product.getDeletedAt());
         return response;
     }
-
 
 }

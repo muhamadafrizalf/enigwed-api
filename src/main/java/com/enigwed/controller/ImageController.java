@@ -26,7 +26,6 @@ public class ImageController {
     @GetMapping(SPathApi.PUBLIC_IMAGE_ID)
     public ResponseEntity<?> getImageById(@PathVariable String id) {
         ApiResponse<?> response = imageService.findByIdResponse(id);
-
         return ResponseEntity.ok(response);
     }
 

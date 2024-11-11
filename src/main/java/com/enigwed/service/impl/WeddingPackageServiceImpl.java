@@ -19,7 +19,6 @@ import com.enigwed.util.AccessValidationUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -382,7 +381,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
             /* VALIDATE INPUT */
             // ErrorResponse //
-            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_NULL);
+            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_REQUIRED);
 
             /* CREATE AND ADD IMAGE */
             // ErrorResponse //
@@ -437,7 +436,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
         } catch (AccessDeniedException e) {
             log.error("Access denied while deleting wedding package image: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error while deleting wedding package image: {}", e.getError());
             throw e;

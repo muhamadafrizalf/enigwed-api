@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderDetailResponse {
-    ProductResponse bonusPackage;
     private double price;
     private int quantity;
     private boolean bonus;
+    ProductResponse bonusPackage;
 
     public static OrderDetailResponse simple(OrderDetail orderDetail) {
         OrderDetailResponse response = new OrderDetailResponse();
-        response.setBonusPackage(ProductResponse.simple(orderDetail.getProduct()));
         response.setPrice(orderDetail.getPrice());
         response.setQuantity(orderDetail.getQuantity());
         response.setBonus(orderDetail.isBonus());
+        response.setBonusPackage(ProductResponse.card(orderDetail.getProduct()));
         return response;
     }
 }

@@ -14,11 +14,9 @@ public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganiz
     Integer countByPhoneAndDeletedAtIsNull(String phone);
     Integer countByNibAndDeletedAtIsNull(String Nib);
     Integer countByNpwpAndDeletedAtIsNull(String Npwp);
-
     Optional<WeddingOrganizer> findByIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(String id);
     Optional<WeddingOrganizer> findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(String userCredentialId);
     Optional<WeddingOrganizer> findByUserCredentialEmailAndDeletedAtIsNull(String email);
-
     List<WeddingOrganizer> findAll(Specification<WeddingOrganizer> spec);
     List<WeddingOrganizer> findAll(Specification<WeddingOrganizer> spec, Sort sort);
 }

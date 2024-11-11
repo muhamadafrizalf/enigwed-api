@@ -24,7 +24,6 @@ public interface SubscriptionService {
     ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest);
     ApiResponse<?> deleteSubscriptionPackage(String subscriptionId);
     // Wedding organizer
-
     ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest);
     ApiResponse<List<SubscriptionResponse>> findOwnActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest);
     ApiResponse<SubscriptionResponse> findOwnSubscriptionById(JwtClaim userInfo, String subscriptionId);

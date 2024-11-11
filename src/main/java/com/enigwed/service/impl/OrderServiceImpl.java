@@ -263,7 +263,7 @@ public class OrderServiceImpl implements OrderService {
             // ErrorResponse //
             if (bookCode == null || bookCode.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.BOOKING_CODE_IS_REQUIRED);
             // ErrorResponse //
-            Order order = orderRepository.findByBookCode(bookCode).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.ORDER_NOT_FOUND));
+            Order order = orderRepository.findByBookCode(bookCode).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.ORDER_NOT_FOUND_BOOK_CODE(bookCode)));
 
             /* MAP ORDER */
             OrderResponse response = OrderResponse.information(order);
@@ -289,7 +289,7 @@ public class OrderServiceImpl implements OrderService {
 
             /* VALIDATE INPUT */
             // ErrorResponse //
-            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.NO_PAYMENT_IMAGE_FOUND);
+            if (image == null) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, SErrorMessage.IMAGE_IS_REQUIRED);
 
             /* CREATE AND SAVE PAYMENT IMAGE */
             // ErrorResponse //
@@ -308,7 +308,7 @@ public class OrderServiceImpl implements OrderService {
 
             /* MAP RESPONSE*/
             OrderResponse response = OrderResponse.information(order);
-            return ApiResponse.success(response, SMessage.ORDER_PAYED(order.getBookCode()));
+            return ApiResponse.success(response, SMessage.ORDER_PAID(order.getBookCode()));
 
         } catch (ErrorResponse e) {
             log.error("Error while uploading payment image: {}", e.getError());
@@ -578,6 +578,7 @@ public class OrderServiceImpl implements OrderService {
             /* SAVE ORDER */
             order = orderRepository.save(order);
 
+            sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, SNotificationMessage.ORDER_FINISHED(order.getCustomer().getName()));
             /*
                 Send notification to customer
             */

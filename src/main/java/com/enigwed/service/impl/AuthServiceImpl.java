@@ -8,7 +8,6 @@ import com.enigwed.dto.request.LoginRequest;
 import com.enigwed.dto.request.RegisterRequest;
 import com.enigwed.dto.response.ApiResponse;
 import com.enigwed.dto.response.LoginResponse;
-import com.enigwed.dto.response.UserResponse;
 import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
@@ -68,9 +67,9 @@ public class AuthServiceImpl implements AuthService {
             LoginResponse response;
             if (userCredential.getRole() == ERole.ROLE_WO) {
                 WeddingOrganizer weddingOrganizer = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userCredential.getId());
-                response = LoginResponse.weddingOrganizer(userCredential, token, weddingOrganizer);
+                response = LoginResponse.withUser(userCredential, token, weddingOrganizer);
             } else {
-                response = LoginResponse.admin(userCredential, token);
+                response = LoginResponse.noUser(userCredential, token);
             }
             return ApiResponse.success(response, SMessage.LOGIN_SUCCESS);
 

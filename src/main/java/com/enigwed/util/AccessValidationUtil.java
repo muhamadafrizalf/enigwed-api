@@ -21,13 +21,6 @@ public class AccessValidationUtil {
         throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
     }
 
-    public void validateAdmin(JwtClaim userInfo) throws AccessDeniedException {
-        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
-            return;
-        }
-        throw new AccessDeniedException(SErrorMessage.ACCESS_DENIED);
-    }
-
     public void validateUserOrAdmin(JwtClaim userInfo, WeddingOrganizer weddingOrganizer) throws AccessDeniedException {
         String userCredentialId = weddingOrganizer.getUserCredential().getId();
         if (userInfo.getUserId().equals(userCredentialId)) {

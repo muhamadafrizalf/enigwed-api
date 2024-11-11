@@ -31,7 +31,6 @@ public class StatisticUtil {
         for (EUserStatus status : EUserStatus.values()) {
             map.put(status.name(), 0);
         }
-
         for (WeddingOrganizer wo : woList) {
             map.put("ALL", map.get("ALL") + 1);
             map.put(getUserStatus(wo).name(), map.get(getUserStatus(wo).name()) + 1);

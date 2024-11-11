@@ -10,10 +10,9 @@ import java.util.List;
 public interface NotificationService {
     // Use in other service
     void createNotification(Notification notification);
-
+    //
     ApiResponse<List<NotificationResponse>> getOwnNotifications(JwtClaim userInfo);
     ApiResponse<NotificationResponse> readNotification(JwtClaim userInfo, String id);
-
-    // For Development Use
+    // FOR DEVELOPMENT DONT USE
     List<Notification> getAllNotifications();
 }

@@ -38,7 +38,7 @@ public class OrderResponse {
         response.setWeddingDate(order.getWeddingDate());
         response.setTotalPrice(order.getTotalPrice());
         response.setStatus(order.getStatus().name());
-        response.setCustomer(CustomerResponse.all(order.getCustomer()));
+        response.setCustomer(CustomerResponse.from(order.getCustomer()));
         response.setWeddingOrganizer(WeddingOrganizerResponse.card(order.getWeddingOrganizer()));
         response.setWeddingPackage(WeddingPackageResponse.card(order.getWeddingPackage()));
         response.setReviewed(order.isReviewed());
@@ -56,7 +56,7 @@ public class OrderResponse {
             response.setOrderDetails(order.getOrderDetails().stream().map(OrderDetailResponse::simple).toList());
         }
         if (order.getReview() != null) {
-            response.setReview(ReviewResponse.simple(order.getReview()));
+            response.setReview(ReviewResponse.from(order.getReview()));
         }
         return response;
     }

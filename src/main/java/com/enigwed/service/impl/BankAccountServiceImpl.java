@@ -43,7 +43,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     private ApiResponse<List<BankAccountResponse>> getListApiResponse(WeddingOrganizer wo, List<BankAccount> bankAccountList) {
         if (bankAccountList == null || bankAccountList.isEmpty())
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_BANK_ACCOUNT_FOUND(wo.getName()));
-        List<BankAccountResponse> responses = bankAccountList.stream().map(BankAccountResponse::all).toList();
+        List<BankAccountResponse> responses = bankAccountList.stream().map(BankAccountResponse::from).toList();
         return ApiResponse.success(responses, SMessage.BANK_ACCOUNTS_FOUND(wo.getName(), responses.size()));
     }
 
@@ -96,7 +96,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             BankAccount bankAccount =  findByIdOrThrow(id);
 
             /* GET RESPONSE */
-            BankAccountResponse response = BankAccountResponse.all(bankAccount);
+            BankAccountResponse response = BankAccountResponse.from(bankAccount);
             return ApiResponse.success(response, SMessage.BANK_ACCOUNT_FOUND(bankAccount.getId()));
 
         }catch (ErrorResponse e) {
@@ -128,7 +128,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             bankAccount = bankAccountRepository.save(bankAccount);
 
             /* MAP RESPONSE */
-            BankAccountResponse response = BankAccountResponse.all(bankAccount);
+            BankAccountResponse response = BankAccountResponse.from(bankAccount);
             return ApiResponse.success(response, SMessage.BANK_ACCOUNT_CREATED(bankAccount.getId()));
 
         } catch (ValidationException e) {
@@ -165,7 +165,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             bankAccount = bankAccountRepository.save(bankAccount);
 
             /* MAP RESPONSE */
-            BankAccountResponse response = BankAccountResponse.all(bankAccount);
+            BankAccountResponse response = BankAccountResponse.from(bankAccount);
             return ApiResponse.success(response, SMessage.BANK_ACCOUNT_UPDATED(bankAccount.getId()));
 
         } catch (ValidationException e) {
@@ -205,11 +205,5 @@ public class BankAccountServiceImpl implements BankAccountService {
         } catch (AccessDeniedException e) {
             throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.DELETE_FAILED, e.getMessage());
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public Integer countBankAccountsByWeddingOrganizerId(String weddingOrganizerId) {
-        return bankAccountRepository.countByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
     }
 }

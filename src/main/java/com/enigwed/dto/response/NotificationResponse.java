@@ -13,23 +13,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationResponse {
-
     private String id;
-
     private EReceiver receiver;
-
     private String receiverId;
-
     private EDataType dataType;
-
     private String dataId;
-
     private String message;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime readAt;
-
     private boolean read;
 
     public static NotificationResponse from(Notification notification) {

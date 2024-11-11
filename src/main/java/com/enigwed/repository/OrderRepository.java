@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, String> {
-    List<Order> findByWeddingOrganizerIdAndStatusAndTransactionDateBetweenOrderByTransactionDateDesc(String weddingOrganizerId, EStatus status, LocalDateTime from, LocalDateTime to);
-
     boolean existsByBookCode(String bookCode);
     Optional<Order> findByBookCode(String bookCode);
     List<Order> findAll(Specification<Order> spec, Sort sort);
-
+    List<Order> findByWeddingOrganizerIdAndStatusAndTransactionDateBetweenOrderByTransactionDateDesc(String weddingOrganizerId, EStatus status, LocalDateTime from, LocalDateTime to);
 }

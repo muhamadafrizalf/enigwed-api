@@ -33,12 +33,12 @@ public class ReviewServiceImpl implements ReviewService {
                 .visiblePublic(reviewRequest.getVisiblePublic() != null ? reviewRequest.getVisiblePublic() : true)
                 .build();
         review = reviewRepository.save(review);
-        return ReviewResponse.simple(review);
+        return ReviewResponse.from(review);
     }
 
     @Override
     public List<ReviewResponse> getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
-        return reviews.stream().map(ReviewResponse::simple).toList();
+        return reviews.stream().map(ReviewResponse::from).toList();
     }
 }

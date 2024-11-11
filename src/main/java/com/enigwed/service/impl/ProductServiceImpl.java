@@ -65,22 +65,6 @@ public class ProductServiceImpl implements ProductService {
         return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND(wo.getName(), productList.size()));
     }
 
-    private ApiResponse<List<ProductResponse>> getListApiResponse(PagingRequest pagingRequest, List<Product> productList, Stream<ProductResponse> productResponseStream) throws ValidationException {
-        /* VALIDATE PAGING REQUEST */
-        if (pagingRequest != null) {
-            validationUtil.validateAndThrow(pagingRequest);
-        } else {
-            pagingRequest = new PagingRequest(1, productList.size());
-        }
-
-        /* RETURN EMPTY LIST IF EMPTY */
-        if (productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
-
-        /* MAP RESPONSE */
-        List<ProductResponse> responses = productResponseStream.toList();
-        return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND(productList.size()));
-    }
-
     @Transactional(readOnly = true)
     @Override
     public Product loadProductById(String id) {
@@ -110,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
 
             /* MAP RESPONSE */
             // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple), wo);
+            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::card), wo);
 
         } catch (ValidationException e) {
             log.error("Validation error while loading products: {}", e.getErrors());
@@ -155,7 +139,7 @@ public class ProductServiceImpl implements ProductService {
 
             /* MAP RESPONSE */
             // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple), wo);
+            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::card), wo);
 
         } catch (ValidationException e) {
             log.error("Validation error while loading own products: {}", e.getErrors());
@@ -179,7 +163,7 @@ public class ProductServiceImpl implements ProductService {
 
             /* MAP RESPONSE */
             ProductResponse response = ProductResponse.all(product);
-            return ApiResponse.success(response, SMessage.PRODUCT_FOUND);
+            return ApiResponse.success(response, SMessage.PRODUCT_FOUND(id));
 
         } catch (AccessDeniedException e) {
             log.error("Access denied while loading own product: {}", e.getMessage());
@@ -375,9 +359,19 @@ public class ProductServiceImpl implements ProductService {
             Specification<Product> spec = SearchSpecifications.searchProduct(keyword);
             List<Product> productList = productRepository.findAll(spec, sort);
 
+            /* VALIDATE PAGING REQUEST */
+            if (pagingRequest != null) {
+                validationUtil.validateAndThrow(pagingRequest);
+            } else {
+                pagingRequest = new PagingRequest(1, productList.size());
+            }
+
+            /* RETURN EMPTY LIST IF EMPTY */
+            if (productList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_PRODUCT_FOUND);
+
             /* MAP RESPONSE */
-            // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::all));
+            List<ProductResponse> responses = productList.stream().map(ProductResponse::all).toList();
+            return ApiResponse.success(responses, pagingRequest, SMessage.PRODUCTS_FOUND(productList.size()));
 
         } catch (ValidationException e) {
             log.error("Validation error while loading all products: {}", e.getErrors());

@@ -160,8 +160,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
 
         /* MAP RESPONSE */
-        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
-        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND, countByStatus);
+        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::from).toList();
+        return ApiResponse.successSubscriptionList(responses, pagingRequest, SMessage.SUBSCRIPTIONS_FOUND(subscriptionList.size()), countByStatus);
     }
 
     private void sendNotificationWeddingOrganizer(ENotificationType type, Subscription subscription, String message) {
@@ -264,7 +264,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
             /* MAP RESPONSE */
             SubscriptionPackageResponse response = SubscriptionPackageResponse.all(subscriptionPackage);
-            return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_PACKAGE_CREATED(subscriptionPackage.getId()));
 
         } catch (ValidationException e) {
             log.error("Validation error while creating subscription package: {}", e.getErrors());
@@ -378,7 +378,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
 
             /* MAP RESPONSE */
-            List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+            List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::from).toList();
             return ApiResponse.success(responses, pagingRequest, SMessage.ACTIVE_SUBSCRIPTIONS_FOUND(responses.size(), wo.getName()));
 
         } catch (ErrorResponse e) {
@@ -404,7 +404,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             accessValidationUtil.validateUser(userInfo, subscription.getWeddingOrganizer());
 
             /* MAP SUBSCRIPTION */
-            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            SubscriptionResponse response = SubscriptionResponse.from(subscription);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND(subscriptionId));
 
         } catch (AccessDeniedException e) {
@@ -455,7 +455,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             sendNotificationAdmin(ENotificationType.SUBSCRIPTION_RECEIVED, subscription, SNotificationMessage.NEW_SUBSCRIPTION_RECEIVED(wo.getName()));
 
             /* MAP RESPONSE */
-            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            SubscriptionResponse response = SubscriptionResponse.from(subscription);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAID(subscription.getId()));
 
         } catch (ValidationException e) {
@@ -479,9 +479,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         /* FIND ALL SUBSCRIPTIONS */
         List<Subscription> subscriptionList;
         if(weddingOrganizerId == null || weddingOrganizerId.isEmpty()) {
-            subscriptionList = subscriptionRepository.findAll();
+            subscriptionList = subscriptionRepository.findAllByOrderByTransactionDateDesc();
         } else {
-            subscriptionList = subscriptionRepository.findByWeddingOrganizerId(weddingOrganizerId);
+            subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(weddingOrganizerId);
         }
 
         /* FILTER ACTIVE SUBSCRIPTIONS */
@@ -495,7 +495,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
 
         /* MAP RESPONSE */
-        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::all).toList();
+        List<SubscriptionResponse> responses = subscriptionList.stream().map(SubscriptionResponse::from).toList();
         return ApiResponse.success(responses, pagingRequest, SMessage.ACTIVE_SUBSCRIPTIONS_FOUND(responses.size()));
     }
 
@@ -508,7 +508,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             Subscription subscription = findSubscriptionByIdOrThrow(subscriptionId);
 
             /* MAP RESPONSE */
-            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            SubscriptionResponse response = SubscriptionResponse.from(subscription);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_FOUND(subscriptionId));
         } catch (ErrorResponse e) {
             log.error("Error while finding subscription by ID: {}", e.getError());
@@ -540,7 +540,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             sendNotificationWeddingOrganizer(ENotificationType.SUBSCRIPTION_CONFIRMED, subscription, SNotificationMessage.SUBSCRIPTION_CONFIRMED(subscription.getSubscriptionPackage().getName()));
 
             /* MAP RESPONSE */
-            SubscriptionResponse response = SubscriptionResponse.all(subscription);
+            SubscriptionResponse response = SubscriptionResponse.from(subscription);
             return ApiResponse.success(response, SMessage.SUBSCRIPTION_CONFIRMED(subscriptionId));
         } catch (ErrorResponse e) {
             log.error("Error while confirming subscription: {}", e.getError());

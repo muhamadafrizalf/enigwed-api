@@ -51,7 +51,7 @@ public class SPathApi {
     public static final String PROTECTED_ORDER_ID_REJECT = PROTECTED_ORDER_ID + "/reject";
     public static final String PROTECTED_ORDER_ID_CONFIRM = PROTECTED_ORDER_ID + "/confirm";
     public static final String PROTECTED_ORDER_ID_FINISH = PROTECTED_ORDER_ID + "/finish";
-    // Subscription
+    // Subscription API
     public static final String PUBLIC_SUBSCRIPTION = PUBLIC + "/subscriptions";
     public static final String PUBLIC_SUBSCRIPTION_PRICE = PUBLIC_SUBSCRIPTION + "/prices";
     public static final String PROTECTED_SUBSCRIPTION = PROTECTED + "/subscriptions";
@@ -64,7 +64,6 @@ public class SPathApi {
     public static final String PROTECTED_NOTIFICATION_ID = PROTECTED_NOTIFICATION + "/{id}";
     // Statistic API
     public static final String PROTECTED_STATISTIC = PROTECTED + "/statistics";
-
 
     // Image
     public static final String PUBLIC_IMAGE = PUBLIC + "/images";

@@ -1,5 +1,6 @@
 package com.enigwed.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,12 +48,15 @@ public class RegisterRequest {
     @NotBlank(message = CONFIRM_PASSWORD_BLANK)
     private String confirmPassword;
 
+    @Valid
     @NotNull(message = PROVINCE_NULL)
     private ProvinceRequest province;
 
+    @Valid
     @NotNull(message = REGENCY_NULL)
     private RegencyRequest regency;
 
+    @Valid
     @NotNull(message = DISTRICT_NULL)
     private DistrictRequest district;
 }

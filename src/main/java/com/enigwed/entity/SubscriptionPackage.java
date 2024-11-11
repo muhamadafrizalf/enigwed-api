@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = SPathDb.SUBSCRIPTION_PRICE)
+@Table(name = SPathDb.SUBSCRIPTION_PACKAGE)
 public class SubscriptionPackage extends AuditEntity{
 
     private String name;

@@ -17,7 +17,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeddingOrganizerResponse {
     private String id;
-    private ImageResponse avatar;
     private String name;
     private String npwp;
     private String nib;
@@ -35,11 +34,12 @@ public class WeddingOrganizerResponse {
     private Long productCount;
     private Long orderFinishCount;
     private Double rating;
+    private LocalDateTime activeUntil;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private EUserStatus status;
-    private LocalDateTime activeUntil;
+    private ImageResponse avatar;
     private List<BankAccountResponse> bankAccounts;
 
     public static WeddingOrganizerResponse card(WeddingOrganizer weddingOrganizer) {
@@ -94,7 +94,7 @@ public class WeddingOrganizerResponse {
     public static WeddingOrganizerResponse information(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = WeddingOrganizerResponse.card(weddingOrganizer);
         if (weddingOrganizer.getBankAccounts() != null && !weddingOrganizer.getBankAccounts().isEmpty()) {
-            response.setBankAccounts(weddingOrganizer.getBankAccounts().stream().filter(bankAccount -> bankAccount.getDeletedAt() == null).map(BankAccountResponse::all).toList());
+            response.setBankAccounts(weddingOrganizer.getBankAccounts().stream().filter(bankAccount -> bankAccount.getDeletedAt() == null).map(BankAccountResponse::from).toList());
         } else {
             response.setBankAccounts(new ArrayList<>());
         }

@@ -11,9 +11,8 @@ public interface ImageService {
     Image updateImage(String id, MultipartFile image);
     void deleteImage(String id);
     Image softDeleteImageById(String id);
-
+    // FOR DEVELOPMENT DONT USE
     Resource loadImageResourceById(String id);
-
     ApiResponse<ImageResponse> findByIdResponse(String id);
     ApiResponse<ImageResponse> updateResponse(String id, MultipartFile image);
 

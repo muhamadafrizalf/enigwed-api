@@ -17,7 +17,7 @@ public class SubscriptionPackageResponse {
     private Double price;
     private Boolean popular;
 
-    public static SubscriptionPackageResponse simple(SubscriptionPackage subscriptionPackage) {
+    public static SubscriptionPackageResponse card(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageResponse response = new SubscriptionPackageResponse();
         response.setId(subscriptionPackage.getId());
         response.setName(subscriptionPackage.getName());
@@ -27,7 +27,7 @@ public class SubscriptionPackageResponse {
     }
 
     public static SubscriptionPackageResponse all(SubscriptionPackage subscriptionPackage) {
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.simple(subscriptionPackage);
+        SubscriptionPackageResponse response = SubscriptionPackageResponse.card(subscriptionPackage);
         response.setPrice(subscriptionPackage.getPrice());
         response.setPopular(subscriptionPackage.isPopular());
         return response;

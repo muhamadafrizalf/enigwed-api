@@ -19,10 +19,10 @@ public class ReviewRequest {
     @NotNull(message = RATING_NULL)
     private Integer rating;
 
-    private String customerName;
-
     @Size(max = 500, message = COMMENT_MAX_500)
     private String comment;
+
+    private String customerName;
 
     private Boolean visiblePublic;
 }

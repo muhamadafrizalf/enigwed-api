@@ -1,5 +1,6 @@
 package com.enigwed.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -34,12 +35,15 @@ public class WeddingOrganizerRequest {
     @NotBlank(message = ADDRESS_BLANK)
     private String address;
 
+    @Valid
     @NotNull(message = PROVINCE_NULL)
     private ProvinceRequest province;
 
+    @Valid
     @NotNull(message = REGENCY_NULL)
     private RegencyRequest regency;
 
+    @Valid
     @NotNull(message = DISTRICT_NULL)
     private DistrictRequest district;
 }

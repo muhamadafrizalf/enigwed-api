@@ -18,7 +18,7 @@ public interface WeddingPackageService {
     // Customer
     ApiResponse<List<WeddingPackageResponse>> customerFindAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingPackageResponse> customerFindWeddingPackageById(String id);
-    // WO
+    // Wedding organizer
     ApiResponse<List<WeddingPackageResponse>> findOwnWeddingPackages(JwtClaim userInfo, FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingPackageResponse> findOwnWeddingPackageById(JwtClaim userInfo, String id);
     ApiResponse<WeddingPackageResponse> createWeddingPackage(JwtClaim userInfo,WeddingPackageRequest weddingPackageRequest);
@@ -26,7 +26,7 @@ public interface WeddingPackageService {
     ApiResponse<?> deleteWeddingPackage(JwtClaim userInfo, String id);
     ApiResponse<WeddingPackageResponse> addWeddingPackageImage(JwtClaim userInfo, String id, MultipartFile image);
     ApiResponse<WeddingPackageResponse> deleteWeddingPackageImage(JwtClaim userInfo, String id, String imageId);
-    // ADMIN
+    // Admin
     ApiResponse<List<WeddingPackageResponse>> findAllWeddingPackages(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingPackageResponse> findWeddingPackageById(String id);
 }

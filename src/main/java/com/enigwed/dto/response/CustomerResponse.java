@@ -14,7 +14,7 @@ public class CustomerResponse {
     private String email;
     private String address;
 
-    public static CustomerResponse all(Customer customer) {
+    public static CustomerResponse from(Customer customer) {
         CustomerResponse response = new CustomerResponse();
         response.setName(customer.getName());
         response.setPhone(customer.getPhone());

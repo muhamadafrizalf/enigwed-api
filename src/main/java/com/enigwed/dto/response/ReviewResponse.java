@@ -16,17 +16,21 @@ public class ReviewResponse {
     private String id;
     private String orderId;
     private String weddingOrganizerId;
+    private String weddingOrganizerName;
     private String weddingPackageId;
+    private String weddingPackageName;
     private Double rating;
     private String customerName;
     private String comment;
 
-    public static ReviewResponse simple(Review review) {
+    public static ReviewResponse from(Review review) {
         ReviewResponse response = new ReviewResponse();
         response.setId(review.getId());
         response.setOrderId(review.getOrder().getId());
         response.setWeddingOrganizerId(review.getWeddingOrganizer().getId());
+        response.setWeddingOrganizerName(review.getWeddingOrganizer().getName());
         response.setWeddingPackageId(review.getWeddingPackage().getId());
+        response.setWeddingPackageName(review.getWeddingPackage().getName());
         response.setRating(review.getRating());
         response.setCustomerName(review.getCustomerName());
         if (review.getComment() != null && !review.getComment().isEmpty()) {

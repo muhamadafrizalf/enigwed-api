@@ -77,7 +77,7 @@ public class AddressServiceImpl implements AddressService {
             /* LOAD PROVINCE */
             // ErrorResponse //
             Province province = provinceRepository.findById(regencyRequest.getProvince_id())
-                    .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
+                    .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.PROVINCE_NOT_FOUND(regencyRequest.getProvince_id())));
 
             /* CHECK AND VALIDATE IF REGENCY ALREADY EXIST */
             // DataIntegrityViolationException //
@@ -121,7 +121,7 @@ public class AddressServiceImpl implements AddressService {
             /* LOAD REGENCY */
             // ErrorResponse //
             Regency regency = regencyRepository.findById(districtRequest.getRegency_id())
-                    .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.DATA_NOT_FOUND, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
+                    .orElseThrow(() -> new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.REGENCY_NOT_FOUND(districtRequest.getRegency_id())));
 
             /* CHECK AND VALIDATE IF DISTRICT ALREADY EXIST */
             // DataIntegrityViolationException //

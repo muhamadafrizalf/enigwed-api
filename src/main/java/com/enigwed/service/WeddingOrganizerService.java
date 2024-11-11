@@ -24,13 +24,13 @@ public interface WeddingOrganizerService {
     // Customer
     ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);
-    // WO
+    // Wedding organizer
     ApiResponse<WeddingOrganizerResponse> findOwnWeddingOrganizer(JwtClaim userInfo);
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer (JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest);
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizerImage(JwtClaim userInfo, String id, MultipartFile avatar);
     ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id);
-    // ADMIN
+    // Admin
     ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
     ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id);

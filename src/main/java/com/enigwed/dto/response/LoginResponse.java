@@ -18,18 +18,16 @@ public class LoginResponse {
     private String role;
     private UserResponse user;
 
-    public static LoginResponse admin(UserCredential user, String token) {
+    public static LoginResponse noUser(UserCredential user, String token) {
         LoginResponse response = new LoginResponse();
         response.setToken(token);
         response.setRole(user.getRole().name());
         return response;
     }
 
-    public static LoginResponse weddingOrganizer(UserCredential user, String token, WeddingOrganizer weddingOrganizer) {
-        LoginResponse response = new LoginResponse();
-        response.setToken(token);
-        response.setRole(user.getRole().name());
-        response.setUser(UserResponse.all(weddingOrganizer));
+    public static LoginResponse withUser(UserCredential user, String token, WeddingOrganizer weddingOrganizer) {
+        LoginResponse response = LoginResponse.noUser(user, token);
+        response.setUser(UserResponse.from(weddingOrganizer));
         return response;
     }
 }

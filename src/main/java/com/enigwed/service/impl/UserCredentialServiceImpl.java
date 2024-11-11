@@ -139,7 +139,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserCredential createUser(UserCredential userCredential) {
-        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE);
+        if (userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).isPresent()) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE(userCredential.getEmail()));
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 
@@ -147,7 +147,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     @Override
     public UserCredential updateUser(UserCredential userCredential) {
         UserCredential possibleConflict = userCredentialRepository.findByEmailAndDeletedAtIsNull(userCredential.getEmail()).orElse(null);
-        if (possibleConflict != null && !possibleConflict.getId().equals(userCredential.getId())) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE);
+        if (possibleConflict != null && !possibleConflict.getId().equals(userCredential.getId())) throw new DataIntegrityViolationException(SErrorMessage.EMAIL_ALREADY_IN_USE(userCredential.getEmail()));
         return userCredentialRepository.saveAndFlush(userCredential);
     }
 

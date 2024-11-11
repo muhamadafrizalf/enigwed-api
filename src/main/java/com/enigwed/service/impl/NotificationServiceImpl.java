@@ -29,8 +29,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final AccessValidationUtil accessValidationUtil;
 
     private Notification findByIdOrThrow(String id) {
-        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.ID_IS_REQUIRED);
-        return notificationRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.NOTIFICATION_NOT_FOUND));
+        if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.NOTIFICATION_ID_IS_REQUIRED);
+        return notificationRepository.findById(id).orElseThrow(() -> new ErrorResponse(HttpStatus.NOT_FOUND, SMessage.FETCHING_FAILED, SErrorMessage.NOTIFICATION_NOT_FOUND(id)));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -53,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
             return ApiResponse.success(new ArrayList<>(), SMessage.NO_NOTIFICATION_FOUND);
         }
         List<NotificationResponse> response = notificationList.stream().map(NotificationResponse::from).toList();
-        return ApiResponse.success(response, SMessage.NOTIFICATION_FOUNDS);
+        return ApiResponse.success(response, SMessage.NOTIFICATION_FOUNDS(notificationList.size()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -77,11 +77,11 @@ public class NotificationServiceImpl implements NotificationService {
 
             /* MAP RESPONSE */
             NotificationResponse response = NotificationResponse.from(notification);
-            return ApiResponse.success(response, SMessage.NOTIFICATION_READ);
+            return ApiResponse.success(response, SMessage.NOTIFICATION_READ(id));
 
         } catch (AccessDeniedException e) {
             log.error("Access denied while updating notification status: {}", e.getMessage());
-            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.UPDATE_FAILED, e.getMessage());
+            throw new ErrorResponse(HttpStatus.FORBIDDEN, SMessage.READ_FAILED(id), e.getMessage());
         } catch (ErrorResponse e) {
             log.error("Error while updating notification status: {}", e.getMessage());
             throw e;

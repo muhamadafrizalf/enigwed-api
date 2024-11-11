@@ -3,7 +3,6 @@ package com.enigwed.constant;
 public class SConstraint {
     /* REQUIRED */
     //// ID BLANK
-    public static final String WEDDING_ORGANIZER_ID_BLANK = "Wedding organizer ID is required";
     public static final String WEDDING_PACKAGE_ID_BLANK = "Wedding Package ID is required";
     public static final String PRODUCT_ID_BLANK = "Product ID is required";
     public static final String PROVINCE_ID_BLANK = "Province ID is required";

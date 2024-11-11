@@ -13,11 +13,11 @@ public class BonusDetailResponse {
     private int quantity;
     private ProductResponse bonusPackage;
 
-    public static BonusDetailResponse simple(BonusDetail bonusDetail) {
+    public static BonusDetailResponse from(BonusDetail bonusDetail) {
         BonusDetailResponse response = new BonusDetailResponse();
         response.setId(bonusDetail.getId());
         response.setQuantity(bonusDetail.getQuantity());
-        response.setBonusPackage(ProductResponse.simple(bonusDetail.getProduct()));
+        response.setBonusPackage(ProductResponse.card(bonusDetail.getProduct()));
         return response;
     }
 }
