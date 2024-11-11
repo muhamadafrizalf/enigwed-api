@@ -68,15 +68,6 @@ public class WeddingOrganizerController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(SPathApi.PROTECTED_WO_ID)
-    public ResponseEntity<?> getWeddingOrganizerById(
-            @PathVariable String id
-    ) {
-        ApiResponse<?> response = weddingOrganizerService.findWeddingOrganizerById(id);
-        return ResponseEntity.ok(response);
-    }
-
     @Operation(
             summary = "For admin and wedding organizer to get list of wedding organizers (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
             description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
@@ -181,6 +172,18 @@ public class WeddingOrganizerController {
     }
 
     @Operation(
+            summary = "For admin to get wedding organizer information by wedding_organizer_id [ADMIN] (WEB)"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(SPathApi.PROTECTED_WO_ID)
+    public ResponseEntity<?> getWeddingOrganizerById(
+            @PathVariable String id
+    ) {
+        ApiResponse<?> response = weddingOrganizerService.findWeddingOrganizerById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
             summary = "For admin to activate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
             description = "Set active to TRUE and active until to first day next month"
     )
@@ -192,6 +195,7 @@ public class WeddingOrganizerController {
         ApiResponse<?> response = weddingOrganizerService.activateWeddingOrganizer(id);
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(
             summary = "For admin to deactivate wedding organizer account by wedding_organizer_id [ADMIN] (WEB)",
