@@ -44,7 +44,11 @@ public class WeddingOrganizerResponse {
         response.setId(weddingOrganizer.getId());
         response.setAvatar(ImageResponse.from(weddingOrganizer.getAvatar()));
         response.setName(weddingOrganizer.getName());
+        response.setPhone(weddingOrganizer.getPhone());
         response.setDescription(weddingOrganizer.getDescription());
+        response.setProvinceId(weddingOrganizer.getProvince().getId());
+        response.setRegencyId(weddingOrganizer.getRegency().getId());
+        response.setDistrictId(weddingOrganizer.getDistrict().getId());
         response.setProvinceName(weddingOrganizer.getProvince().getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
@@ -89,9 +93,6 @@ public class WeddingOrganizerResponse {
         response.setNpwp(weddingOrganizer.getNpwp());
         response.setNib(weddingOrganizer.getNib());
         response.setEmail(weddingOrganizer.getUserCredential().getEmail());
-        response.setProvinceId(weddingOrganizer.getProvince().getId());
-        response.setRegencyId(weddingOrganizer.getRegency().getId());
-        response.setDistrictId(weddingOrganizer.getDistrict().getId());
         response.setCreatedAt(weddingOrganizer.getCreatedAt());
         response.setUpdatedAt(weddingOrganizer.getUpdatedAt());
         response.setDeletedAt(weddingOrganizer.getDeletedAt());
