@@ -31,5 +31,6 @@ public class OrderRequest {
     @NotBlank(message = WEDDING_PACKAGE_ID_BLANK)
     private String weddingPackageId;
 
+    @Valid
     private List<AdditionalProduct> additionalProducts;
 }
