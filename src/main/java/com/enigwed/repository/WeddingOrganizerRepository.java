@@ -1,6 +1,8 @@
 package com.enigwed.repository;
 
 import com.enigwed.entity.WeddingOrganizer;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +19,9 @@ public interface WeddingOrganizerRepository extends JpaRepository<WeddingOrganiz
     List<WeddingOrganizer> findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
     Optional<WeddingOrganizer> findByUserCredentialIdAndDeletedAtIsNullAndUserCredentialActiveIsTrue(String userCredentialId);
     Optional<WeddingOrganizer> findByUserCredentialEmailAndDeletedAtIsNull(String email);
+
+    List<WeddingOrganizer> findAll(Specification<WeddingOrganizer> spec);
+    List<WeddingOrganizer> findAll(Specification<WeddingOrganizer> spec, Sort sort);
 
     @Query("SELECT wo FROM WeddingOrganizer wo WHERE (" +
             "LOWER(wo.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

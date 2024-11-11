@@ -1,5 +1,6 @@
 package com.enigwed.dto.response;
 
+import com.enigwed.constant.EStatus;
 import com.enigwed.constant.EUserStatus;
 import com.enigwed.entity.Review;
 import com.enigwed.entity.WeddingOrganizer;
@@ -32,6 +33,7 @@ public class WeddingOrganizerResponse {
     private String address;
     private Long weddingPackageCount;
     private Long productCount;
+    private Long orderFinishCount;
     private Double rating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -63,15 +65,22 @@ public class WeddingOrganizerResponse {
                         .filter(product -> product.getDeletedAt() == null)
                         .count()
         );
+        response.setOrderFinishCount(
+                weddingOrganizer.getOrders().stream()
+                        .filter(order -> order.getStatus().equals(EStatus.FINISHED))
+                        .count()
+        );
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {
             response.setRating(weddingOrganizer.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        } else {
+            response.setRating(0.0);
         }
+        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         return response;
     }
 
     public static WeddingOrganizerResponse cardAdmin(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = WeddingOrganizerResponse.card(weddingOrganizer);
-        response.setActiveUntil(weddingOrganizer.getUserCredential().getActiveUntil());
         if (weddingOrganizer.getDeletedAt() != null) {
             response.setStatus(EUserStatus.DELETED);
         } else if (weddingOrganizer.getUserCredential().isActive()) {

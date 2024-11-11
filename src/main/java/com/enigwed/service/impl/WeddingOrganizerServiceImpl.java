@@ -13,12 +13,16 @@ import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.WeddingOrganizerRepository;
+import com.enigwed.repository.spesification.SearchSpecifications;
 import com.enigwed.service.*;
 import com.enigwed.util.AccessValidationUtil;
+import com.enigwed.util.StatisticUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,7 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
     private final AddressService addressService;
     private final ValidationUtil validationUtil;
     private final AccessValidationUtil accessValidationUtil;
+    private final StatisticUtil statisticUtil;
 
     private WeddingOrganizer findByIdOrThrow(String id) {
         if (id == null || id.isEmpty()) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.WEDDING_ORGANIZER_ID_IS_REQUIRED);
@@ -58,19 +60,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
                 .toList();
     }
 
-    private ApiResponse<List<WeddingOrganizerResponse>> getListApiResponse(FilterRequest filter, PagingRequest pagingRequest, List<WeddingOrganizer> woList) {
-        // ResponseEntity //
-        if (woList.isEmpty())
-            return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND);
-
-        /* FILTER RESULT */
-        woList = filterResult(filter, woList);
-
-        /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::card).toList();
-        return ApiResponse.success(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()));
-    }
-
     private EUserStatus getUserStatus(WeddingOrganizer wo) {
         if (wo.getUserCredential().isActive()) {
             return EUserStatus.ACTIVE;
@@ -85,43 +74,6 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
         return woList.stream()
                 .filter(wo -> filter.getUserStatus() == null || getUserStatus(wo) == filter.getUserStatus())
                 .toList();
-    }
-
-    private Map<String, Integer> countByStatus(List<WeddingOrganizer> woList) {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("ALL", 0);
-        for (EUserStatus status : EUserStatus.values()) {
-            map.put(status.name(), 0);
-        }
-
-        for (WeddingOrganizer wo : woList) {
-            map.put("ALL", map.get("ALL") + 1);
-            map.put(getUserStatus(wo).name(), map.get(getUserStatus(wo).name()) + 1);
-        }
-        return map;
-    }
-
-    private ApiResponse<List<WeddingOrganizerResponse>> getApiResponse(FilterRequest filter, PagingRequest pagingRequest, List<WeddingOrganizer> woList) {
-        /* COUNT WEDDING ORGANIZER BY STATUS */
-        Map<String, Integer> countByStatus = countByStatus(woList);
-        if (woList.isEmpty()) return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
-
-        /* FILTER RESULT */
-        woList = filterResult(filter, woList);
-        if (woList.isEmpty())
-            return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
-
-        /* RE-COUNT WEDDING ORGANIZER BY STATUS BEFORE FILTER BY STATUS */
-        countByStatus = countByStatus(woList);
-
-        /* FILTER RESULT BY STATUS */
-        woList = filterByStatus(filter, woList);
-        if (woList.isEmpty())
-            return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
-
-        /* MAP RESULT */
-        List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::cardAdmin).toList();
-        return ApiResponse.successWeddingOrganizerList(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()), countByStatus);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -201,41 +153,52 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
+    public ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword) {
         try {
             /* VALIDATE INPUT */
             // ValidationException //
             validationUtil.validateAndThrow(pagingRequest);
 
-            /* LOAD ONLY ACTIVE WEDDING ORGANIZERS */
-            List<WeddingOrganizer> woList = weddingOrganizerRepository.findByDeletedAtIsNullAndUserCredentialActiveIsTrue();
+            /* LOAD WEDDING ORGANIZERS BY KEYWORD */
+            Specification<WeddingOrganizer> spec = SearchSpecifications.searchWeddingOrganizer(keyword);
+            List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll(spec);
 
-            /* MAP RESPONSE */
-            return getListApiResponse(filter, pagingRequest, woList);
+            /* FILTER DELETED AND INACTIVE WEDDING ORGANIZER*/
+            woList = woList.stream().filter(wo -> wo.getUserCredential().isActive() && wo.getDeletedAt() == null).toList();
+
+            /* HANDLE EMPTY RESULT */
+            if (woList.isEmpty())
+                return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND);
+
+            /* FILTER RESULT */
+            woList = filterResult(filter, woList);
+
+            /* HANDLE EMPTY RESULT */
+            if (woList.isEmpty())
+                return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND);
+
+            /* MAP RESULT */
+            List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::card).toList();
+
+            /* SORT RESULT */
+            responseList = responseList.stream()
+                    .sorted(Comparator
+                            .comparing(WeddingOrganizerResponse::getRating, Comparator.reverseOrder())
+                            .thenComparing(WeddingOrganizerResponse::getOrderFinishCount, Comparator.reverseOrder())
+                            .thenComparing(WeddingOrganizerResponse::getWeddingPackageCount, Comparator.reverseOrder())
+                            .thenComparing(WeddingOrganizerResponse::getProductCount, Comparator.reverseOrder())
+                            .thenComparing(WeddingOrganizerResponse::getActiveUntil)
+                            .thenComparing(WeddingOrganizerResponse::getName)
+                    )
+                    .toList();
+
+            /* RETURN RESPONSE */
+            return ApiResponse.success(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()));
 
         } catch (ValidationException e) {
             log.error("Validation error loading wedding organizers: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
-        try {
-            /* VALIDATE INPUT */
-            // ValidationException //
-            validationUtil.validateAndThrow(pagingRequest);
-
-            /* SEARCH ACTIVE WEDDING ORGANIZERS BY KEYWORD */
-            List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizerCustomer(keyword);
-
-            return getListApiResponse(filter, pagingRequest, woList);
-        } catch (ValidationException e) {
-            log.error("Validation error searching wedding organizers: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
-        }
-
     }
 
     @Transactional(readOnly = true)
@@ -443,41 +406,44 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest) {
+    public ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword) {
         try {
             /* VALIDATE INPUT */
             // ValidationException //
             validationUtil.validateAndThrow(pagingRequest);
 
             /* LOAD ALL WEDDING ORGANIZERS */
-            List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll();
+            Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+            Specification<WeddingOrganizer> spec = SearchSpecifications.searchWeddingOrganizer(keyword);
+            List<WeddingOrganizer> woList = weddingOrganizerRepository.findAll(spec, sort);
 
-            /* FILTER AND MAP RESPONSE */
-            return getApiResponse(filter, pagingRequest, woList);
+            /* COUNT WEDDING ORGANIZER BY STATUS */
+            Map<String, Integer> countByStatus = statisticUtil.countWeddingOrganizerByStatus(woList);
+            if (woList.isEmpty()) return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+
+            /* FILTER RESULT */
+            woList = filterResult(filter, woList);
+            if (woList.isEmpty())
+                return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+
+            /* RE-COUNT WEDDING ORGANIZER BY STATUS BEFORE FILTER BY STATUS */
+            countByStatus = statisticUtil.countWeddingOrganizerByStatus(woList);
+
+            /* FILTER RESULT BY STATUS */
+            woList = filterByStatus(filter, woList);
+            if (woList.isEmpty())
+                return ApiResponse.successWeddingOrganizerList(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_ORGANIZER_FOUND, countByStatus);
+
+            /* MAP RESULT */
+            List<WeddingOrganizerResponse> responseList = woList.stream().map(WeddingOrganizerResponse::cardAdmin).toList();
+
+            /* RETURN RESPONSE */
+            return ApiResponse.successWeddingOrganizerList(responseList, pagingRequest, SMessage.WEDDING_ORGANIZERS_FOUND(woList.size()), countByStatus);
+
         } catch (ValidationException e){
             log.error("Access denied while loading all wedding organizers: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest) {
-        try{
-            /* VALIDATE INPUT */
-            // ValidationException //
-            validationUtil.validateAndThrow(pagingRequest);
-
-            /* SEARCH ALL WEDDING ORGANIZERS BY KEYWORD */
-            List<WeddingOrganizer> woList = weddingOrganizerRepository.searchWeddingOrganizer(keyword);
-
-            /* FILTER AND MAP RESPONSE */
-            return getApiResponse(filter, pagingRequest, woList);
-        } catch (ValidationException e){
-            log.error("Access denied while searching all wedding organizers: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
-        }
-
     }
 
     @Transactional(readOnly = true)

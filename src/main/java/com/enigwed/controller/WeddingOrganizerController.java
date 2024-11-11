@@ -28,29 +28,20 @@ public class WeddingOrganizerController {
     private final JwtUtil jwtUtil;
 
     @Operation(
-            summary = "For customer to get wedding organizer information by wedding_organizer_id (MOBILE)"
-    )
-    @GetMapping(SPathApi.PUBLIC_WO_ID)
-    public ResponseEntity<?> customerGetWeddingOrganizerById(
-            @PathVariable String id
-    ) {
-        ApiResponse<?> response = weddingOrganizerService.customerFindWeddingOrganizerById(id);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(
             summary = "For customer to get list of wedding organizers (Default pagination {page:1, size:8}) (MOBILE)",
-            description = "Sorted by [SOON]"
+            description = "Sorted by rating, orderFinishCount, weddingPackageCount, productCount, activeUntilCount, name"
     )
     @GetMapping(SPathApi.PUBLIC_WO)
     public ResponseEntity<?> customerGetAllWeddingOrganizers(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-
-            @Parameter(description = "Keyword can filter result by name, phone, description, address, and city name", required = false)
+            @Parameter(description = "Keyword can filter result by name, phone, description, address, and city name")
             @RequestParam(required = false) String keyword,
+            @Parameter(description = "To filter by province_id")
             @RequestParam(required = false) String provinceId,
+            @Parameter(description = "To filter by regency_id")
             @RequestParam(required = false) String regencyId,
+            @Parameter(description = "To filter by district_id")
             @RequestParam(required = false) String districtId
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
@@ -59,18 +50,26 @@ public class WeddingOrganizerController {
         if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
         if (districtId != null && !districtId.isEmpty()) filter.setDistrictId(districtId);
 
-        ApiResponse<?> response;
-        if (keyword != null && !keyword.isEmpty()) {
-            response = weddingOrganizerService.customerSearchWeddingOrganizer(keyword, filter, pagingRequest);
-        } else {
-            response = weddingOrganizerService.customerFindAllWeddingOrganizers(filter, pagingRequest);
-        }
+        ApiResponse<?> response = weddingOrganizerService.customerFindAllWeddingOrganizers(filter, pagingRequest, keyword);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "For customer to get wedding organizer information by wedding_organizer_id (MOBILE)"
+    )
+    @GetMapping(SPathApi.PUBLIC_WO_ID)
+    public ResponseEntity<?> customerGetWeddingOrganizerById(
+            @Parameter(description = "Path variable id")
+            @PathVariable String id
+    ) {
+        ApiResponse<?> response = weddingOrganizerService.customerFindWeddingOrganizerById(id);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
             summary = "For admin and wedding organizer to get list of wedding organizers (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
-            description = "Admin get all wedding organizer, WO can only get their own wedding organizer"
+            description = "Admin get all wedding organizer (sorted by createdAt), WO can only get their own wedding organizer"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_WO)
@@ -79,30 +78,34 @@ public class WeddingOrganizerController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "8") int size,
-            @Parameter(description = "Keyword can filter result by name, phone, description, address, province name, city name, and district name", required = false)
+            @Parameter(description = "Keyword can filter result by name, phone, description, address, province name, city name, and district name")
             @RequestParam(required = false) String keyword,
+            @Parameter(description = "To filter by user status")
             @RequestParam(required = false) EUserStatus status,
+            @Parameter(description = "To filter by province_id")
             @RequestParam(required = false) String provinceId,
+            @Parameter(description = "Filter by regency_id")
             @RequestParam(required = false) String regencyId,
+            @Parameter(description = "Filter by district_id")
             @RequestParam(required = false) String districtId
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
+
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
+
         FilterRequest filter = new FilterRequest();
         if (status != null) filter.setUserStatus(status);
         if (provinceId != null && !provinceId.isEmpty()) filter.setProvinceId(provinceId);
         if (regencyId != null && !regencyId.isEmpty()) filter.setRegencyId(regencyId);
         if (districtId != null && !districtId.isEmpty()) filter.setDistrictId(districtId);
+
         ApiResponse<?> response;
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
-            response = weddingOrganizerService.findOwnWeddingOrganizer(userInfo);
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            response = weddingOrganizerService.findAllWeddingOrganizers(filter, pagingRequest, keyword);
         } else {
-            if (keyword != null && !keyword.isEmpty()) {
-                response = weddingOrganizerService.searchWeddingOrganizer(keyword, filter, pagingRequest);
-            } else {
-                response = weddingOrganizerService.findAllWeddingOrganizers(filter, pagingRequest);
-            }
+            response = weddingOrganizerService.findOwnWeddingOrganizer(userInfo);
         }
+
         return ResponseEntity.ok(response);
     }
 
@@ -131,6 +134,7 @@ public class WeddingOrganizerController {
     public ResponseEntity<?> deleteWeddingOrganizer(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -147,8 +151,9 @@ public class WeddingOrganizerController {
     public ResponseEntity<?> updateWeddingOrganizerImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
-            @RequestPart(name = "avatar", required = true) MultipartFile avatar
+            @RequestPart(name = "avatar") MultipartFile avatar
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
         ApiResponse<?> response = weddingOrganizerService.updateWeddingOrganizerImage(userInfo, id, avatar);
@@ -164,6 +169,7 @@ public class WeddingOrganizerController {
     public ResponseEntity<?> deleteWeddingOrganizerImage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -177,6 +183,7 @@ public class WeddingOrganizerController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(SPathApi.PROTECTED_WO_ID)
     public ResponseEntity<?> getWeddingOrganizerById(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         ApiResponse<?> response = weddingOrganizerService.findWeddingOrganizerById(id);
@@ -190,6 +197,7 @@ public class WeddingOrganizerController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_WO_ID_ACTIVATE)
     public ResponseEntity<?> activateWeddingOrganizer(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         ApiResponse<?> response = weddingOrganizerService.activateWeddingOrganizer(id);
@@ -204,6 +212,7 @@ public class WeddingOrganizerController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(SPathApi.PROTECTED_WO_ID_DEACTIVATE)
     public ResponseEntity<?> deactivateWeddingOrganizer(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         ApiResponse<?> response = weddingOrganizerService.deactivateWeddingOrganizer(id);

@@ -16,27 +16,22 @@ import java.util.List;
 public interface WeddingOrganizerService {
     // Use in other service
     void createWeddingOrganizer(WeddingOrganizer weddingOrganizer) throws DataIntegrityViolationException;
+    void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPackage subscriptionPackage);
     WeddingOrganizer loadWeddingOrganizerById(String id);
     WeddingOrganizer loadWeddingOrganizerByUserCredentialId(String userCredentialId);
     WeddingOrganizer loadWeddingOrganizerByEmail(String email);
-    void extendWeddingOrganizerSubscription(WeddingOrganizer weddingOrganizer, SubscriptionPackage subscriptionPackage);
     List<WeddingOrganizer> findAllWeddingOrganizers();
-
     // Customer
-    ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest);
-    ApiResponse<List<WeddingOrganizerResponse>> customerSearchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingOrganizerResponse>> customerFindAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingOrganizerResponse> customerFindWeddingOrganizerById(String id);
-
     // WO
     ApiResponse<WeddingOrganizerResponse> findOwnWeddingOrganizer(JwtClaim userInfo);
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizer (JwtClaim userInfo, WeddingOrganizerRequest weddingOrganizerRequest);
     ApiResponse<?> deleteWeddingOrganizer(JwtClaim userInfo, String id);
     ApiResponse<WeddingOrganizerResponse> updateWeddingOrganizerImage(JwtClaim userInfo, String id, MultipartFile avatar);
     ApiResponse<WeddingOrganizerResponse> deleteWeddingOrganizerImage(JwtClaim userInfo, String id);
-
     // ADMIN
-    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest);
-    ApiResponse<List<WeddingOrganizerResponse>> searchWeddingOrganizer(String keyword, FilterRequest filter, PagingRequest pagingRequest);
+    ApiResponse<List<WeddingOrganizerResponse>> findAllWeddingOrganizers(FilterRequest filter, PagingRequest pagingRequest, String keyword);
     ApiResponse<WeddingOrganizerResponse> findWeddingOrganizerById(String id);
     ApiResponse<WeddingOrganizerResponse> activateWeddingOrganizer(String id);
     ApiResponse<WeddingOrganizerResponse> deactivateWeddingOrganizer(String id);
