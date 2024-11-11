@@ -28,11 +28,11 @@ public class ReviewResponse {
         response.setWeddingOrganizerId(review.getWeddingOrganizer().getId());
         response.setWeddingPackageId(review.getWeddingPackage().getId());
         response.setRating(review.getRating());
-        if (review.getCustomerName() != null && !review.getCustomerName().isEmpty()) {
-            response.setCustomerName(review.getCustomerName());
-        }
+        response.setCustomerName(review.getCustomerName());
         if (review.getComment() != null && !review.getComment().isEmpty()) {
             response.setComment(review.getComment());
+        } else {
+            response.setComment("");
         }
         return response;
     }

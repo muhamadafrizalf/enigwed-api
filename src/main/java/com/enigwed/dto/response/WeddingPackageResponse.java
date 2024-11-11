@@ -60,8 +60,6 @@ public class WeddingPackageResponse {
         return response;
     }
 
-
-
     public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
