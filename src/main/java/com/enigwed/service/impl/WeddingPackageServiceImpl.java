@@ -105,8 +105,10 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
                         .build();
                 bonusDetails.add(bonusDetail);
             }
+            weddingPackage.setBonusDetails(bonusDetails);
+        } else {
+            weddingPackage.setBonusDetails(new ArrayList<>());
         }
-        weddingPackage.setBonusDetails(bonusDetails);
     }
 
     @Transactional(readOnly = true)
