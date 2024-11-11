@@ -11,6 +11,7 @@ import com.enigwed.dto.response.SubscriptionPackageResponse;
 import com.enigwed.dto.response.SubscriptionResponse;
 import com.enigwed.entity.*;
 import com.enigwed.exception.ErrorResponse;
+import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.SubscriptionPackageRepository;
 import com.enigwed.repository.SubscriptionRepository;
 import com.enigwed.service.*;
@@ -211,54 +212,108 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPackageId) {
         SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageId);
         SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_FOUND);
+        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PACKAGE_FOUND(subscriptionPackageId));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<SubscriptionPackageResponse> createSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest) {
-        validationUtil.validateAndThrow(subscriptionPackageRequest);
-        if (subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).isPresent())
-            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
+        try {
+            /* VALIDATE INPUT */
+            // ValidationException //
+            validationUtil.validateAndThrow(subscriptionPackageRequest);
 
-        SubscriptionPackage subscriptionPackage = SubscriptionPackage.builder()
-                .name(subscriptionPackageRequest.getName())
-                .subscriptionLength(subscriptionPackageRequest.getSubscriptionLength())
-                .price(subscriptionPackageRequest.getPrice())
-                .build();
+            /* CHECK DATA INTEGRITY */
+            // ERROR RESPONSE //
+            SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).orElse(null);
+            if (possibleConflict != null)
+                throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PACKAGE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
 
-        subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
+            /* CREATE SUBSCRIPTION PACKAGE */
+            SubscriptionPackage subscriptionPackage = SubscriptionPackage.builder()
+                    .name(subscriptionPackageRequest.getName())
+                    .subscriptionLength(subscriptionPackageRequest.getSubscriptionLength())
+                    .price(subscriptionPackageRequest.getPrice())
+                    .popular(subscriptionPackageRequest.getPopular() != null ? subscriptionPackageRequest.getPopular() : false)
+                    .build();
 
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
+            /* SAVE SUBSCRIPTION PACKAGE */
+            subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
+
+            /* MAP RESPONSE */
+            SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_CREATED);
+
+        } catch (ValidationException e) {
+            log.error("Validation error while creating subscription package: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
+        }  catch (ErrorResponse e) {
+            log.error("Error while creating subscription package: {}", e.getError());
+            throw e;
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<SubscriptionPackageResponse> updateSubscriptionPackage(SubscriptionPackageRequest subscriptionPackageRequest) {
-        validationUtil.validateAndThrow(subscriptionPackageRequest);
-        SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageRequest.getId());
-        SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).orElse(null);
-        if (possibleConflict != null && !subscriptionPackage.getId().equals(possibleConflict.getId())) {
-            throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.CREATE_FAILED, SErrorMessage.SUBSCRIPTION_PRICE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
+        try {
+            /* LOAD SUBSCRIPTION PACKAGE */
+            // ErrorResponse //
+            SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionPackageRequest.getId());
+
+            /* VALIDATE INPUT */
+            // ValidationException //
+            validationUtil.validateAndThrow(subscriptionPackageRequest);
+
+            /* CHECK DATA INTEGRITY */
+            // ERROR RESPONSE //
+            SubscriptionPackage possibleConflict = subscriptionPackageRepository.findBySubscriptionLengthAndDeletedAtIsNull(subscriptionPackageRequest.getSubscriptionLength()).orElse(null);
+            if (possibleConflict != null && !subscriptionPackage.getId().equals(possibleConflict.getId()))
+                throw new ErrorResponse(HttpStatus.CONFLICT, SMessage.UPDATE_FAILED, SErrorMessage.SUBSCRIPTION_PACKAGE_ALREADY_EXIST(subscriptionPackageRequest.getSubscriptionLength().name()));
+
+            /* UPDATE SUBSCRIPTION PACKAGE */
+            subscriptionPackage.setSubscriptionLength(subscriptionPackageRequest.getSubscriptionLength());
+            subscriptionPackage.setPrice(subscriptionPackageRequest.getPrice());
+            if (subscriptionPackageRequest.getPopular() != null) subscriptionPackage.setPopular(subscriptionPackageRequest.getPopular());
+
+            /* SAVE SUBSCRIPTION PACKAGE */
+            subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
+
+            /* MAP RESPONSE */
+            SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
+            return ApiResponse.success(response, SMessage.SUBSCRIPTION_PACKAGE_UPDATED(subscriptionPackage.getId()));
+
+        } catch (ValidationException e) {
+            log.error("Validation error while updating subscription package: {}", e.getErrors());
+            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getErrors().get(0));
+        } catch (ErrorResponse e) {
+            log.error("Error while updating subscription package: {}", e.getError());
+            throw e;
         }
-
-        subscriptionPackage.setSubscriptionLength(subscriptionPackageRequest.getSubscriptionLength());
-        subscriptionPackage.setPrice(subscriptionPackageRequest.getPrice());
-        subscriptionPackage.setPopular(subscriptionPackageRequest.getPopular());
-
-        subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
-
-        SubscriptionPackageResponse response = SubscriptionPackageResponse.from(subscriptionPackage);
-        return ApiResponse.success(response, SMessage.SUBSCRIPTION_PRICE_UPDATED);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<?> deleteSubscriptionPackage(String subscriptionId) {
-        SubscriptionPackage packet = findSubscriptionPackageByIdOrThrow(subscriptionId);
-        packet.setDeletedAt(LocalDateTime.now());
-        subscriptionPackageRepository.save(packet);
-        return ApiResponse.success(SMessage.SUBSCRIPTION_PRICE_DELETED);
+        try {
+            /* LOAD SUBSCRIPTION PACKAGE */
+            // ErrorResponse //
+            SubscriptionPackage subscriptionPackage = findSubscriptionPackageByIdOrThrow(subscriptionId);
+
+            /* SET DELETED AT*/
+            subscriptionPackage.setDeletedAt(LocalDateTime.now());
+
+            /* SAVE SUBSCRIPTION PACKAGE */
+            subscriptionPackageRepository.save(subscriptionPackage);
+
+            return ApiResponse.success(SMessage.SUBSCRIPTION_PACKAGE_DELETED(subscriptionId));
+        } catch (ErrorResponse e) {
+            log.error("Error while deleting subscription package: {}", e.getError());
+            throw e;
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ApiResponse<SubscriptionResponse> paySubscription(JwtClaim userInfo, SubscriptionRequest subscriptionRequest) {
         validationUtil.validateAndThrow(subscriptionRequest);
@@ -289,11 +344,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return ApiResponse.success(response, SMessage.SUBSCRIPTION_PAID);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<List<SubscriptionResponse>> findOwnSubscriptions(JwtClaim userInfo, FilterRequest filterRequest, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
-        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
+        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
         Map<String, Integer> countByStatus = countByStatus(subscriptionList);
         if (subscriptionList == null || subscriptionList.isEmpty())
             return ApiResponse.successSubscriptionList(new ArrayList<>(), pagingRequest, SMessage.NO_SUBSCRIPTION_FOUND, countByStatus);
@@ -315,7 +371,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public ApiResponse<List<SubscriptionResponse>> findActiveSubscriptions(JwtClaim userInfo, PagingRequest pagingRequest) {
         WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
-        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDate(wo.getId());
+        List<Subscription> subscriptionList = subscriptionRepository.findByWeddingOrganizerIdOrderByTransactionDateDesc(wo.getId());
         subscriptionList = subscriptionList.stream()
                 .filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED))
                 .filter(subscription -> subscription.getActiveUntil().isAfter(LocalDateTime.now()))

@@ -261,7 +261,7 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             return ApiResponse.success(response, SMessage.WEDDING_PACKAGE_CREATED(weddingPackage.getId()));
 
         } catch (ValidationException e) {
-            log.error("Validation error creating wedding package: {}", e.getErrors());
+            log.error("Validation error while creating wedding package: {}", e.getErrors());
             throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.CREATE_FAILED, e.getErrors().get(0));
         } catch (ErrorResponse e) {
             log.error("Error while creating wedding package: {}", e.getMessage());

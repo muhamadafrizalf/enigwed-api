@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -77,6 +78,8 @@ public class WeddingOrganizerResponse {
         response.setAddress(weddingOrganizer.getAddress());
         if (weddingOrganizer.getBankAccounts() != null && !weddingOrganizer.getBankAccounts().isEmpty()) {
             response.setBankAccounts(weddingOrganizer.getBankAccounts().stream().filter(bankAccount -> bankAccount.getDeletedAt() == null).map(BankAccountResponse::all).toList());
+        } else {
+            response.setBankAccounts(new ArrayList<>());
         }
         return response;
     }

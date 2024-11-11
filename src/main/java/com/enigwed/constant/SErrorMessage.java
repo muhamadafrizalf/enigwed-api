@@ -48,9 +48,6 @@ public class SErrorMessage {
     public static final String CANNOT_DELETE_BANK_ACCOUNT = "The bank account cannot be deleted because this wedding organizer has no other payment method available.";
 
 
-    public static String SUBSCRIPTION_PRICE_ALREADY_EXIST(String length) {
-        return "Subscription price with length: " + length + " already exists";
-    }
 
     // Required
     public static final String BANK_ACCOUNT_ID_IS_REQUIRED = "Bank account ID is required";
@@ -76,6 +73,7 @@ public class SErrorMessage {
     public static String PROVINCE_ID_ALREADY_EXIST(String id, String name) {return String.format("Province with ID %s already exists with the name %s", id, name);}
     public static String REGENCY_ID_ALREADY_EXIST(String id, String name) {return String.format("Regency with ID %s already exists with the name %s", id, name);}
     public static String DISTRICT_ID_ALREADY_EXIST(String id, String name) {return String.format("District with ID %s already exists with the name %s", id, name);}
+    public static String SUBSCRIPTION_PACKAGE_ALREADY_EXIST(String length) {return String.format("Subscription package with length %s already exists", length);}
 
     // Order
     public static String INVALID_ORDER_STATUS(EStatus before, String message) {return String.format("Cannot %s order, order not in %s status", message, before);}

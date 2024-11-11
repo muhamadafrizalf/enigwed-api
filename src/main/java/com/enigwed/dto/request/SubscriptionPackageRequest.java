@@ -30,5 +30,4 @@ public class SubscriptionPackageRequest {
     private Double price;
 
     private Boolean popular;
-
 }

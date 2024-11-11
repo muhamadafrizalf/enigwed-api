@@ -120,4 +120,6 @@ public class SMessage {
     public static String SUBSCRIPTION_PACKAGE_UPDATED(String id) {return String.format("Subscription package with ID %s successfully updated", id);}
     public static String SUBSCRIPTION_PACKAGE_DELETED(String id) {return String.format("Subscription package with ID %s successfully deleted", id);}
 
+    // Subscription
+
 }
