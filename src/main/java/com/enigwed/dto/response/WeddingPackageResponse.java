@@ -60,7 +60,9 @@ public class WeddingPackageResponse {
 
     public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
+        response.setProvinceId(weddingPackage.getProvince().getId());
         response.setProvinceName(weddingPackage.getProvince().getName());
+        response.setRegencyId(weddingPackage.getRegency().getId());
         response.setRegencyName(weddingPackage.getRegency().getName());
         response.setWeddingOrganizer(WeddingOrganizerResponse.card(weddingPackage.getWeddingOrganizer()));
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
