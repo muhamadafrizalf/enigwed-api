@@ -18,17 +18,6 @@ src/main/resources/static/images/*
 
 # Un-ignore specific files in the static/images folder
 !src/main/resources/static/images/No_Image_Available.jpg
-!src/main/resources/static/images/bandung.jpg
-!src/main/resources/static/images/bali.jpg
-!src/main/resources/static/images/jakarta.jpg
-!src/main/resources/static/images/malang.jpg
-!src/main/resources/static/images/nusa-dua.jpg
-!src/main/resources/static/images/surabaya.jpg
-!src/main/resources/static/images/yogyakarta.jpeg
-!src/main/resources/static/images/wo-001.jpg
-!src/main/resources/static/images/wo-002.jpg
-!src/main/resources/static/images/wo-003.jpg
-
 
 ### IntelliJ IDEA ###
 .idea
