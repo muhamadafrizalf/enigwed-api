@@ -311,9 +311,10 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
 
             /* ADD BONUS DETAILS */
             if (!weddingPackage.getBonusDetails().isEmpty()) {
-                for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
-                    weddingPackage.getBonusDetails().remove(bonusDetail);
+                List<BonusDetail> bonusDetailsToRemove = new ArrayList<>(weddingPackage.getBonusDetails());
+                for (BonusDetail bonusDetail : bonusDetailsToRemove) {
                     bonusDetail.setWeddingPackage(null);
+                    weddingPackage.getBonusDetails().remove(bonusDetail);
                 }
             }
             setBonusDetails(weddingPackageRequest, weddingPackage);
