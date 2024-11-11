@@ -34,23 +34,18 @@ public class ProductController {
             @RequestParam(required = false) Integer size,
             @Parameter(description = "To filter by wedding_organizer_id", required = true)
             @RequestParam(required = false) String weddingOrganizerId,
-            @Parameter(description = "Keyword can filter result by name, and description", required = false)
+            @Parameter(description = "Keyword can filter result by name, and description")
             @RequestParam(required = false) String keyword
     ) {
         PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
-        ApiResponse<?> response;
-        boolean isKeyword = keyword != null && !keyword.isEmpty();
-        if (isKeyword) {
-            response = productService.customerSearchProductFromWeddingOrganizer(weddingOrganizerId, keyword, pagingRequest);
-        } else {
-            response = productService.customerFindAllProductsFromWeddingOrganizer(weddingOrganizerId, pagingRequest);
-        }
+        ApiResponse<?> response = productService.customerFindAllProductsFromWeddingOrganizer(weddingOrganizerId, pagingRequest, keyword);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "For customer to get product information by product_id (MOBILE)")
     @GetMapping(SPathApi.PUBLIC_PRODUCT_ID)
     public ResponseEntity<?> customerGetBonusPackageById(
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         ApiResponse<?> response = productService.customerFindProductById(id);
@@ -67,11 +62,13 @@ public class ProductController {
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size
+            @RequestParam(required = false) Integer size,
+            @Parameter(description = "Keyword can filter result by name, and description")
+            @RequestParam(required = false) String keyword
     ) {
         PagingRequest pagingRequest = page != null && size != null ? new PagingRequest(page, size) : null;
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
-        ApiResponse<?> response = productService.findOwnProducts(userInfo, pagingRequest);
+        ApiResponse<?> response = productService.findOwnProducts(userInfo, pagingRequest, keyword);
         return ResponseEntity.ok(response);
     }
 
@@ -84,6 +81,7 @@ public class ProductController {
     public ResponseEntity<?> getOwnProductById(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -131,6 +129,7 @@ public class ProductController {
     public ResponseEntity<?> deleteBonusPackage(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -147,7 +146,9 @@ public class ProductController {
     public ResponseEntity<?> addBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Form-data part image")
             @RequestPart(name = "image") MultipartFile image
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -164,7 +165,9 @@ public class ProductController {
     public ResponseEntity<?> deleteBonusPackageImages(
             @Parameter(description = "Http header token bearer", example = "Bearer string_token", required = true)
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @Parameter(description = "Path variable id")
             @PathVariable String id,
+            @Parameter(description = "Path variable image-id")
             @PathVariable(value = "image-id") String imageId
     ) {
         JwtClaim userInfo = jwtUtil.getUserInfoByHeader(authHeader);
@@ -179,10 +182,12 @@ public class ProductController {
     @GetMapping(SPathApi.PUBLIC_PRODUCT + "/dev")
     public ResponseEntity<?> dev(
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "8") int size
+            @RequestParam(required = false, defaultValue = "8") int size,
+            @Parameter(description = "Keyword can filter result by name, and description")
+            @RequestParam(required = false) String keyword
     ) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        ApiResponse<?> response = productService.findAllProducts(pagingRequest);
+        ApiResponse<?> response = productService.findAllProducts(pagingRequest, keyword);
         return ResponseEntity.ok(response);
     }
 

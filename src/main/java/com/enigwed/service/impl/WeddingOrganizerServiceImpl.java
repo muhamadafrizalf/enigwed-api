@@ -183,11 +183,11 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
             /* SORT RESULT */
             responseList = responseList.stream()
                     .sorted(Comparator
-                            .comparing(WeddingOrganizerResponse::getRating, Comparator.reverseOrder())
-                            .thenComparing(WeddingOrganizerResponse::getOrderFinishCount, Comparator.reverseOrder())
+                            .comparing(WeddingOrganizerResponse::getOrderFinishCount, Comparator.reverseOrder())
+                            .thenComparing(WeddingOrganizerResponse::getRating, Comparator.reverseOrder())
                             .thenComparing(WeddingOrganizerResponse::getWeddingPackageCount, Comparator.reverseOrder())
                             .thenComparing(WeddingOrganizerResponse::getProductCount, Comparator.reverseOrder())
-                            .thenComparing(WeddingOrganizerResponse::getActiveUntil)
+                            .thenComparing(WeddingOrganizerResponse::getActiveUntil, Comparator.reverseOrder())
                             .thenComparing(WeddingOrganizerResponse::getName)
                     )
                     .toList();
@@ -256,8 +256,11 @@ public class WeddingOrganizerServiceImpl implements WeddingOrganizerService {
                 throw new DataIntegrityViolationException(SErrorMessage.PHONE_ALREADY_EXIST);
 
             /* UPDATE WEDDING ORGANIZER */
+            String phone = weddingOrganizerRequest.getPhone().startsWith("08") ?
+                    String.format("+628%s", weddingOrganizerRequest.getPhone().substring(2)) :
+                    weddingOrganizerRequest.getPhone();
             wo.setName(weddingOrganizerRequest.getName());
-            wo.setPhone(weddingOrganizerRequest.getPhone());
+            wo.setPhone(phone);
             wo.setDescription(weddingOrganizerRequest.getDescription());
             wo.setAddress(weddingOrganizerRequest.getAddress());
 

@@ -32,6 +32,7 @@ public class RegisterRequest {
     @NotBlank(message = NIB_BLANK)
     private String nib;
 
+    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$|^0\\d{9,15}$|^\\(?\\d{3}\\)?[-\\s]?\\d{3}[-\\s]?\\d{4}$", message = PHONE_INVALID)
     @NotBlank(message = PHONE_BLANK)
     private String phone;
 

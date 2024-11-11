@@ -14,11 +14,10 @@ public interface ProductService {
     // Use in other service
     Product loadProductById(String id);
     // Customer
-    ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest);
-    ApiResponse<List<ProductResponse>> customerSearchProductFromWeddingOrganizer(String weddingOrganizerId, String keyword, PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest, String keyword);
     ApiResponse<ProductResponse> customerFindProductById(String id);
     // WO
-    ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest, String keyword);
     ApiResponse<ProductResponse> findOwnProductById(JwtClaim userInfo, String id);
     ApiResponse<ProductResponse> createProduct(JwtClaim userInfo, ProductRequest productRequest);
     ApiResponse<ProductResponse> updateProduct(JwtClaim userInfo, ProductRequest productRequest);
@@ -26,6 +25,5 @@ public interface ProductService {
     ApiResponse<ProductResponse> addProductImage(JwtClaim userInfo, String id, MultipartFile image);
     ApiResponse<ProductResponse> deleteProductImage(JwtClaim userInfo, String id, String imageId);
     // FOR DEVELOPMENT DONT USE
-    ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest);
-    ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest);
+    ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest, String keyword);
 }

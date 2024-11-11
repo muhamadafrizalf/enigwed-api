@@ -1,6 +1,7 @@
 package com.enigwed.repository.spesification;
 
 import com.enigwed.entity.Order;
+import com.enigwed.entity.Product;
 import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.entity.WeddingPackage;
 import org.springframework.data.jpa.domain.Specification;
@@ -56,6 +57,20 @@ public class SearchSpecifications {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("province").get("name")), likePattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("regency").get("name")), likePattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("district").get("name")), likePattern)
+                );
+            }
+            return criteriaBuilder.conjunction();
+        };
+    }
+
+    public static Specification<Product> searchProduct(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.hasText(keyword)) {
+                String likePattern = "%" + keyword.toLowerCase() + "%";
+
+                return criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), likePattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), likePattern)
                 );
             }
             return criteriaBuilder.conjunction();

@@ -49,6 +49,8 @@ public class WeddingPackageResponse {
         response.setOrderCount(weddingPackage.getOrderCount());
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
             response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
+        } else {
+            response.setRating(0.0);
         }
         response.setWeddingOrganizerId(weddingPackage.getWeddingOrganizer().getId());
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());

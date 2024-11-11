@@ -2,6 +2,7 @@ package com.enigwed.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class CustomerRequest {
     @NotBlank(message = EMAIL_BLANK)
     private String email;
 
+    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$|^0\\d{9,15}$|^\\(?\\d{3}\\)?[-\\s]?\\d{3}[-\\s]?\\d{4}$", message = PHONE_INVALID)
     @NotBlank(message = PHONE_BLANK)
     private String phone;
 

@@ -50,6 +50,7 @@ public class SConstraint {
     /* INVALID */
     //// INVALID PATTERN
     public static final String EMAIL_INVALID = "Invalid email format";
+    public static final String PHONE_INVALID = "Invalid phone number";
     public static final String ACCOUNT_NUMBER_INVALID = "Account number must contain only numbers";
     public static final String BANK_CODE_INVALID = "Bank code must contain only numbers";
     public static final String NIB_INVALID = "NIB must contain only numbers";

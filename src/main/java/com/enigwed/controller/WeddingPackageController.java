@@ -28,7 +28,7 @@ public class WeddingPackageController {
 
     @Operation(
             summary = "For customer to get list of wedding packages (Default pagination {page:1, size:list.size}) (MOBILE)",
-            description = "With filter wedding organizer id, province, regency, min and max price, and keyword"
+            description = "Sorted by orderCount, rating, weddingOrganizerRating, weddingOrganizerActiveUntil, and name"
     )
     @GetMapping(SPathApi.PUBLIC_WEDDING_PACKAGE)
     public ResponseEntity<?> customerGetAllWeddingPackages(
@@ -74,7 +74,8 @@ public class WeddingPackageController {
 
     @Operation(
             summary = "For admin and wedding organizer to get list of wedding packages (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
-            description = "Admin get all wedding packages, WO can only get their own wedding packages, can be filter"
+            description = "Admin get all wedding packages, WO can only get their own wedding packages\n" +
+                    "Sorted by orderCount, rating, weddingOrganizerRating, weddingOrganizerActiveUntil, and name"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_WEDDING_PACKAGE)

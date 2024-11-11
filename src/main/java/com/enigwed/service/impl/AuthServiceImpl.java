@@ -125,12 +125,15 @@ public class AuthServiceImpl implements AuthService {
             Image avatar = imageService.createImage(null);
 
             /* CREATE WEDDING ORGANIZER */
+            String phone = registerRequest.getPhone().startsWith("08") ?
+                    String.format("+628%s", registerRequest.getPhone().substring(2)) :
+                    registerRequest.getPhone();
             WeddingOrganizer wo = WeddingOrganizer.builder()
                     .name(registerRequest.getName())
                     .description(registerRequest.getDescription())
                     .npwp(registerRequest.getNpwp())
                     .nib(registerRequest.getNib())
-                    .phone(registerRequest.getPhone())
+                    .phone(phone)
                     .address(registerRequest.getAddress())
                     .province(province)
                     .regency(regency)

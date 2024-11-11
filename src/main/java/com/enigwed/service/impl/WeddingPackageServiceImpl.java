@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -58,8 +59,17 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             pagingRequest = new PagingRequest(1, weddingPackageList.size());
         }
 
-        /* MAP RESULT */
-        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card).toList();
+        /* MAP AND SORT RESULT */
+        List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card)
+                .sorted(Comparator
+                        .comparing(WeddingPackageResponse::getOrderCount, Comparator.reverseOrder())
+                        .thenComparing(WeddingPackageResponse::getRating, Comparator.reverseOrder())
+                        .thenComparing(weddingPackageResponse -> weddingPackageResponse.getWeddingOrganizer().getRating(), Comparator.reverseOrder())
+                        .thenComparing(weddingPackageResponse -> weddingPackageResponse.getWeddingOrganizer().getActiveUntil(), Comparator.reverseOrder())
+                        .thenComparing(WeddingPackageResponse::getName)
+                )
+                .toList();
+
         return ApiResponse.success(responses, pagingRequest, SMessage.WEDDING_PACKAGES_FOUND(weddingPackageList.size()));
     }
 
@@ -129,13 +139,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             }
 
             /* FIND WEDDING PACKAGES */
-            Sort sort = Sort.by(
-                    Sort.Order.desc("orderCount"),
-                    Sort.Order.asc("weddingOrganizer.userCredential.activeUntil"),
-                    Sort.Order.asc("name")
-            );
             Specification<WeddingPackage> spec = SearchSpecifications.searchWeddingPackage(keyword);
-            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec, sort);
+            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec);
             weddingPackageList = weddingPackageList.stream().filter(item -> item.getDeletedAt() == null && item.getWeddingOrganizer().getUserCredential().isActive()).toList();
 
             /* MAP RESPONSE */
@@ -178,12 +183,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
             /* FIND WEDDING PACKAGES */
-            Sort sort = Sort.by(
-                    Sort.Order.desc("orderCount"),
-                    Sort.Order.asc("name")
-            );
             Specification<WeddingPackage> spec = SearchSpecifications.searchWeddingPackage(keyword);
-            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec, sort);
+            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec);
             weddingPackageList = weddingPackageList.stream().filter(item -> item.getDeletedAt() == null && item.getWeddingOrganizer().getId().equals(wo.getId())).toList();
 
             /* MAP RESPONSE */
@@ -443,12 +444,8 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             validationUtil.validateAndThrow(pagingRequest);
 
             /* FIND WEDDING PACKAGES */
-            Sort sort = Sort.by(
-                    Sort.Order.desc("orderCount"),
-                    Sort.Order.asc("name")
-            );
             Specification<WeddingPackage> spec = SearchSpecifications.searchWeddingPackage(keyword);
-            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec, sort);
+            List<WeddingPackage> weddingPackageList = weddingPackageRepository.findAll(spec);
             weddingPackageList = weddingPackageList.stream().filter(item -> item.getDeletedAt() == null).toList();
 
             /* MAP RESPONSE */

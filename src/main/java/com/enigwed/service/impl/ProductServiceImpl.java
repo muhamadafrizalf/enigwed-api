@@ -13,6 +13,7 @@ import com.enigwed.entity.WeddingOrganizer;
 import com.enigwed.exception.ErrorResponse;
 import com.enigwed.exception.ValidationException;
 import com.enigwed.repository.ProductRepository;
+import com.enigwed.repository.spesification.SearchSpecifications;
 import com.enigwed.service.ProductService;
 import com.enigwed.service.ImageService;
 import com.enigwed.service.WeddingOrganizerService;
@@ -20,6 +21,8 @@ import com.enigwed.util.AccessValidationUtil;
 import com.enigwed.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,14 +96,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest) {
+    public ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest, String keyword) {
         try {
             /* LOAD WEDDING ORGANIZER */
             // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerById(weddingOrganizerId);
 
             /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNullOrderByPriceAsc(weddingOrganizerId);
+            Sort sort = Sort.by(Sort.Order.asc("name"));
+            Specification<Product> spec = SearchSpecifications.searchProduct(keyword);
+            List<Product> productList = productRepository.findAll(spec, sort);
+            productList = productList.stream().filter(product -> product.getWeddingOrganizer().getId().equals(weddingOrganizerId) && product.getDeletedAt() == null).toList();
 
             /* MAP RESPONSE */
             // ValidationException //
@@ -113,31 +119,6 @@ public class ProductServiceImpl implements ProductService {
             log.error("Error while loading products: {}", e.getMessage());
             throw e;
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<ProductResponse>> customerSearchProductFromWeddingOrganizer(String weddingOrganizerId, String keyword, PagingRequest pagingRequest) {
-        try {
-            /* LOAD WEDDING ORGANIZER */
-            // ErrorResponse //
-            WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerById(weddingOrganizerId);
-
-            /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByWeddingOrganizerIdAndKeyword(weddingOrganizerId, keyword);
-
-            /* MAP RESPONSE */
-            // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple), wo);
-
-        } catch (ValidationException e) {
-            log.error("Validation error while searching products: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
-        } catch (ErrorResponse e) {
-            log.error("Error while searching products: {}", e.getMessage());
-            throw e;
-        }
-
     }
 
     @Transactional(readOnly = true)
@@ -160,14 +141,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest) {
+    public ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest, String keyword) {
         try {
             /* LOAD WEDDING ORGANIZER */
             // ErrorResponse //
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
             /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNullOrderByPriceAsc(wo.getId());
+            Sort sort = Sort.by(Sort.Order.asc("name"));
+            Specification<Product> spec = SearchSpecifications.searchProduct(keyword);
+            List<Product> productList = productRepository.findAll(spec, sort);
+            productList = productList.stream().filter(product -> product.getWeddingOrganizer().getId().equals(wo.getId()) && product.getDeletedAt() == null).toList();
 
             /* MAP RESPONSE */
             // ValidationException //
@@ -384,10 +368,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest) {
+    public ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest, String keyword) {
         try {
             /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByDeletedAtIsNull();
+            Sort sort = Sort.by(Sort.Order.asc("name"));
+            Specification<Product> spec = SearchSpecifications.searchProduct(keyword);
+            List<Product> productList = productRepository.findAll(spec, sort);
 
             /* MAP RESPONSE */
             // ValidationException //
@@ -399,20 +385,4 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest) {
-        try {
-            /* FIND PRODUCTS */
-            List<Product> productList = productRepository.searchBonusPackage(keyword);
-
-            /* MAP RESPONSE */
-            // ValidationException //
-            return getListApiResponse(pagingRequest, productList, productList.stream().map(ProductResponse::simple));
-
-        } catch (ValidationException e) {
-            log.error("Validation error while searching all products: {}", e.getErrors());
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, e.getErrors().get(0));
-        }
-    }
 }

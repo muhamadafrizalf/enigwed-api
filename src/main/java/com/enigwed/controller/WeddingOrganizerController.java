@@ -69,7 +69,8 @@ public class WeddingOrganizerController {
 
     @Operation(
             summary = "For admin and wedding organizer to get list of wedding organizers (Default pagination {page:1, size:8}) [ADMIN, WO] (WEB)",
-            description = "Admin get all wedding organizer (sorted by createdAt), WO can only get their own wedding organizer"
+            description = "Admin get all wedding organizer (sorted by createdAt),\n" +
+                    "wedding organizer can only get their own wedding organizer"
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'WO')")
     @GetMapping(SPathApi.PROTECTED_WO)

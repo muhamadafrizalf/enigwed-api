@@ -168,10 +168,13 @@ public class OrderServiceImpl implements OrderService {
             order.setWeddingDate(orderRequest.getWeddingDate());
 
             /* CREATE AND SET CUSTOMER */
+            String phone = orderRequest.getCustomer().getPhone().startsWith("08") ?
+                    String.format("+628%s", orderRequest.getCustomer().getPhone().substring(2)) :
+                    orderRequest.getCustomer().getPhone();
             Customer customer = Customer.builder()
                     .name(orderRequest.getCustomer().getName())
                     .email(orderRequest.getCustomer().getEmail())
-                    .phone(orderRequest.getCustomer().getPhone())
+                    .phone(phone)
                     .address(orderRequest.getCustomer().getAddress())
                     .build();
             order.setCustomer(customer);
