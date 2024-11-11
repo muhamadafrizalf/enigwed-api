@@ -45,7 +45,7 @@ public class WeddingPackage extends AuditEntity {
     @OneToMany(mappedBy = "weddingPackage")
     List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "weddingPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "weddingPackage", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private List<BonusDetail> bonusDetails = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
