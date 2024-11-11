@@ -310,6 +310,12 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
             }
 
             /* ADD BONUS DETAILS */
+            if (!weddingPackage.getBonusDetails().isEmpty()) {
+                for (BonusDetail bonusDetail : weddingPackage.getBonusDetails()) {
+                    weddingPackage.getBonusDetails().remove(bonusDetail);
+                    bonusDetail.setWeddingPackage(null);
+                }
+            }
             setBonusDetails(weddingPackageRequest, weddingPackage);
 
             /* SAVE WEDDING PACKAGE */
