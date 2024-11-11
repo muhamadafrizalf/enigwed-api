@@ -38,7 +38,6 @@ public class WeddingOrganizerResponse {
     private LocalDateTime activeUntil;
     private List<BankAccountResponse> bankAccounts;
 
-
     public static WeddingOrganizerResponse card(WeddingOrganizer weddingOrganizer) {
         WeddingOrganizerResponse response = new WeddingOrganizerResponse();
         response.setId(weddingOrganizer.getId());

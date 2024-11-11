@@ -20,6 +20,7 @@ public class WeddingPackageResponse {
     private Double price;
     private Integer orderCount;
     private Double rating;
+    private String weddingOrganizerId;
     private String weddingOrganizerName;
     List<ReviewResponse> reviews;
     private LocalDateTime createdAt;
@@ -48,10 +49,13 @@ public class WeddingPackageResponse {
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
             response.setRating(weddingPackage.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0));
         }
+        response.setWeddingOrganizerId(weddingPackage.getWeddingOrganizer().getId());
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
         response.setRegencyName(weddingPackage.getRegency().getName());
         return response;
     }
+
+
 
     public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
