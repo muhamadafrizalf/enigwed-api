@@ -30,7 +30,8 @@ public class WeddingOrganizerResponse {
     private String districtId;
     private String districtName;
     private String address;
-    private Integer weddingPackageCount;
+    private Long weddingPackageCount;
+    private Long productCount;
     private Double rating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -53,8 +54,13 @@ public class WeddingOrganizerResponse {
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
         response.setWeddingPackageCount(
-                (int) weddingOrganizer.getWeddingPackages().stream()
+                weddingOrganizer.getWeddingPackages().stream()
                         .filter(weddingPackage -> weddingPackage.getDeletedAt() == null)
+                        .count()
+        );
+        response.setProductCount(
+                weddingOrganizer.getProducts().stream()
+                        .filter(product -> product.getDeletedAt() == null)
                         .count()
         );
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {

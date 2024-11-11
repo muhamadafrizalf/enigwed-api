@@ -54,6 +54,9 @@ public class WeddingOrganizer extends AuditEntity{
     List<WeddingPackage> weddingPackages = new ArrayList<>();
 
     @OneToMany(mappedBy = "weddingOrganizer")
+    List<Product> products = new ArrayList<>();
+
+    @OneToMany(mappedBy = "weddingOrganizer")
     List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "weddingOrganizer", cascade = CascadeType.MERGE)
