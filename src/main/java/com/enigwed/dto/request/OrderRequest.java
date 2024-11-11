@@ -1,5 +1,6 @@
 package com.enigwed.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ import static com.enigwed.constant.SConstraint.*;
 public class OrderRequest {
 
     @NotNull(message = CUSTOMER_NULL)
+    @Valid
     private CustomerRequest customer;
 
     @Future(message = WEDDING_DATE_INVALID)
