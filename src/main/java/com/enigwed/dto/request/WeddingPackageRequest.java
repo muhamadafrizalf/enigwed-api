@@ -1,5 +1,6 @@
 package com.enigwed.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -38,5 +39,6 @@ public class WeddingPackageRequest {
     @NotNull(message = REGENCY_NULL)
     private RegencyRequest regency;
 
+    @Valid
     private List<BonusDetailRequest> bonusDetails;
 }
