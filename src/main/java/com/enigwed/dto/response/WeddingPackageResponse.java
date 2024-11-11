@@ -52,7 +52,11 @@ public class WeddingPackageResponse {
         }
         response.setWeddingOrganizerId(weddingPackage.getWeddingOrganizer().getId());
         response.setWeddingOrganizerName(weddingPackage.getWeddingOrganizer().getName());
+        response.setProvinceId(weddingPackage.getProvince().getId());
+        response.setProvinceName(weddingPackage.getProvince().getName());
+        response.setRegencyId(weddingPackage.getRegency().getId());
         response.setRegencyName(weddingPackage.getRegency().getName());
+        response.setWeddingOrganizer(WeddingOrganizerResponse.card(weddingPackage.getWeddingOrganizer()));
         return response;
     }
 
@@ -60,11 +64,6 @@ public class WeddingPackageResponse {
 
     public static WeddingPackageResponse information(WeddingPackage weddingPackage) {
         WeddingPackageResponse response = WeddingPackageResponse.card(weddingPackage);
-        response.setProvinceId(weddingPackage.getProvince().getId());
-        response.setProvinceName(weddingPackage.getProvince().getName());
-        response.setRegencyId(weddingPackage.getRegency().getId());
-        response.setRegencyName(weddingPackage.getRegency().getName());
-        response.setWeddingOrganizer(WeddingOrganizerResponse.card(weddingPackage.getWeddingOrganizer()));
         if (weddingPackage.getReviews() != null && !weddingPackage.getReviews().isEmpty()) {
             response.setReviews(weddingPackage.getReviews().stream().filter(Review::isVisiblePublic).map(ReviewResponse::simple).toList());
         }
@@ -86,8 +85,6 @@ public class WeddingPackageResponse {
         response.setCreatedAt(weddingPackage.getCreatedAt());
         response.setUpdatedAt(weddingPackage.getUpdatedAt());
         response.setDeletedAt(weddingPackage.getDeletedAt());
-        response.setProvinceId(weddingPackage.getProvince().getId());
-        response.setRegencyId(weddingPackage.getRegency().getId());
         return response;
     }
 }
