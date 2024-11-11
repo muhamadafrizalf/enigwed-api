@@ -13,12 +13,10 @@ import java.util.List;
 public interface ProductService {
     // Use in other service
     Product loadProductById(String id);
-
     // Customer
     ApiResponse<List<ProductResponse>> customerFindAllProductsFromWeddingOrganizer(String weddingOrganizerId, PagingRequest pagingRequest);
     ApiResponse<List<ProductResponse>> customerSearchProductFromWeddingOrganizer(String weddingOrganizerId, String keyword, PagingRequest pagingRequest);
     ApiResponse<ProductResponse> customerFindProductById(String id);
-
     // WO
     ApiResponse<List<ProductResponse>> findOwnProducts(JwtClaim userInfo, PagingRequest pagingRequest);
     ApiResponse<ProductResponse> findOwnProductById(JwtClaim userInfo, String id);
@@ -27,7 +25,6 @@ public interface ProductService {
     ApiResponse<?> deleteProduct(JwtClaim userInfo, String id);
     ApiResponse<ProductResponse> addProductImage(JwtClaim userInfo, String id, MultipartFile image);
     ApiResponse<ProductResponse> deleteProductImage(JwtClaim userInfo, String id, String imageId);
-
     // FOR DEVELOPMENT DONT USE
     ApiResponse<List<ProductResponse>> findAllProducts(PagingRequest pagingRequest);
     ApiResponse<List<ProductResponse>> searchProducts(String keyword, PagingRequest pagingRequest);

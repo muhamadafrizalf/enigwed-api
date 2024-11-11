@@ -20,11 +20,11 @@ public class CustomerRequest {
     @NotBlank(message = CUSTOMER_NAME_BLANK)
     private String name;
 
-    @NotBlank(message = PHONE_BLANK)
-    private String email;
-
     @Email(message = EMAIL_INVALID)
     @NotBlank(message = EMAIL_BLANK)
+    private String email;
+
+    @NotBlank(message = PHONE_BLANK)
     private String phone;
 
     @Size(max = 1000, message = ADDRESS_MAX_1000)

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
     Optional<Product> findByIdAndDeletedAtIsNull(String id);
-    List<Product> findByWeddingOrganizerIdAndDeletedAtIsNull(String weddingOrganizerId);
+    List<Product> findByWeddingOrganizerIdAndDeletedAtIsNullOrderByPriceAsc(String weddingOrganizerId);
 
     @Query("SELECT bp FROM Product bp " +
             "WHERE bp.weddingOrganizer.id = :weddingOrganizerId AND bp.deletedAt IS NULL AND (" +

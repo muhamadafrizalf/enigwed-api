@@ -100,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerById(weddingOrganizerId);
 
             /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(weddingOrganizerId);
+            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNullOrderByPriceAsc(weddingOrganizerId);
 
             /* MAP RESPONSE */
             // ValidationException //
@@ -167,7 +167,7 @@ public class ProductServiceImpl implements ProductService {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
 
             /* FIND PRODUCTS */
-            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNull(wo.getId());
+            List<Product> productList = productRepository.findByWeddingOrganizerIdAndDeletedAtIsNullOrderByPriceAsc(wo.getId());
 
             /* MAP RESPONSE */
             // ValidationException //
