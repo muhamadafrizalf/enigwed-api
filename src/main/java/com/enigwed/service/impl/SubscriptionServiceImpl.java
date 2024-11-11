@@ -212,8 +212,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to) {
-        return subscriptionRepository.findByStatusAndTransactionDateBetween(ESubscriptionPaymentStatus.CONFIRMED, from, to);
+    public List<Subscription> loadConfirmedSubscription(LocalDateTime from, LocalDateTime to) {
+        List<Subscription> subscriptionList = subscriptionRepository.findByStatusAndTransactionDateBetween(ESubscriptionPaymentStatus.CONFIRMED, from, to);
+        subscriptionList = subscriptionList.stream().filter(subscription -> subscription.getStatus().equals(ESubscriptionPaymentStatus.CONFIRMED)).toList();
+        return subscriptionList;
     }
 
     @Transactional(readOnly = true)

@@ -50,7 +50,7 @@ public class WeddingOrganizerResponse {
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
         response.setWeddingPackageCount(
                 (int) weddingOrganizer.getWeddingPackages().stream()
-                        .filter(weddingPackage -> weddingPackage.getDeletedAt() != null)
+                        .filter(weddingPackage -> weddingPackage.getDeletedAt() == null)
                         .count()
         );
         if (weddingOrganizer.getReviews() != null && !weddingOrganizer.getReviews().isEmpty()) {

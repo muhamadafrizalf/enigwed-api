@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface SubscriptionService {
     // Use in other service
-    List<Subscription> getSubscriptions(LocalDateTime from, LocalDateTime to);
+    List<Subscription> loadConfirmedSubscription(LocalDateTime from, LocalDateTime to);
     // Wedding organizer & admin
     ApiResponse<List<SubscriptionPackageResponse>> findSubscriptionPackages();
     ApiResponse<SubscriptionPackageResponse> findSubscriptionPackageById(String subscriptionPackageId);

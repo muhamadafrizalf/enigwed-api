@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -70,22 +71,23 @@ public class StatisticServiceImpl implements StatisticService {
         return map;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ApiResponse<StatisticResponse> getStatisticsIncome(JwtClaim userInfo, LocalDateTime from, LocalDateTime to) {
         if (from.isAfter(to)) throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.FETCHING_FAILED, SErrorMessage.INVALID_DATE);
-        if (userInfo.getRole().equals(ERole.ROLE_WO.name())) {
+        if (userInfo.getRole().equals(ERole.ROLE_ADMIN.name())) {
+            List<Subscription> subscriptionList = subscriptionService.loadConfirmedSubscription(from, to);
+            Map<String, Double> statistic = getStatisticSubscription(subscriptionList, from, to);
+            List<WeddingOrganizer> woList = weddingOrganizerService.findAllWeddingOrganizers();
+            Map<String, Integer> countByStatus = statisticUtil.countWeddingOrganizerByStatus(woList);
+            StatisticResponse response = StatisticResponse.admin(woList, countByStatus, statistic);
+            return ApiResponse.success(response, SMessage.STATISTIC_FETCHED);
+        } else {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
             List<Order> orderList = orderService.loadFinishedOrderByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), from, to);
             Map<String, Double> statistic = getStatisticOrder(orderList, from, to);
             Map<String, Integer> countByStatus = statisticUtil.countOrderByStatus(orderList);
             StatisticResponse response = StatisticResponse.wo(wo, countByStatus, statistic);
-            return ApiResponse.success(response, SMessage.STATISTIC_FETCHED);
-        } else {
-            List<Subscription> subscriptionList = subscriptionService.getSubscriptions(from, to);
-            Map<String, Double> statistic = getStatisticSubscription(subscriptionList, from, to);
-            List<WeddingOrganizer> woList = weddingOrganizerService.findAllWeddingOrganizers();
-            Map<String, Integer> countByStatus = statisticUtil.countWeddingOrganizerByStatus(woList);
-            StatisticResponse response = StatisticResponse.admin(woList, countByStatus, statistic);
             return ApiResponse.success(response, SMessage.STATISTIC_FETCHED);
         }
     }
