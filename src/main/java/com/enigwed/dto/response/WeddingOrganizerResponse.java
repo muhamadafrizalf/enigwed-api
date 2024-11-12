@@ -55,6 +55,7 @@ public class WeddingOrganizerResponse {
         response.setProvinceName(weddingOrganizer.getProvince().getName());
         response.setRegencyName(weddingOrganizer.getRegency().getName());
         response.setDistrictName(weddingOrganizer.getDistrict().getName());
+        response.setAddress(weddingOrganizer.getAddress());
         response.setWeddingPackageCount(
                 weddingOrganizer.getWeddingPackages().stream()
                         .filter(weddingPackage -> weddingPackage.getDeletedAt() == null)

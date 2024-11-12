@@ -29,7 +29,7 @@ public class UserCredential extends AuditEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private ERole role;
 
-    private boolean active;
+    private boolean active = false;
 
     @Column(name = "active_until")
     private LocalDateTime activeUntil;
@@ -69,7 +69,6 @@ public class UserCredential extends AuditEntity implements UserDetails {
     @PrePersist
     protected void onCreate() {
         super.onCreate();
-        this.active = false;
         this.activeUntil = LocalDateTime.now();
     }
 }
