@@ -16,7 +16,7 @@ import java.util.List;
 public interface OrderService {
     // Use In Other Service
     Order loadOrderById(String id);
-    List<Order> loadFinishedOrderByWeddingOrganizerIdAndTransactionDateBetween(String weddingOrganizerId, LocalDateTime from, LocalDateTime to);
+    List<Order> loadOrdersByWeddingOrganizerIdAndTransactionDateBetween(String weddingOrganizerId, LocalDateTime from, LocalDateTime to);
     // Customer
     ApiResponse<OrderResponse> customerCreateOrder(OrderRequest orderRequest);
     ApiResponse<OrderResponse> customerFindOrderByBookCode(String bookCode);

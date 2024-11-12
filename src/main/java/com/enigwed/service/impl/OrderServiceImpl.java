@@ -150,8 +150,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> loadFinishedOrderByWeddingOrganizerIdAndTransactionDateBetween(String weddingOrganizerId, LocalDateTime from, LocalDateTime to) {
-        return orderRepository.findByWeddingOrganizerIdAndStatusAndTransactionDateBetweenOrderByTransactionDateDesc(weddingOrganizerId, EStatus.FINISHED, from, to);
+    public List<Order> loadOrdersByWeddingOrganizerIdAndTransactionDateBetween(String weddingOrganizerId, LocalDateTime from, LocalDateTime to) {
+        return orderRepository.findByWeddingOrganizerIdAndTransactionDateBetweenOrderByTransactionDateDesc(weddingOrganizerId, from, to);
     }
 
     @Transactional(rollbackFor = Exception.class)

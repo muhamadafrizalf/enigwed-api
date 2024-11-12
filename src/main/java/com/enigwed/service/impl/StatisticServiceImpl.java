@@ -84,9 +84,10 @@ public class StatisticServiceImpl implements StatisticService {
             return ApiResponse.success(response, SMessage.STATISTIC_FETCHED);
         } else {
             WeddingOrganizer wo = weddingOrganizerService.loadWeddingOrganizerByUserCredentialId(userInfo.getUserId());
-            List<Order> orderList = orderService.loadFinishedOrderByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), from, to);
-            Map<String, Double> statistic = getStatisticOrder(orderList, from, to);
+            List<Order> orderList = orderService.loadOrdersByWeddingOrganizerIdAndTransactionDateBetween(wo.getId(), from, to);
             Map<String, Integer> countByStatus = statisticUtil.countOrderByStatus(orderList);
+            List<Order> finishedOrderList = orderList.stream().filter(order -> order.getStatus().equals(EStatus.FINISHED)).toList();
+            Map<String, Double> statistic = getStatisticOrder(orderList, from, to);
             StatisticResponse response = StatisticResponse.wo(wo, countByStatus, statistic);
             return ApiResponse.success(response, SMessage.STATISTIC_FETCHED);
         }
