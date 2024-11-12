@@ -223,25 +223,4 @@ public class ImageServiceImpl implements ImageService {
         return ApiResponse.success(response, SMessage.IMAGE_FOUND);
     }
 
-    @Override
-    public ApiResponse<ImageResponse> updateResponse(String imageId, MultipartFile updatedImage) {
-        try {
-            Image image = findByIdOrThrow(imageId);
-            deleteImageFromDirectory(image.getPath());
-            SaveImage newImage = saveImageToDirectory(updatedImage);
-            image.setName(newImage.uniqueFilename());
-            image.setPath(newImage.filePath());
-            image.setContentType(newImage.contentType());
-            image.setSize(newImage.size());
-            image = imageRepository.saveAndFlush(image);
-            ImageResponse response = ImageResponse.from(image);
-            return ApiResponse.success(response, SMessage.IMAGE_UPDATED);
-        } catch (ConstraintViolationException e) {
-            throw new ErrorResponse(HttpStatus.BAD_REQUEST, SMessage.UPDATE_FAILED, e.getMessage());
-        } catch (IOException e) {
-            throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.UPDATE_FAILED, e.getMessage());
-        }
-    }
-
-
 }
