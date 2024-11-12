@@ -78,6 +78,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     public void sendNotificationEachMonth() {
         LocalDateTime now = LocalDateTime.now();
         List<UserCredential> userCredentialList = userCredentialRepository.findByDeletedAtIsNullAndActiveIsTrue();
+        userCredentialList = userCredentialList.stream().filter(userCredential -> !userCredential.getRole().equals(ERole.ROLE_ADMIN)).toList();
 
         for (UserCredential user : userCredentialList) {
             LocalDateTime activeUntil = user.getActiveUntil();
@@ -100,6 +101,7 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     public void deactivateUserEachMonth() {
         LocalDateTime now = LocalDateTime.now();
         List<UserCredential> userCredentialList = userCredentialRepository.findByDeletedAtIsNullAndActiveIsTrueAndActiveUntilBefore(now);
+        userCredentialList = userCredentialList.stream().filter(userCredential -> !userCredential.getRole().equals(ERole.ROLE_ADMIN)).toList();
 
         if (userCredentialList.isEmpty()) {
             log.info("No users to deactivate.");
