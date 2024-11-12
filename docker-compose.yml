@@ -21,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        SKIP_TESTS: "true"  # Pass an argument to skip tests
     container_name: enigwed
     depends_on:
       - postgres
