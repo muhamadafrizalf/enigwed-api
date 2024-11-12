@@ -32,6 +32,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: 123
     ports:
       - "8082:8080"  # Local port 8082 to container port 8080
+    volumes:
+      - /home/enigma/asset/images:/app/images  # Mount directory from host to container
     networks:
       - enigwed_network
 

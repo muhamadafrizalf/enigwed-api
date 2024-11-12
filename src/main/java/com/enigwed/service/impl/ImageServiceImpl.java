@@ -40,12 +40,15 @@ public class ImageServiceImpl implements ImageService {
 
     @PostConstruct
     public void initDirectory() {
-        if (!Files.exists(directoryPath)) {
-            try {
-                Files.createDirectory(directoryPath);
-            } catch (IOException e) {
-                throw new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, SMessage.ERROR_CREATING_IMAGE_DIRECTORY, e.getMessage());
+        try {
+            log.info("Initializing image directory...");
+            if (!Files.exists(directoryPath)) {
+                log.info("Directory does not exist, creating...");
+                Files.createDirectories(directoryPath);
             }
+        } catch (IOException e) {
+            log.error("Failed to initialize image directory: {}", e.getMessage());
+            throw new RuntimeException("Error initializing image directory", e);
         }
     }
 
