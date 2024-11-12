@@ -2,7 +2,7 @@
 FROM openjdk:17-jdk-slim
 
 # Copy the JAR file into the container
-COPY target/enigwed-api.jar /app.jar
+COPY target/enigwed-0.0.1-SNAPSHOT.jar /app.jar
 
 # Expose port 8080 (default for Spring Boot)
 EXPOSE 8080

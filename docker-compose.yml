@@ -16,14 +16,14 @@ services:
     networks:
       - enigwed_network
 
-  # Spring Boot Application (enigwed-api)
-  enigwed-api:
+  # Spring Boot Application (enigwed)
+  enigwed:
     build:
       context: .
-      dockerfile: Dockerfile  # Make sure you have your Dockerfile in the same directory
-    container_name: enigwed-api
+      dockerfile: Dockerfile
+    container_name: enigwed
     depends_on:
-      - postgres  # Ensure PostgreSQL starts before the app
+      - postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-enigwed:5432/enigwed_db
       SPRING_DATASOURCE_USERNAME: postgres
