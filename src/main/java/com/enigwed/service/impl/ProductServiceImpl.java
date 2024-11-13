@@ -54,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
         if (pagingRequest != null) {
             validationUtil.validateAndThrow(pagingRequest);
         } else {
-            pagingRequest = new PagingRequest(1, productList.size());
+            pagingRequest = new PagingRequest(1, !productList.isEmpty() ? productList.size() : 1);
         }
 
         /* RETURN EMPTY LIST IF EMPTY */

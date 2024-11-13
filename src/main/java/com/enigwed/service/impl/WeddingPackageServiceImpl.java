@@ -49,14 +49,14 @@ public class WeddingPackageServiceImpl implements WeddingPackageService {
     }
 
     private ApiResponse<List<WeddingPackageResponse>> getListApiResponse(FilterRequest filter, PagingRequest pagingRequest, List<WeddingPackage> weddingPackageList) {
+        if (pagingRequest == null) {
+            pagingRequest = new PagingRequest(1, !weddingPackageList.isEmpty() ? weddingPackageList.size() : 1);
+        }
+
         if (weddingPackageList == null || weddingPackageList.isEmpty()) return ApiResponse.success(new ArrayList<>(), pagingRequest, SMessage.NO_WEDDING_PACKAGE_FOUND);
 
         /* FILTER RESULT */
         weddingPackageList = filterResult(filter, weddingPackageList);
-
-        if (pagingRequest == null) {
-            pagingRequest = new PagingRequest(1, weddingPackageList.size());
-        }
 
         /* MAP AND SORT RESULT */
         List<WeddingPackageResponse> responses = weddingPackageList.stream().map(WeddingPackageResponse::card)
