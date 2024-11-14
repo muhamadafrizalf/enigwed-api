@@ -13,6 +13,8 @@ target/
 .springBeans
 .sts4-cache
 
+firebase-key.json
+
 # Ignore everything in the static/images folder
 src/main/resources/static/images/*
 
