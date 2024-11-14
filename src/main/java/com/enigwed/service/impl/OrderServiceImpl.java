@@ -576,6 +576,7 @@ public class OrderServiceImpl implements OrderService {
             weddingPackageService.addOrderCount(order.getWeddingPackage());
 
             /* SAVE ORDER */
+            order.setTransactionFinishDate(LocalDateTime.now());
             order = orderRepository.save(order);
 
             sendNotificationWeddingOrganizer(ENotificationType.ORDER_FINISHED, order, SNotificationMessage.ORDER_FINISHED(order.getCustomer().getName()));
